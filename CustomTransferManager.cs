@@ -291,52 +291,12 @@ namespace MoreEffectiveTransfer
                 case TransferReason.Paper:
                     return 2;
                 case TransferReason.Garbage:
-                    if(MoreEffectiveTransfer.radicalGarbageService)
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return 3;
-                    }
-                case TransferReason.Crime:
-                    if (MoreEffectiveTransfer.radicalPoliceService)
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return 3;
-                    }
                 case TransferReason.Snow:
                 case TransferReason.RoadMaintenance:
                 case TransferReason.ParkMaintenance:
-                    if (MoreEffectiveTransfer.radicalRoadService)
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return 3;
-                    }
+                    return 3;
+                case TransferReason.Crime:
                 case TransferReason.Fire:
-                    if (MoreEffectiveTransfer.radicalFireService)
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return 3;
-                    }
-                case TransferReason.Dead:
-                    if (MoreEffectiveTransfer.radicalDeadService)
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return 3;
-                    }
                 case TransferReason.GarbageMove:
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
@@ -605,10 +565,21 @@ namespace MoreEffectiveTransfer
                                             {
                                                 float incomingOutgoingDistance = Vector3.SqrMagnitude(incomingOfferPre.Position - outgoingPosition);
                                                 // NON-STOCK CODE START
-                                                Vector3 incomingPositionNew = Vector3.zero;
                                                 if (canUseNewMatchOffers)
                                                 {
-                                                    if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
+                                                    //Fix warehouse always import issue;
+                                                    bool wareHouseStopIncoming = false;
+                                                    if (incomingOfferPre.Building!= 0)
+                                                    {
+                                                        if (Singleton<BuildingManager>.instance.m_buildings.m_buffer[incomingOfferPre.Building].Info.m_buildingAI is WarehouseAI)
+                                                        {
+                                                            if (incomingOfferPre.Priority == 0)
+                                                            {
+                                                                wareHouseStopIncoming = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1) && !wareHouseStopIncoming)
                                                     {
                                                         validPriority = outgoingPriorityInside;
                                                         validIncomingIdex = j;
