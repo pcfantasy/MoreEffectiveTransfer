@@ -12,144 +12,222 @@ namespace MoreEffectiveTransfer
 {
     public class CustomTransferManager : TransferManager
     {
-        private static float GetDistanceMultiplier(TransferManager.TransferReason material)
+        private static float GetDistanceMultiplier(TransferReason material)
         {
             switch (material)
             {
-                case TransferManager.TransferReason.Garbage:
+                case TransferReason.Garbage:
                     return 5E-07f;
-                case TransferManager.TransferReason.Crime:
+                case TransferReason.Crime:
                     return 1E-05f;
-                case TransferManager.TransferReason.Sick:
+                case TransferReason.Sick:
                     return 1E-06f;
-                case TransferManager.TransferReason.Dead:
+                case TransferReason.Dead:
                     return 1E-05f;
-                case TransferManager.TransferReason.Worker0:
+                case TransferReason.Worker0:
                     return 1E-07f;
-                case TransferManager.TransferReason.Worker1:
+                case TransferReason.Worker1:
                     return 1E-07f;
-                case TransferManager.TransferReason.Worker2:
+                case TransferReason.Worker2:
                     return 1E-07f;
-                case TransferManager.TransferReason.Worker3:
+                case TransferReason.Worker3:
                     return 1E-07f;
-                case TransferManager.TransferReason.Student1:
+                case TransferReason.Student1:
                     return 2E-07f;
-                case TransferManager.TransferReason.Student2:
+                case TransferReason.Student2:
                     return 2E-07f;
-                case TransferManager.TransferReason.Student3:
+                case TransferReason.Student3:
                     return 2E-07f;
-                case TransferManager.TransferReason.Fire:
+                case TransferReason.Fire:
                     return 1E-05f;
-                case TransferManager.TransferReason.Bus:
+                case TransferReason.Bus:
                     return 1E-05f;
-                case TransferManager.TransferReason.Oil:
+                case TransferReason.Oil:
                     return 1E-07f;
-                case TransferManager.TransferReason.Ore:
+                case TransferReason.Ore:
                     return 1E-07f;
-                case TransferManager.TransferReason.Logs:
+                case TransferReason.Logs:
                     return 1E-07f;
-                case TransferManager.TransferReason.Grain:
+                case TransferReason.Grain:
                     return 1E-07f;
-                case TransferManager.TransferReason.Goods:
+                case TransferReason.Goods:
                     return 1E-07f;
-                case TransferManager.TransferReason.PassengerTrain:
+                case TransferReason.PassengerTrain:
                     return 1E-05f;
-                case TransferManager.TransferReason.Coal:
+                case TransferReason.Coal:
                     return 1E-07f;
-                case TransferManager.TransferReason.Family0:
+                case TransferReason.Family0:
                     return 1E-08f;
-                case TransferManager.TransferReason.Family1:
+                case TransferReason.Family1:
                     return 1E-08f;
-                case TransferManager.TransferReason.Family2:
+                case TransferReason.Family2:
                     return 1E-08f;
-                case TransferManager.TransferReason.Family3:
+                case TransferReason.Family3:
                     return 1E-08f;
-                case TransferManager.TransferReason.Single0:
+                case TransferReason.Single0:
                     return 1E-08f;
-                case TransferManager.TransferReason.Single1:
+                case TransferReason.Single1:
                     return 1E-08f;
-                case TransferManager.TransferReason.Single2:
+                case TransferReason.Single2:
                     return 1E-08f;
-                case TransferManager.TransferReason.Single3:
+                case TransferReason.Single3:
                     return 1E-08f;
-                case TransferManager.TransferReason.PartnerYoung:
+                case TransferReason.PartnerYoung:
                     return 1E-08f;
-                case TransferManager.TransferReason.PartnerAdult:
+                case TransferReason.PartnerAdult:
                     return 1E-08f;
-                case TransferManager.TransferReason.Shopping:
+                case TransferReason.Shopping:
                     return 2E-07f;
-                case TransferManager.TransferReason.Petrol:
+                case TransferReason.Petrol:
                     return 1E-07f;
-                case TransferManager.TransferReason.Food:
+                case TransferReason.Food:
                     return 1E-07f;
-                case TransferManager.TransferReason.LeaveCity0:
+                case TransferReason.LeaveCity0:
                     return 1E-08f;
-                case TransferManager.TransferReason.LeaveCity1:
+                case TransferReason.LeaveCity1:
                     return 1E-08f;
-                case TransferManager.TransferReason.LeaveCity2:
+                case TransferReason.LeaveCity2:
                     return 1E-08f;
-                case TransferManager.TransferReason.Entertainment:
+                case TransferReason.Entertainment:
                     return 2E-07f;
-                case TransferManager.TransferReason.Lumber:
+                case TransferReason.Lumber:
                     return 1E-07f;
-                case TransferManager.TransferReason.GarbageMove:
+                case TransferReason.GarbageMove:
                     return 5E-07f;
-                case TransferManager.TransferReason.MetroTrain:
+                case TransferReason.MetroTrain:
                     return 1E-05f;
-                case TransferManager.TransferReason.PassengerPlane:
+                case TransferReason.PassengerPlane:
                     return 1E-05f;
-                case TransferManager.TransferReason.PassengerShip:
+                case TransferReason.PassengerShip:
                     return 1E-05f;
-                case TransferManager.TransferReason.DeadMove:
+                case TransferReason.DeadMove:
                     return 5E-07f;
-                case TransferManager.TransferReason.DummyCar:
+                case TransferReason.DummyCar:
                     return -1E-08f;
-                case TransferManager.TransferReason.DummyTrain:
+                case TransferReason.DummyTrain:
                     return -1E-08f;
-                case TransferManager.TransferReason.DummyShip:
+                case TransferReason.DummyShip:
                     return -1E-08f;
-                case TransferManager.TransferReason.DummyPlane:
+                case TransferReason.DummyPlane:
                     return -1E-08f;
-                case TransferManager.TransferReason.Single0B:
+                case TransferReason.Single0B:
                     return 1E-08f;
-                case TransferManager.TransferReason.Single1B:
+                case TransferReason.Single1B:
                     return 1E-08f;
-                case TransferManager.TransferReason.Single2B:
+                case TransferReason.Single2B:
                     return 1E-08f;
-                case TransferManager.TransferReason.Single3B:
+                case TransferReason.Single3B:
                     return 1E-08f;
-                case TransferManager.TransferReason.ShoppingB:
+                case TransferReason.ShoppingB:
                     return 2E-07f;
-                case TransferManager.TransferReason.ShoppingC:
+                case TransferReason.ShoppingC:
                     return 2E-07f;
-                case TransferManager.TransferReason.ShoppingD:
+                case TransferReason.ShoppingD:
                     return 2E-07f;
-                case TransferManager.TransferReason.ShoppingE:
+                case TransferReason.ShoppingE:
                     return 2E-07f;
-                case TransferManager.TransferReason.ShoppingF:
+                case TransferReason.ShoppingF:
                     return 2E-07f;
-                case TransferManager.TransferReason.ShoppingG:
+                case TransferReason.ShoppingG:
                     return 2E-07f;
-                case TransferManager.TransferReason.ShoppingH:
+                case TransferReason.ShoppingH:
                     return 2E-07f;
-                case TransferManager.TransferReason.EntertainmentB:
+                case TransferReason.EntertainmentB:
                     return 2E-07f;
-                case TransferManager.TransferReason.EntertainmentC:
+                case TransferReason.EntertainmentC:
                     return 2E-07f;
-                case TransferManager.TransferReason.EntertainmentD:
+                case TransferReason.EntertainmentD:
                     return 2E-07f;
-                case TransferManager.TransferReason.Taxi:
+                case TransferReason.Taxi:
                     return 1E-05f;
-                case TransferManager.TransferReason.CriminalMove:
+                case TransferReason.CriminalMove:
                     return 5E-07f;
-                case TransferManager.TransferReason.Tram:
+                case TransferReason.Tram:
                     return 1E-05f;
-                case TransferManager.TransferReason.Snow:
+                case TransferReason.Snow:
                     return 5E-07f;
-                case TransferManager.TransferReason.SnowMove:
+                case TransferReason.SnowMove:
                     return 5E-07f;
-                case TransferManager.TransferReason.RoadMaintenance:
+                case TransferReason.RoadMaintenance:
                     return 5E-07f;
+                case TransferReason.SickMove:
+                    return 1E-07f;
+                case TransferReason.ForestFire:
+                    return 1E-05f;
+                case TransferReason.Collapsed:
+                    return 1E-05f;
+                case TransferReason.Collapsed2:
+                    return 1E-05f;
+                case TransferReason.Fire2:
+                    return 1E-05f;
+                case TransferReason.Sick2:
+                    return 1E-06f;
+                case TransferReason.FloodWater:
+                    return 5E-07f;
+                case TransferReason.EvacuateA:
+                    return 1E-05f;
+                case TransferReason.EvacuateB:
+                    return 1E-05f;
+                case TransferReason.EvacuateC:
+                    return 1E-05f;
+                case TransferReason.EvacuateD:
+                    return 1E-05f;
+                case TransferReason.EvacuateVipA:
+                    return 1E-05f;
+                case TransferReason.EvacuateVipB:
+                    return 1E-05f;
+                case TransferReason.EvacuateVipC:
+                    return 1E-05f;
+                case TransferReason.EvacuateVipD:
+                    return 1E-05f;
+                case TransferReason.Ferry:
+                    return 1E-05f;
+                case TransferReason.CableCar:
+                    return 1E-05f;
+                case TransferReason.Blimp:
+                    return 1E-05f;
+                case TransferReason.Monorail:
+                    return 1E-05f;
+                case TransferReason.TouristBus:
+                    return 1E-05f;
+                case TransferReason.ParkMaintenance:
+                    return 5E-07f;
+                case TransferReason.TouristA:
+                    return 2E-07f;
+                case TransferReason.TouristB:
+                    return 2E-07f;
+                case TransferReason.TouristC:
+                    return 2E-07f;
+                case TransferReason.TouristD:
+                    return 2E-07f;
+                case TransferReason.Mail:
+                    return 1E-05f;
+                case TransferReason.UnsortedMail:
+                    return 5E-07f;
+                case TransferReason.SortedMail:
+                    return 5E-07f;
+                case TransferReason.OutgoingMail:
+                    return 5E-07f;
+                case TransferReason.IncomingMail:
+                    return 5E-07f;
+                case TransferReason.AnimalProducts:
+                    return 1E-07f;
+                case TransferReason.Flours:
+                    return 1E-07f;
+                case TransferReason.Paper:
+                    return 1E-07f;
+                case TransferReason.PlanedTimber:
+                    return 1E-07f;
+                case TransferReason.Petroleum:
+                    return 1E-07f;
+                case TransferReason.Plastics:
+                    return 1E-07f;
+                case TransferReason.Glass:
+                    return 1E-07f;
+                case TransferReason.Metals:
+                    return 1E-07f;
+                case TransferReason.LuxuryProducts:
+                    return 1E-07f;
                 default:
                     return 1E-07f;
             }
@@ -219,7 +297,18 @@ namespace MoreEffectiveTransfer
             BuildingManager bM = Singleton<BuildingManager>.instance;
             if (bM.m_buildings.m_buffer[buildingID].m_flags.IsFlagSet(Building.Flags.Untouchable))
             {
-                return false;
+                //For more outside connection MOD
+                switch (material)
+                {
+                    case TransferReason.Fire:
+                    case TransferReason.Garbage:
+                    case TransferReason.GarbageMove:
+                    case TransferReason.Crime:
+                    case TransferReason.Sick:
+                    case TransferReason.DeadMove:
+                        return true;
+                    default: return false;
+                }
             }
             if (bM.m_buildings.m_buffer[buildingID].Info.m_buildingAI is WarehouseAI)
             {
@@ -787,10 +876,9 @@ namespace MoreEffectiveTransfer
                 BuildingInfo info3 = buildings.m_buffer[(int)building].Info;
                 offerIn.Amount = delta;
                 // NON-STOCK CODE START
-                // New Outside Interaction
+                // New Outside Interaction Mod
                 if ((material == TransferManager.TransferReason.DeadMove || material == TransferManager.TransferReason.GarbageMove) && Singleton<BuildingManager>.instance.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Untouchable))
                 {
-                    DebugLog.LogToFileOnly("Find StartMoreTransfer");
                     StartMoreTransfer(building, ref buildings.m_buffer[(int)building], material, offerIn);
                 }
                 else
