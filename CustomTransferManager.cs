@@ -662,7 +662,7 @@ namespace MoreEffectiveTransfer
                                                     {
                                                         if (Singleton<BuildingManager>.instance.m_buildings.m_buffer[incomingOfferPre.Building].Info.m_buildingAI is WarehouseAI)
                                                         {
-                                                            if (incomingOfferPre.Priority == 0)
+                                                            if (incomingOfferPre.Priority == 0 && (outgoingOffer.Priority == 0 || outgoingOffer.Priority == 1))
                                                             {
                                                                 wareHouseStopIncoming = true;
                                                             }
