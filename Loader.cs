@@ -22,7 +22,6 @@ namespace MoreEffectiveTransfer
         public override void OnCreated(ILoading loading)
         {
             base.OnCreated(loading);
-
         }
 
         public override void OnLevelLoaded(LoadMode mode)
@@ -34,7 +33,9 @@ namespace MoreEffectiveTransfer
                 if (mode == LoadMode.LoadGame || mode == LoadMode.NewGame)
                 {
                     DebugLog.LogToFileOnly("OnLevelLoaded");
+                    DataInit();
                     Detour();
+                    MoreEffectiveTransfer.LoadSetting();
                     if (mode == LoadMode.NewGame)
                     {
                         DebugLog.LogToFileOnly("New Game");
@@ -43,6 +44,17 @@ namespace MoreEffectiveTransfer
             }
         }
 
+        public void DataInit()
+        {
+            for (int i = 0; i < 49152; i++)
+            {
+                MoreEffectiveTransferThreading.refreshCanNotConnectedBuildingIDCount[i] = 0;
+                for (int j = 0; j < 8; j++)
+                {
+                    MoreEffectiveTransferThreading.canNotConnectedBuildingID[i, j] = 0;
+                }
+            }
+        }
 
         public override void OnLevelUnloading()
         {

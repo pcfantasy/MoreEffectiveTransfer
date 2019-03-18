@@ -12,6 +12,7 @@ namespace MoreEffectiveTransfer
 {
     public class CustomTransferManager : TransferManager
     {
+        private static bool _init = false;
         private static float GetDistanceMultiplier(TransferReason material)
         {
             switch (material)
@@ -233,7 +234,7 @@ namespace MoreEffectiveTransfer
             }
         }
 
-        private void GetParams()
+        private static void Init()
         {
             var inst = Singleton<TransferManager>.instance;
             var incomingCount = typeof(TransferManager).GetField("m_incomingCount", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -256,40 +257,17 @@ namespace MoreEffectiveTransfer
             m_outgoingAmount = outgoingAmount.GetValue(inst) as int[];
         }
 
-        private void SetParams()
-        {
-            var inst = Singleton<TransferManager>.instance;
-            var incomingCount = typeof(TransferManager).GetField("m_incomingCount", BindingFlags.NonPublic | BindingFlags.Instance);
-            var incomingOffers = typeof(TransferManager).GetField("m_incomingOffers", BindingFlags.NonPublic | BindingFlags.Instance);
-            var incomingAmount = typeof(TransferManager).GetField("m_incomingAmount", BindingFlags.NonPublic | BindingFlags.Instance);
-            var outgoingCount = typeof(TransferManager).GetField("m_outgoingCount", BindingFlags.NonPublic | BindingFlags.Instance);
-            var outgoingOffers = typeof(TransferManager).GetField("m_outgoingOffers", BindingFlags.NonPublic | BindingFlags.Instance);
-            var outgoingAmount = typeof(TransferManager).GetField("m_outgoingAmount", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (inst == null)
-            {
-                CODebugBase<LogChannel>.Error(LogChannel.Core, "No instance of TransferManager found!");
-                DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, "No instance of TransferManager found!");
-                return;
-            }
-            incomingCount.SetValue(inst, m_incomingCount);
-            incomingOffers.SetValue(inst, m_incomingOffers);
-            incomingAmount.SetValue(inst, m_incomingAmount);
-            outgoingCount.SetValue(inst, m_outgoingCount);
-            outgoingOffers.SetValue(inst, m_outgoingOffers);
-            outgoingAmount.SetValue(inst, m_outgoingAmount);
-        }
+        private static TransferManager.TransferOffer[] m_outgoingOffers;
 
-        private TransferManager.TransferOffer[] m_outgoingOffers;
+        private static TransferManager.TransferOffer[] m_incomingOffers;
 
-        private TransferManager.TransferOffer[] m_incomingOffers;
+        private static ushort[] m_outgoingCount;
 
-        private ushort[] m_outgoingCount;
+        private static ushort[] m_incomingCount;
 
-        private ushort[] m_incomingCount;
+        private static int[] m_outgoingAmount;
 
-        private int[] m_outgoingAmount;
-
-        private int[] m_incomingAmount;
+        private static int[] m_incomingAmount;
 
         private bool CanUseNewMatchOffers(ushort buildingID, TransferReason material)
         {
@@ -304,7 +282,6 @@ namespace MoreEffectiveTransfer
                     case TransferReason.Garbage:
                     case TransferReason.GarbageMove:
                     case TransferReason.Crime:
-                    case TransferReason.Sick:
                     case TransferReason.DeadMove:
                         return true;
                     default: return false;
@@ -341,7 +318,6 @@ namespace MoreEffectiveTransfer
                 case TransferReason.CriminalMove:
                 case TransferReason.Dead:
                 case TransferReason.DeadMove:
-                case TransferReason.SickMove:
                 case TransferReason.Snow:
                 case TransferReason.SnowMove:
                 case TransferReason.RoadMaintenance:
@@ -389,7 +365,6 @@ namespace MoreEffectiveTransfer
                 case TransferReason.GarbageMove:
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
-                case TransferReason.SickMove:
                 case TransferReason.SnowMove:
                     return 1;
                 case TransferReason.Taxi:
@@ -398,10 +373,113 @@ namespace MoreEffectiveTransfer
             }
         }
 
+        private bool IsUnRoutedMatch(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        {
+            if (!MoreEffectiveTransfer.fixUnRouteTransfer)
+            {
+                return false;
+            }
+
+            bool active = offerIn.Active;
+            bool active2 = offerOut.Active;
+            VehicleManager instance1 = Singleton<VehicleManager>.instance;
+            BuildingManager instance = Singleton<BuildingManager>.instance;
+            if (active && offerIn.Vehicle != 0)
+            {
+                ushort targetBuilding = 0;
+                ushort sourceBuilding = instance1.m_vehicles.m_buffer[offerIn.Vehicle].m_sourceBuilding;
+                targetBuilding = offerOut.Building;
+
+                if ((targetBuilding!=0) && (sourceBuilding!=0))
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        if (MoreEffectiveTransferThreading.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+                //info.m_vehicleAI.StartTransfer(vehicle, ref vehicles.m_buffer[(int)vehicle], material, offerOut);
+            }
+            else if (active2 && offerOut.Vehicle != 0)
+            {
+                ushort targetBuilding = 0;
+                ushort sourceBuilding = instance1.m_vehicles.m_buffer[offerOut.Vehicle].m_sourceBuilding;
+                targetBuilding = offerIn.Building;
+
+                if ((targetBuilding != 0) && (sourceBuilding != 0))
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        if (MoreEffectiveTransferThreading.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+                //info2.m_vehicleAI.StartTransfer(vehicle2, ref vehicles2.m_buffer[(int)vehicle2], material, offerIn);
+            }
+            else if (active && offerIn.Citizen != 0u)
+            {
+                DebugLog.LogToFileOnly("Error: No such case active && offerIn.Citizen != 0u");
+                return false;
+            }
+            else if (active2 && offerOut.Citizen != 0u)
+            {
+                DebugLog.LogToFileOnly("Error: No such case active && offerOut.Citizen != 0u");
+                return false;
+            }
+            else if (active2 && offerOut.Building != 0)
+            {
+                ushort targetBuilding = 0;
+                ushort sourceBuilding = offerOut.Building;
+                targetBuilding = offerIn.Building;
+
+                if ((targetBuilding != 0) && (sourceBuilding != 0))
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        if (MoreEffectiveTransferThreading.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+                //info3.m_buildingAI.StartTransfer(building, ref buildings.m_buffer[(int)building], material, offerIn);
+            }
+            else if (active && offerIn.Building != 0)
+            {
+                ushort targetBuilding = 0;
+                ushort sourceBuilding = offerIn.Building;
+                targetBuilding = offerOut.Building;
+
+                if ((targetBuilding != 0) && (sourceBuilding != 0))
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        if (MoreEffectiveTransferThreading.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+                //info4.m_buildingAI.StartTransfer(building2, ref buildings2.m_buffer[(int)building2], material, offerOut);
+            }
+            return false;
+        }
 
         private void MatchOffers(TransferReason material)
         {
-            GetParams();
+            if (!_init)
+            {
+                Init();
+                _init = true;
+            }
             if (material != TransferReason.None)
             {
                 float distanceMultiplier = GetDistanceMultiplier(material);
@@ -501,9 +579,12 @@ namespace MoreEffectiveTransfer
                                                 {
                                                     if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                     {
-                                                        validPriority = incomingPriorityInside;
-                                                        validOutgoingIdex = i;
-                                                        currentShortestDistance = incomingOutgoingDistance;
+                                                        if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material))
+                                                        {
+                                                            validPriority = incomingPriorityInside;
+                                                            validOutgoingIdex = i;
+                                                            currentShortestDistance = incomingOutgoingDistance;
+                                                        }
                                                     }
                                                 }
                                                 // NON-STOCK CODE END
@@ -670,9 +751,12 @@ namespace MoreEffectiveTransfer
                                                     }
                                                     if (((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1) && !wareHouseStopIncoming)
                                                     {
-                                                        validPriority = outgoingPriorityInside;
-                                                        validIncomingIdex = j;
-                                                        currentShortestDistance = incomingOutgoingDistance;
+                                                        if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer, material))
+                                                        {
+                                                            validPriority = outgoingPriorityInside;
+                                                            validIncomingIdex = j;
+                                                            currentShortestDistance = incomingOutgoingDistance;
+                                                        }
                                                     }
                                                 }
                                                 // NON-STOCK CODE END
@@ -787,8 +871,6 @@ namespace MoreEffectiveTransfer
                 m_incomingAmount[(int)material] = 0;
                 m_outgoingAmount[(int)material] = 0;
             }
-
-            SetParams();
         }
 
         private void StartTransfer(TransferManager.TransferReason material, TransferManager.TransferOffer offerOut, TransferManager.TransferOffer offerIn, int delta)

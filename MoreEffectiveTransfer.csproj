@@ -60,6 +60,7 @@
     <Compile Include="MoreEffectiveTransfer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RedirectionHelper.cs" />
+    <Compile Include="MoreEffectiveTransferThreading.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

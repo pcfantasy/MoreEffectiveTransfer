@@ -12,26 +12,14 @@ namespace MoreEffectiveTransfer
     {
         public static string[] English =
         {
-            "Radical Service Select(Enable to respond very quickly, leads to less building problems but use more service cars)",
-            "Radical Garbage Service(Suggest Disable)",
-            "Radical Police Service(Suggest Enable)",
-            "Radical Dead Service(Suggest Enable)",
-            "Radical Hospital Service(Suggest Enable)",
-            "Radical Road Service(Suggest Disable)",
-            "Radical Fire Service(Suggest Enable)",
+            "Fix UnRouted Transfer Match If you have district with broken roadnetwork",
+            "Fix UnRouted Transfer Match Enable",
         };
-
-
 
         public static string[] Chinese =
         {
-            "激进的服务策略(迅速响应,可减少楼房问题的概率但会增加城市服务车子的数量)",  //0
-            "激进的垃圾服务(建议关闭)",          //1
-            "激进的警察服务(建议打开)",          //2
-            "激进的遗体服务(建议打开)",        //3
-            "激进的医疗服务(建议打开)",        //4
-            "激进的道路服务(建议关闭)",        //5
-            "激进的消防服务(建议打开)",        //6
+            "修正无法连接的运输,如果你有区域是和其它区域道路连接是隔离的",  //0
+            "修正无法连接的运输",          //1
         };
 
         public static string[] OptionUI = new string[English.Length];
