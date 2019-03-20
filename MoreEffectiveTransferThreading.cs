@@ -15,138 +15,52 @@ namespace MoreEffectiveTransfer
     public class MoreEffectiveTransferThreading : ThreadingExtensionBase
     {
         public static bool isFirstTime = true;
-        //Store Failed to connected building
-        public static uint[,] canNotConnectedBuildingID = new uint[49152,8];
-        public static byte[] refreshCanNotConnectedBuildingIDCount = new byte[49152];
         public override void OnBeforeSimulationFrame()
         {
             base.OnBeforeSimulationFrame();
             if (Loader.CurrentLoadMode == LoadMode.LoadGame || Loader.CurrentLoadMode == LoadMode.NewGame)
             {
-                uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex + 1u;
-                int num7 = (int)(currentFrameIndex & 15u);
-                int num8 = num7 * 1024;
-                int num9 = (num7 + 1) * 1024 - 1;
-                VehicleManager instance1 = Singleton<VehicleManager>.instance;
                 if (MoreEffectiveTransfer.IsEnabled)
                 {
-                    for (int i = num8; i <= num9; i = i + 1)
-                    {
-                        VehicleStatus(i, currentFrameIndex, ref instance1.m_vehicles.m_buffer[i]);
-                    }
+                    CheckDetour();
                 }
             }
         }
 
-        private bool NeedCheckPathFind(TransferManager.TransferReason material)
+        public void CheckDetour()
         {
-            switch (material)
+            if (isFirstTime && Loader.DetourInited)
             {
-                case TransferManager.TransferReason.Oil:
-                case TransferManager.TransferReason.Ore:
-                case TransferManager.TransferReason.Coal:
-                case TransferManager.TransferReason.Petrol:
-                case TransferManager.TransferReason.Food:
-                case TransferManager.TransferReason.Grain:
-                case TransferManager.TransferReason.Lumber:
-                case TransferManager.TransferReason.Logs:
-                case TransferManager.TransferReason.Goods:
-                case TransferManager.TransferReason.LuxuryProducts:
-                case TransferManager.TransferReason.AnimalProducts:
-                case TransferManager.TransferReason.Flours:
-                case TransferManager.TransferReason.Petroleum:
-                case TransferManager.TransferReason.Plastics:
-                case TransferManager.TransferReason.Metals:
-                case TransferManager.TransferReason.Glass:
-                case TransferManager.TransferReason.PlanedTimber:
-                case TransferManager.TransferReason.Paper:
-                case TransferManager.TransferReason.Fire:
-                case TransferManager.TransferReason.Garbage:
-                case TransferManager.TransferReason.GarbageMove:
-                case TransferManager.TransferReason.Crime:
-                case TransferManager.TransferReason.CriminalMove:
-                case TransferManager.TransferReason.Dead:
-                case TransferManager.TransferReason.DeadMove:
-                case TransferManager.TransferReason.Snow:
-                case TransferManager.TransferReason.SnowMove:
-                case TransferManager.TransferReason.RoadMaintenance:
-                case TransferManager.TransferReason.ParkMaintenance:
-                case TransferManager.TransferReason.Taxi:
-                    return true;
-                default: return false;
-            }
-        }
-
-        public void VehicleStatus(int i, uint currentFrameIndex, ref Vehicle vehicle)
-        {
-            int num4 = (int)(currentFrameIndex & 255u);
-
-            if (MoreEffectiveTransfer.fixUnRouteTransfer)
-            {
-                if (NeedCheckPathFind((TransferManager.TransferReason)vehicle.m_transferType))
+                isFirstTime = false;
+                if (Loader.DetourInited)
                 {
-                    if (vehicle.m_targetBuilding != 0)
+                    DebugLog.LogToFileOnly("ThreadingExtension.OnBeforeSimulationFrame: First frame detected. Checking detours.");
+                    List<string> list = new List<string>();
+                    foreach (Loader.Detour current in Loader.Detours)
                     {
-                        if (vehicle.m_sourceBuilding != 0)
+                        if (!RedirectionHelper.IsRedirected(current.OriginalMethod, current.CustomMethod))
                         {
-                            if (vehicle.m_flags.IsFlagSet(Vehicle.Flags.Created) && !vehicle.m_flags.IsFlagSet(Vehicle.Flags.Deleted))
+                            list.Add(string.Format("{0}.{1} with {2} parameters ({3})", new object[]
                             {
-                                if (vehicle.m_flags.IsFlagSet(Vehicle.Flags.WaitingPath))
-                                {
-                                    PathManager instance1 = Singleton<PathManager>.instance;
-                                    byte pathFindFlags = instance1.m_pathUnits.m_buffer[(int)((UIntPtr)vehicle.m_path)].m_pathFindFlags;
-                                    if ((pathFindFlags & 8) != 0)
-                                    {
-                                        bool alreadyHaveFailedBuilding = false;
-                                        bool reachMaxFailedBuilding = true;
-                                        for (int j = 0; j < 8; j++)
-                                        {
-                                            if (canNotConnectedBuildingID[vehicle.m_targetBuilding, j] == vehicle.m_sourceBuilding)
-                                            {
-                                                alreadyHaveFailedBuilding = true;
-                                                reachMaxFailedBuilding = false;
-                                                break;
-                                            }
-                                        }
-
-                                        if (!alreadyHaveFailedBuilding)
-                                        {
-                                            for (int j = 0; j < 8; j++)
-                                            {
-                                                if (canNotConnectedBuildingID[vehicle.m_targetBuilding, j] == 0)
-                                                {
-                                                    canNotConnectedBuildingID[vehicle.m_targetBuilding, j] = vehicle.m_sourceBuilding;
-                                                    reachMaxFailedBuilding = false;
-                                                    break;
-                                                }
-                                            }
-                                        }
-
-                                        if (reachMaxFailedBuilding)
-                                        {
-                                            DebugLog.LogToFileOnly("Error: reachMaxFailedBuilding, please check your roadnetwork");
-                                        }
-                                    }
-                                    else if ((pathFindFlags & 4) != 0)
-                                    {
-                                        //After several times, we can ignore those (can not connected) buildings
-                                        refreshCanNotConnectedBuildingIDCount[vehicle.m_targetBuilding]++;
-                                        if (refreshCanNotConnectedBuildingIDCount[vehicle.m_targetBuilding] > 32)
-                                        {
-                                            for (int j = 0; j < 8; j++)
-                                            {
-                                                refreshCanNotConnectedBuildingIDCount[vehicle.m_targetBuilding] = 0;
-                                                if (canNotConnectedBuildingID[vehicle.m_targetBuilding, j] != 0)
-                                                {
-                                                    canNotConnectedBuildingID[vehicle.m_targetBuilding, j] = 0;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    current.OriginalMethod.DeclaringType.Name,
+                    current.OriginalMethod.Name,
+                    current.OriginalMethod.GetParameters().Length,
+                    current.OriginalMethod.DeclaringType.AssemblyQualifiedName
+                            }));
                         }
+                    }
+                    DebugLog.LogToFileOnly(string.Format("ThreadingExtension.OnBeforeSimulationFrame: First frame detected. Detours checked. Result: {0} missing detours", list.Count));
+                    if (list.Count > 0)
+                    {
+                        string error = "MoreEffectiveTransferManager detected an incompatibility with another mod! You can continue playing but it's NOT recommended. RealGasStation will not work as expected. See RealGasStation.log for technical details.";
+                        DebugLog.LogToFileOnly(error);
+                        string text = "The following methods were overriden by another mod:";
+                        foreach (string current2 in list)
+                        {
+                            text += string.Format("\n\t{0}", current2);
+                        }
+                        DebugLog.LogToFileOnly(text);
+                        UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", text, true);
                     }
                 }
             }

@@ -394,7 +394,7 @@ namespace MoreEffectiveTransfer
                 {
                     for (int j = 0; j < 8; j++)
                     {
-                        if (MoreEffectiveTransferThreading.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        if (CustomCarAI.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
                             return true;
                         }
@@ -413,7 +413,7 @@ namespace MoreEffectiveTransfer
                 {
                     for (int j = 0; j < 8; j++)
                     {
-                        if (MoreEffectiveTransferThreading.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        if (CustomCarAI.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
                             return true;
                         }
@@ -442,7 +442,7 @@ namespace MoreEffectiveTransfer
                 {
                     for (int j = 0; j < 8; j++)
                     {
-                        if (MoreEffectiveTransferThreading.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        if (CustomCarAI.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
                             return true;
                         }
@@ -461,7 +461,7 @@ namespace MoreEffectiveTransfer
                 {
                     for (int j = 0; j < 8; j++)
                     {
-                        if (MoreEffectiveTransferThreading.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        if (CustomCarAI.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
                             return true;
                         }

@@ -15,12 +15,27 @@ namespace MoreEffectiveTransfer
     public class Loader : LoadingExtensionBase
     {
         public static LoadMode CurrentLoadMode;
-        public static RedirectCallsState state1;
         public static bool isRealCityRunning = false;
         public static bool isEmployOvereducatedWorkersRunning = false;
+        public class Detour
+        {
+            public MethodInfo OriginalMethod;
+            public MethodInfo CustomMethod;
+            public RedirectCallsState Redirect;
+
+            public Detour(MethodInfo originalMethod, MethodInfo customMethod)
+            {
+                this.OriginalMethod = originalMethod;
+                this.CustomMethod = customMethod;
+                this.Redirect = RedirectionHelper.RedirectCalls(originalMethod, customMethod);
+            }
+        }
+        public static List<Detour> Detours { get; set; }
+        public static bool DetourInited = false;
 
         public override void OnCreated(ILoading loading)
         {
+            Detours = new List<Detour>();
             base.OnCreated(loading);
         }
 
@@ -34,7 +49,7 @@ namespace MoreEffectiveTransfer
                 {
                     DebugLog.LogToFileOnly("OnLevelLoaded");
                     DataInit();
-                    Detour();
+                    InitDetour();
                     MoreEffectiveTransfer.LoadSetting();
                     if (mode == LoadMode.NewGame)
                     {
@@ -48,10 +63,10 @@ namespace MoreEffectiveTransfer
         {
             for (int i = 0; i < 49152; i++)
             {
-                MoreEffectiveTransferThreading.refreshCanNotConnectedBuildingIDCount[i] = 0;
+                CustomCarAI.refreshCanNotConnectedBuildingIDCount[i] = 0;
                 for (int j = 0; j < 8; j++)
                 {
-                    MoreEffectiveTransferThreading.canNotConnectedBuildingID[i, j] = 0;
+                    CustomCarAI.canNotConnectedBuildingID[i, j] = 0;
                 }
             }
         }
@@ -73,18 +88,80 @@ namespace MoreEffectiveTransfer
             base.OnReleased();
         }
 
-        public void Detour()
+        public void InitDetour()
         {
             isRealCityRunning = CheckRealCityIsLoaded();
-            var srcMethod1 = typeof(TransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance);
-            var destMethod1 = typeof(CustomTransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance);
-            state1 = RedirectionHelper.RedirectCalls(srcMethod1, destMethod1);
+            if (!DetourInited)
+            {
+                DebugLog.LogToFileOnly("Init detours");
+                bool detourFailed = false;
+
+                //1
+                DebugLog.LogToFileOnly("Detour TransferManager::MatchOffers calls");
+                try
+                {
+                    Detours.Add(new Detour(typeof(TransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance),
+                                           typeof(CustomTransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance)));
+                }
+                catch (Exception)
+                {
+                    DebugLog.LogToFileOnly("Could not detour TransferManager::MatchOffers");
+                    detourFailed = true;
+                }
+
+                //2
+                DebugLog.LogToFileOnly("Detour CarAI::PathfindFailure calls");
+                try
+                {
+                    Detours.Add(new Detour(typeof(CarAI).GetMethod("PathfindFailure", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType() }, null),
+                                           typeof(CustomCarAI).GetMethod("PathfindFailure", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType() }, null)));
+                }
+                catch (Exception)
+                {
+                    DebugLog.LogToFileOnly("Could not detour CarAI::PathfindFailure");
+                    detourFailed = true;
+                }
+
+                //3
+                DebugLog.LogToFileOnly("Detour CarAI::PathfindSuccess calls");
+                try
+                {
+                    Detours.Add(new Detour(typeof(CarAI).GetMethod("PathfindSuccess", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType() }, null),
+                                           typeof(CustomCarAI).GetMethod("PathfindSuccess", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType() }, null)));
+                }
+                catch (Exception)
+                {
+                    DebugLog.LogToFileOnly("Could not detour CarAI::PathfindSuccess");
+                    detourFailed = true;
+                }
+
+                if (detourFailed)
+                {
+                    DebugLog.LogToFileOnly("Detours failed");
+                }
+                else
+                {
+                    DebugLog.LogToFileOnly("Detours successful");
+                }
+                DetourInited = true;
+            }
         }
 
         public void RevertDetour()
         {
-            var srcMethod1 = typeof(TransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance);
-            RedirectionHelper.RevertRedirect(srcMethod1, state1);
+            if (DetourInited)
+            {
+                DebugLog.LogToFileOnly("Revert detours");
+                Detours.Reverse();
+                foreach (Detour d in Detours)
+                {
+                    RedirectionHelper.RevertRedirect(d.OriginalMethod, d.Redirect);
+                }
+                DetourInited = false;
+                Detours.Clear();
+                DebugLog.LogToFileOnly("Reverting detours finished.");
+            }
+            MoreEffectiveTransferThreading.isFirstTime = true;
         }
 
         private bool Check3rdPartyModLoaded(string namespaceStr, bool printAll = false)

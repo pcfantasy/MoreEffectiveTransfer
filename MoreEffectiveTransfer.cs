@@ -57,13 +57,13 @@ namespace MoreEffectiveTransfer
                 StreamReader sr = new StreamReader(fs);
                 string strLine = sr.ReadLine();
 
-                if (strLine == "False")
+                if (strLine == "True")
                 {
-                    fixUnRouteTransfer = false;
+                    fixUnRouteTransfer = true;
                 }
                 else
                 {
-                    fixUnRouteTransfer = true;
+                    fixUnRouteTransfer = false;
                 }
 
                 sr.Close();
