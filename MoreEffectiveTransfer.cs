@@ -1,13 +1,7 @@
-﻿using ColossalFramework;
-using ColossalFramework.Globalization;
-using ColossalFramework.UI;
-using ICities;
-using System;
-using System.Collections.Generic;
+﻿using ICities;
+using MoreEffectiveTransfer.Util;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace MoreEffectiveTransfer
 {
@@ -15,6 +9,7 @@ namespace MoreEffectiveTransfer
     {
         public static bool IsEnabled = false;
         public static bool fixUnRouteTransfer = false;
+        public static bool debugMode = false;
         public static byte lastLanguage = 0;
 
         public string Name
@@ -41,10 +36,10 @@ namespace MoreEffectiveTransfer
 
         public static void SaveSetting()
         {
-            //save langugae
             FileStream fs = File.Create("MoreEffectiveTransfer_setting.txt");
             StreamWriter streamWriter = new StreamWriter(fs);
             streamWriter.WriteLine(fixUnRouteTransfer);
+            streamWriter.WriteLine(debugMode);
             streamWriter.Flush();
             fs.Close();
         }
@@ -56,7 +51,6 @@ namespace MoreEffectiveTransfer
                 FileStream fs = new FileStream("MoreEffectiveTransfer_setting.txt", FileMode.Open);
                 StreamReader sr = new StreamReader(fs);
                 string strLine = sr.ReadLine();
-
                 if (strLine == "True")
                 {
                     fixUnRouteTransfer = true;
@@ -66,6 +60,16 @@ namespace MoreEffectiveTransfer
                     fixUnRouteTransfer = false;
                 }
 
+                strLine = sr.ReadLine();
+                if (strLine == "True")
+                {
+                    debugMode = true;
+                }
+                else
+                {
+                    debugMode = false;
+                }
+
                 sr.Close();
                 fs.Close();
             }
@@ -73,25 +77,23 @@ namespace MoreEffectiveTransfer
 
         public void OnSettingsUI(UIHelperBase helper)
         {
-
             LoadSetting();
-            if (SingletonLite<LocaleManager>.instance.language.Contains("zh"))
-            {
-                Language.LanguageSwitch(1);
-            }
-            else
-            {
-                Language.LanguageSwitch(0);
-            }
-
-            UIHelperBase group1 = helper.AddGroup(Language.OptionUI[0]);
-            group1.AddCheckbox(Language.OptionUI[1], fixUnRouteTransfer, (index) => fixUnRouteTransferEnable(index));
+            UIHelperBase group1 = helper.AddGroup(Localization.Get("FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION"));
+            group1.AddCheckbox(Localization.Get("FIX_UNROUTED_TRANSFER_MATCH_ENALBE"), fixUnRouteTransfer, (index) => fixUnRouteTransferEnable(index));
+            UIHelperBase group2 = helper.AddGroup(Localization.Get("DEBUG_MODE_DESCRIPTION"));
+            group2.AddCheckbox(Localization.Get("DEBUG_MODE_DESCRIPTION_ENALBE"), debugMode, (index) => debugModeEnable(index));
             SaveSetting();
         }
 
         public void fixUnRouteTransferEnable(bool index)
         {
             fixUnRouteTransfer = index;
+            SaveSetting();
+        }
+
+        public void debugModeEnable(bool index)
+        {
+            debugMode = index;
             SaveSetting();
         }
     }

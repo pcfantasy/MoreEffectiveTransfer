@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MoreEffectiveTransfer</RootNamespace>
     <AssemblyName>MoreEffectiveTransfer</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,6 +32,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>F:\SteamLibrary\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -53,19 +57,34 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomCarAI.cs" />
-    <Compile Include="CustomTransferManager.cs" />
-    <Compile Include="DebugLog.cs" />
-    <Compile Include="Language.cs" />
+    <Compile Include="CustomAI\CustomCarAI.cs" />
+    <Compile Include="CustomAI\CustomHelicopterDepotAI.cs" />
+    <Compile Include="CustomManager\CustomTransferManager.cs" />
+    <Compile Include="UI\BuildingUI.cs" />
+    <Compile Include="Util\DebugLog.cs" />
+    <Compile Include="Util\HarmonyDetours.cs" />
     <Compile Include="Loader.cs" />
+    <Compile Include="Util\Localization.cs" />
     <Compile Include="MoreEffectiveTransfer.cs" />
+    <Compile Include="UI\PlayerBuildingUI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RedirectionHelper.cs" />
+    <Compile Include="Util\MainDataStore.cs" />
+    <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="MoreEffectiveTransferThreading.cs" />
+    <Compile Include="UI\UniqueFactoryUI.cs" />
+    <Compile Include="UI\WareHouseUI.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Locales\zh.txt" />
+    <Content Include="Locales\en.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "C:\Users\Administrator\Desktop\Other Mod\MoreEffectiveTransfer\MoreEffectiveTransfer\bin\Release\MoreEffectiveTransfer.dll"  "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\MoreEffectiveTransfer.dll"</PostBuildEvent>
+    <PostBuildEvent>copy "C:\Users\Administrator\Desktop\Other Mod\MoreEffectiveTransfer\MoreEffectiveTransfer\bin\Release\MoreEffectiveTransfer.dll"  "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\MoreEffectiveTransfer.dll"
+copy "C:\Users\Administrator\Desktop\Other Mod\MoreEffectiveTransfer\MoreEffectiveTransfer\bin\Release\0Harmony.dll"  "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\0Harmony.dll"
+rd /q /s "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\Locales"
+mkdir "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\Locales"
+copy "C:\Users\Administrator\Desktop\Other Mod\MoreEffectiveTransfer\MoreEffectiveTransfer\Locales\*.txt" "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\Locales"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

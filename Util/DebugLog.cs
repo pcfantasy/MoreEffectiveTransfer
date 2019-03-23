@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MoreEffectiveTransfer
+namespace MoreEffectiveTransfer.Util
 {
     public static class DebugLog
     {

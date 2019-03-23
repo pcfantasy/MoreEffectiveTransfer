@@ -1,18 +1,63 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Plugins;
+using MoreEffectiveTransfer.CustomAI;
+using MoreEffectiveTransfer.Util;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
-namespace MoreEffectiveTransfer
+namespace MoreEffectiveTransfer.CustomManager
 {
     public class CustomTransferManager : TransferManager
     {
         private static bool _init = false;
+
+        public static void TransferManagerAddOutgoingOfferPrefix(TransferManager.TransferReason material, TransferManager.TransferOffer offer)
+        {
+            //If no HelicopterDepot, change offer type.
+            if (!CustomHelicopterDepotAI.haveFireHelicopterDepotFinal)
+            {
+                if (material == TransferReason.Fire2)
+                {
+                    material = TransferReason.Fire;
+                    for (int i = offer.Priority; i >= 0; i--)
+                    {
+                        int num = (int)((byte)material * 8 + i);
+                        int num2 = (int)m_outgoingCount[num];
+                        if (num2 < 256)
+                        {
+                            int num3 = num * 256 + num2;
+                            m_outgoingOffers[num3] = offer;
+                            m_outgoingCount[num] = (ushort)(num2 + 1);
+                            m_outgoingAmount[(int)material] += offer.Amount;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            if (!CustomHelicopterDepotAI.haveSickHelicopterDepotFinal)
+            {
+                if (material == TransferReason.Sick2)
+                {
+                    material = TransferReason.Sick;
+                    for (int i = offer.Priority; i >= 0; i--)
+                    {
+                        int num = (int)((byte)material * 8 + i);
+                        int num2 = (int)m_outgoingCount[num];
+                        if (num2 < 256)
+                        {
+                            int num3 = num * 256 + num2;
+                            m_outgoingOffers[num3] = offer;
+                            m_outgoingCount[num] = (ushort)(num2 + 1);
+                            m_outgoingAmount[(int)material] += offer.Amount;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         private static float GetDistanceMultiplier(TransferReason material)
         {
             switch (material)
@@ -392,9 +437,9 @@ namespace MoreEffectiveTransfer
 
                 if ((targetBuilding!=0) && (sourceBuilding!=0))
                 {
-                    for (int j = 0; j < 8; j++)
+                    for (int j = 0; j < MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]; j++)
                     {
-                        if (CustomCarAI.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
                             return true;
                         }
@@ -411,9 +456,9 @@ namespace MoreEffectiveTransfer
 
                 if ((targetBuilding != 0) && (sourceBuilding != 0))
                 {
-                    for (int j = 0; j < 8; j++)
+                    for (int j = 0; j < MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]; j++)
                     {
-                        if (CustomCarAI.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
                             return true;
                         }
@@ -440,9 +485,9 @@ namespace MoreEffectiveTransfer
 
                 if ((targetBuilding != 0) && (sourceBuilding != 0))
                 {
-                    for (int j = 0; j < 8; j++)
+                    for (int j = 0; j < MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]; j++)
                     {
-                        if (CustomCarAI.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
                             return true;
                         }
@@ -459,9 +504,9 @@ namespace MoreEffectiveTransfer
 
                 if ((targetBuilding != 0) && (sourceBuilding != 0))
                 {
-                    for (int j = 0; j < 8; j++)
+                    for (int j = 0; j < MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]; j++)
                     {
-                        if (CustomCarAI.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
+                        if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
                             return true;
                         }

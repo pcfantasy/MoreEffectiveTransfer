@@ -2,6 +2,9 @@
 using ColossalFramework.Globalization;
 using ColossalFramework.UI;
 using ICities;
+using MoreEffectiveTransfer.CustomAI;
+using MoreEffectiveTransfer.UI;
+using MoreEffectiveTransfer.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +25,19 @@ namespace MoreEffectiveTransfer
             {
                 if (MoreEffectiveTransfer.IsEnabled)
                 {
+                    uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+                    int num4 = (int)(currentFrameIndex & 255u);
+                    if (num4 == 255)
+                    {
+                        BuildingUI.refeshOnce = true;
+                        PlayerBuildingUI.refeshOnce = true;
+                        UniqueFactoryUI.refeshOnce = true;
+                        WareHouseUI.refeshOnce = true;
+                        CustomHelicopterDepotAI.haveFireHelicopterDepotFinal = CustomHelicopterDepotAI.haveFireHelicopterDepot;
+                        CustomHelicopterDepotAI.haveFireHelicopterDepot = false;
+                        CustomHelicopterDepotAI.haveSickHelicopterDepotFinal = CustomHelicopterDepotAI.haveSickHelicopterDepot;
+                        CustomHelicopterDepotAI.haveSickHelicopterDepot = false;
+                    }
                     CheckDetour();
                 }
             }
