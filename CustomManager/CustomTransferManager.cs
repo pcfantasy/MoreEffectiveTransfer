@@ -399,7 +399,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Glass:
                 case TransferReason.PlanedTimber:
                 case TransferReason.Paper:
-                    return 2;
+                    return 3;
                 case TransferReason.Garbage:
                 case TransferReason.Snow:
                 case TransferReason.RoadMaintenance:
