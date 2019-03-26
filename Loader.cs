@@ -326,6 +326,7 @@ namespace MoreEffectiveTransfer
         public void InitDetour()
         {
             isRealCityRunning = CheckRealCityIsLoaded();
+            isEmployOvereducatedWorkersRunning = CheckEmployOvereducatedWorkersRunningIsLoaded();
             if (!DetourInited)
             {
                 DebugLog.LogToFileOnly("Init detours");
@@ -409,6 +410,11 @@ namespace MoreEffectiveTransfer
         private bool CheckRealCityIsLoaded()
         {
             return this.Check3rdPartyModLoaded("RealCity", true);
+        }
+
+        private bool CheckEmployOvereducatedWorkersRunningIsLoaded()
+        {
+            return this.Check3rdPartyModLoaded("EmployOvereducatedWorkersRunning", true);
         }
     }
 }
