@@ -10,7 +10,6 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool fixUnRouteTransfer = false;
         public static bool debugMode = false;
-        public static byte lastLanguage = 0;
 
         public string Name
         {

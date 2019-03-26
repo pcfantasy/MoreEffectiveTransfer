@@ -66,6 +66,7 @@ namespace MoreEffectiveTransfer.Util
             harmony.ConditionalPatch(helicopterDepotAISimulationStep,
                 null,
                 new HarmonyMethod(helicopterDepotAISimulationStepPostFix));
+            Loader.HarmonyDetourInited = true;
             DebugLog.LogToFileOnly("Harmony patches applied");
         }
 
@@ -95,6 +96,7 @@ namespace MoreEffectiveTransfer.Util
             harmony.ConditionalUnPatch(helicopterDepotAISimulationStep,
                 null,
                 new HarmonyMethod(helicopterDepotAISimulationStepPostFix));
+            Loader.HarmonyDetourInited = false;
             DebugLog.LogToFileOnly("Harmony patches DeApplied");
         }
     }

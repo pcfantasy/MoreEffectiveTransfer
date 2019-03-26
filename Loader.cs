@@ -311,7 +311,6 @@ namespace MoreEffectiveTransfer
             {
                 DebugLog.LogToFileOnly("Init harmony detours");
                 HarmonyDetours.Apply();
-                HarmonyDetourInited = true;
             }
         }
 
@@ -321,7 +320,6 @@ namespace MoreEffectiveTransfer
             {
                 DebugLog.LogToFileOnly("Revert harmony detours");
                 HarmonyDetours.DeApply();
-                HarmonyDetourInited = false;
             }
         }
 

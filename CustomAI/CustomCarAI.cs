@@ -76,10 +76,13 @@ namespace MoreEffectiveTransfer.CustomAI
 
                             if (!alreadyHaveFailedBuilding)
                             {
-                                MainDataStore.canNotConnectedBuildingID[data.m_targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[vehicleID]] = data.m_sourceBuilding;
-                                MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding]++;
-                                if (MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding] == 255)
+                                if (MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding] < 255)
                                 {
+                                    MainDataStore.canNotConnectedBuildingID[data.m_targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[vehicleID]] = data.m_sourceBuilding;
+                                    MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding]++;
+                                }
+                                else
+                                { 
                                     DebugLog.LogToFileOnly("Error: Max canNotConnectedBuildingIDCount 255 reached, Please check your roadnetwork");
                                     var building1 = Singleton<BuildingManager>.instance.m_buildings.m_buffer[data.m_targetBuilding];
                                     DebugLog.LogToFileOnly("DebugInfo: building m_class is " + building1.Info.m_class.ToString());
