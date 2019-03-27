@@ -33,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\0Harmony.dll</HintPath>
+      <HintPath>..\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>F:\SteamLibrary\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
@@ -80,11 +80,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "C:\Users\Administrator\Desktop\Other Mod\MoreEffectiveTransfer\MoreEffectiveTransfer\bin\Release\MoreEffectiveTransfer.dll"  "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\MoreEffectiveTransfer.dll"
-copy "C:\Users\Administrator\Desktop\Other Mod\MoreEffectiveTransfer\MoreEffectiveTransfer\bin\Release\0Harmony.dll"  "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\0Harmony.dll"
+    <PostBuildEvent>copy "D:\Mod\MoreEffectiveTransfer\bin\Release\MoreEffectiveTransfer.dll" "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\MoreEffectiveTransfer.dll"
+copy "D:\Mod\MoreEffectiveTransfer\bin\Release\0Harmony.dll"  "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\0Harmony.dll"
 rd /q /s "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\Locales"
 mkdir "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\Locales"
-copy "C:\Users\Administrator\Desktop\Other Mod\MoreEffectiveTransfer\MoreEffectiveTransfer\Locales\*.txt" "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\Locales"</PostBuildEvent>
+copy "D:\Mod\MoreEffectiveTransfer\Locales\*.txt" "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\Locales"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
