@@ -410,6 +410,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.GarbageMove:
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
+                case TransferReason.Dead:
                 case TransferReason.SnowMove:
                     return 1;
                 case TransferReason.Taxi:
