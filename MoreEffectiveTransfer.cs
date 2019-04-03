@@ -10,6 +10,9 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool fixUnRouteTransfer = false;
         public static bool debugMode = false;
+        public static bool preferLocalDemand = false;
+        public static bool preferVehicle = false;
+        public static bool applyPriority = false;
 
         public string Name
         {
@@ -39,6 +42,9 @@ namespace MoreEffectiveTransfer
             StreamWriter streamWriter = new StreamWriter(fs);
             streamWriter.WriteLine(fixUnRouteTransfer);
             streamWriter.WriteLine(debugMode);
+            streamWriter.WriteLine(preferLocalDemand);
+            streamWriter.WriteLine(applyPriority);
+            streamWriter.WriteLine(preferVehicle);
             streamWriter.Flush();
             fs.Close();
         }
@@ -69,6 +75,36 @@ namespace MoreEffectiveTransfer
                     debugMode = false;
                 }
 
+                strLine = sr.ReadLine();
+                if (strLine == "True")
+                {
+                    preferLocalDemand = true;
+                }
+                else
+                {
+                    preferLocalDemand = false;
+                }
+
+                strLine = sr.ReadLine();
+                if (strLine == "True")
+                {
+                    applyPriority = true;
+                }
+                else
+                {
+                    applyPriority = false;
+                }
+
+                strLine = sr.ReadLine();
+                if (strLine == "True")
+                {
+                    preferVehicle = true;
+                }
+                else
+                {
+                    preferVehicle = false;
+                }
+
                 sr.Close();
                 fs.Close();
             }
@@ -81,6 +117,10 @@ namespace MoreEffectiveTransfer
             group1.AddCheckbox(Localization.Get("FIX_UNROUTED_TRANSFER_MATCH_ENALBE"), fixUnRouteTransfer, (index) => fixUnRouteTransferEnable(index));
             UIHelperBase group2 = helper.AddGroup(Localization.Get("DEBUG_MODE_DESCRIPTION"));
             group2.AddCheckbox(Localization.Get("DEBUG_MODE_DESCRIPTION_ENALBE"), debugMode, (index) => debugModeEnable(index));
+            UIHelperBase group3 = helper.AddGroup(Localization.Get("EXPERIMENTAL_FEATURES"));
+            group3.AddCheckbox(Localization.Get("PREFER_LOCAL"), preferLocalDemand, (index) => preferLocalDemandEnable(index));
+            group3.AddCheckbox(Localization.Get("APPLY_PRIORITY"), applyPriority, (index) => applyPriorityEnable(index));
+            group3.AddCheckbox(Localization.Get("PREFER_VEHICLE"), preferVehicle, (index) => preferVehicleEnable(index));
             SaveSetting();
         }
 
@@ -93,6 +133,24 @@ namespace MoreEffectiveTransfer
         public void debugModeEnable(bool index)
         {
             debugMode = index;
+            SaveSetting();
+        }
+
+        public void preferLocalDemandEnable(bool index)
+        {
+            preferLocalDemand = index;
+            SaveSetting();
+        }
+
+        public void applyPriorityEnable(bool index)
+        {
+            applyPriority = index;
+            SaveSetting();
+        }
+
+        public void preferVehicleEnable(bool index)
+        {
+            preferVehicle = index;
             SaveSetting();
         }
     }

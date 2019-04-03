@@ -4,3 +4,7 @@ DEBUG_MODE_DESCRIPTION	Show Detail UnRouted Transfer Match Info in BuildingUI
 DEBUG_MODE_DESCRIPTION_ENALBE	Debug Mode Enable
 FAILED_BUILDING_COUNT	UnRouted Transfer Match Building Count
 GENERATE_DETAIL_REPORT	Generate detailed report in MoreEffectiveTransfer.txt
+EXPERIMENTAL_FEATURES	Experimental features
+PREFER_LOCAL	Prefer local demand in material transfer
+APPLY_PRIORITY	Apply priority in outside material transfer(Plane > Ship > Train > Road)
+PREFER_VEHICLE	Prefer sevice transfer with running sevice vehicle

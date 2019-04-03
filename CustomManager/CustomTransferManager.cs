@@ -303,15 +303,10 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
         private static TransferManager.TransferOffer[] m_outgoingOffers;
-
         private static TransferManager.TransferOffer[] m_incomingOffers;
-
         private static ushort[] m_outgoingCount;
-
         private static ushort[] m_incomingCount;
-
         private static int[] m_outgoingAmount;
-
         private static int[] m_incomingAmount;
 
         private bool CanUseNewMatchOffers(ushort buildingID, TransferReason material)
@@ -378,7 +373,6 @@ namespace MoreEffectiveTransfer.CustomManager
             //incoming first mode 0
             //outgoing first mode 1
             //balanced mode 2
-            //balanced mode with priority 3
             switch (material)
             {
                 case TransferReason.Oil:
@@ -399,12 +393,11 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Glass:
                 case TransferReason.PlanedTimber:
                 case TransferReason.Paper:
-                    return 3;
                 case TransferReason.Garbage:
                 case TransferReason.Snow:
                 case TransferReason.RoadMaintenance:
                 case TransferReason.ParkMaintenance:
-                    return 3;
+                    return 2;
                 case TransferReason.Crime:
                 case TransferReason.Fire:
                 case TransferReason.GarbageMove:
@@ -417,6 +410,123 @@ namespace MoreEffectiveTransfer.CustomManager
                     return 0;
                 default: return 2;
             }
+        }
+
+        private float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        {
+            bool canApplyPriority = false;
+            switch (material)
+            {
+                case TransferReason.Oil:
+                case TransferReason.Ore:
+                case TransferReason.Coal:
+                case TransferReason.Petrol:
+                case TransferReason.Food:
+                case TransferReason.Grain:
+                case TransferReason.Lumber:
+                case TransferReason.Logs:
+                case TransferReason.Goods:
+                case TransferReason.LuxuryProducts:
+                case TransferReason.AnimalProducts:
+                case TransferReason.Flours:
+                case TransferReason.Petroleum:
+                case TransferReason.Plastics:
+                case TransferReason.Metals:
+                case TransferReason.Glass:
+                case TransferReason.PlanedTimber:
+                case TransferReason.Paper:
+                    canApplyPriority = true; break;
+                default: canApplyPriority = false; break;
+            }
+
+            bool canApplyVehicle = false;
+            switch (material)
+            {
+                case TransferReason.Garbage:
+                case TransferReason.Snow:
+                case TransferReason.RoadMaintenance:
+                case TransferReason.ParkMaintenance:
+                case TransferReason.Crime:
+                case TransferReason.Fire:
+                case TransferReason.GarbageMove:
+                case TransferReason.CriminalMove:
+                case TransferReason.DeadMove:
+                case TransferReason.Dead:
+                case TransferReason.SnowMove:
+                case TransferReason.Taxi:
+                    canApplyVehicle = true; break;
+                default: canApplyVehicle = false; break;
+            }
+
+            float priority = 1f;
+
+            if (canApplyPriority)
+            {
+                if (MoreEffectiveTransfer.applyPriority)
+                {
+                    if (offerIn.Building != 0)
+                    {
+                        Building buildingData = Singleton<BuildingManager>.instance.m_buildings.m_buffer[offerIn.Building];
+                        if (buildingData.m_flags.IsFlagSet(Building.Flags.Untouchable))
+                        {
+                            if (buildingData.Info.m_class.m_service == ItemClass.Service.Road)
+                            {
+                                priority = 1f;
+                            }
+                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportTrain)
+                            {
+                                priority = 0.8f;
+                            }
+                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportShip)
+                            {
+                                priority = 0.6f;
+                            }
+                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportPlane)
+                            {
+                                priority = 0.4f;
+                            }
+                        }
+                    }
+
+                    if (offerOut.Building != 0)
+                    {
+                        Building buildingData = Singleton<BuildingManager>.instance.m_buildings.m_buffer[offerOut.Building];
+                        if (buildingData.m_flags.IsFlagSet(Building.Flags.Untouchable))
+                        {
+                            if (buildingData.Info.m_class.m_service == ItemClass.Service.Road)
+                            {
+                                priority = 1f;
+                            }
+                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportTrain)
+                            {
+                                priority = 0.8f;
+                            }
+                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportShip)
+                            {
+                                priority = 0.6f;
+                            }
+                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportPlane)
+                            {
+                                priority = 0.4f;
+                            }
+                        }
+                    }
+                }
+
+                if (MoreEffectiveTransfer.preferVehicle)
+                {
+                    if (canApplyVehicle)
+                    {
+                        priority *= 0.2f;
+                    }
+                }
+
+                if (MoreEffectiveTransfer.preferLocalDemand)
+                {
+                    priority *= 3f;
+                }
+            }
+            return priority;
         }
 
         private bool IsUnRoutedMatch(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
@@ -541,7 +651,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     // NON-STOCK CODE START
                     byte matchOffersMode = MatchOffersMode(material);
                     bool isLoopValid = false;
-                    if (matchOffersMode == 2 || matchOffersMode == 3)
+                    if (matchOffersMode == 2)
                     {
                         isLoopValid = (incomingIdex < incomingCount || outgoingIdex < outgoingCount);
                     }
@@ -580,14 +690,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                     if (canUseNewMatchOffers)
                                     {
                                         priority = 7;
-                                        if (matchOffersMode != 3)
-                                        {
-                                            incomingPriority = 0;
-                                        }
-                                        else
-                                        {
-                                            incomingPriority = Mathf.Max(0, 2 - oldPriority);
-                                        }
+                                        incomingPriority = Mathf.Max(0, 2 - oldPriority);
                                         incomingPriorityExclude = (!incomingOffer.Exclude) ? incomingPriority : Mathf.Max(0, 3 - oldPriority);
                                     }
                                     else
@@ -623,6 +726,8 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 // NON-STOCK CODE START
                                                 if (canUseNewMatchOffers)
                                                 {
+                                                    //ApplyPriority
+                                                    incomingOutgoingDistance *= ApplyPriority(incomingOffer, outgoingOfferPre, material);
                                                     if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                     {
                                                         if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material))
@@ -742,14 +847,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                     if (canUseNewMatchOffers)
                                     {
                                         priority = 7;
-                                        if (matchOffersMode != 3)
-                                        {
-                                            outgoingPriority = 0;
-                                        }
-                                        else
-                                        {
-                                            outgoingPriority = Mathf.Max(0, 2 - oldPriority);
-                                        }
+                                        outgoingPriority = Mathf.Max(0, 2 - oldPriority);
                                         outgoingPriorityExclude = (!outgoingOffer.Exclude) ? outgoingPriority : Mathf.Max(0, 3 - oldPriority);
                                     }
                                     else
@@ -783,6 +881,8 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 // NON-STOCK CODE START
                                                 if (canUseNewMatchOffers)
                                                 {
+                                                    //ApplyPriority
+                                                    incomingOutgoingDistance *= ApplyPriority(incomingOfferPre, outgoingOffer, material);
                                                     //Fix warehouse always import issue;
                                                     bool wareHouseStopIncoming = false;
                                                     if (incomingOfferPre.Building!= 0)
@@ -893,7 +993,7 @@ namespace MoreEffectiveTransfer.CustomManager
                         }
 
                         // NON-STOCK CODE START
-                        if (matchOffersMode == 2 || matchOffersMode == 3)
+                        if (matchOffersMode == 2)
                         {
                             isLoopValid = (incomingIdex < incomingCount || outgoingIdex < outgoingCount);
                         }
