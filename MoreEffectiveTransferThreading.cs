@@ -45,7 +45,7 @@ namespace MoreEffectiveTransfer
 
         public void CheckDetour()
         {
-            if (isFirstTime && Loader.DetourInited)
+            if (isFirstTime && Loader.DetourInited && Loader.HarmonyDetourInited)
             {
                 isFirstTime = false;
                 if (Loader.DetourInited)
@@ -79,7 +79,7 @@ namespace MoreEffectiveTransfer
                         UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", text, true);
                     }
 
-                    if (!Loader.HarmonyDetourInited)
+                    if (Loader.HarmonyDetourFailed)
                     {
                         string error = "MoreEffectiveTransferManager HarmonyDetourInit is failed, Send MoreEffectiveTransferManager.txt to Author.";
                         DebugLog.LogToFileOnly(error);

@@ -412,6 +412,20 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
+        private bool RejectLowPriority(TransferReason material)
+        {
+            switch (material)
+            {
+                case TransferReason.GarbageMove:
+                case TransferReason.CriminalMove:
+                case TransferReason.DeadMove:
+                case TransferReason.SnowMove:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         private float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
             bool canApplyPriority = false;
@@ -892,6 +906,13 @@ namespace MoreEffectiveTransfer.CustomManager
                                                             if (incomingOfferPre.Priority == 0 && (outgoingOffer.Priority == 0 || outgoingOffer.Priority == 1))
                                                             {
                                                                 wareHouseStopIncoming = true;
+                                                            }
+                                                        }
+                                                        else if (RejectLowPriority(material))
+                                                        {
+                                                            if (incomingOfferPre.Priority == 0)
+                                                            {
+                                                                incomingOutgoingDistance = incomingOutgoingDistance * 10000f;
                                                             }
                                                         }
                                                     }

@@ -36,6 +36,7 @@ namespace MoreEffectiveTransfer
         public static List<Detour> Detours { get; set; }
         public static bool DetourInited = false;
         public static bool HarmonyDetourInited = false;
+        public static bool HarmonyDetourFailed = true;
         public static bool isGuiRunning = false;
         public static UIPanel buildingInfo;
         public static UIPanel playerBuildingInfo;
@@ -311,6 +312,7 @@ namespace MoreEffectiveTransfer
             {
                 DebugLog.LogToFileOnly("Init harmony detours");
                 HarmonyDetours.Apply();
+                HarmonyDetourInited = true;
             }
         }
 
@@ -320,6 +322,8 @@ namespace MoreEffectiveTransfer
             {
                 DebugLog.LogToFileOnly("Revert harmony detours");
                 HarmonyDetours.DeApply();
+                HarmonyDetourInited = false;
+                HarmonyDetourFailed = true;
             }
         }
 
