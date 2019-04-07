@@ -65,7 +65,7 @@ namespace MoreEffectiveTransfer.CustomAI
                         if (data.m_sourceBuilding != 0)
                         {
                             bool alreadyHaveFailedBuilding = false;
-                            for (int j = 0; j < MainDataStore.canNotConnectedBuildingIDCount[vehicleID]; j++)
+                            for (int j = 0; j < MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding]; j++)
                             {
                                 if (MainDataStore.canNotConnectedBuildingID[data.m_targetBuilding, j] == data.m_sourceBuilding)
                                 {
@@ -78,17 +78,33 @@ namespace MoreEffectiveTransfer.CustomAI
                             {
                                 if (MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding] < 255)
                                 {
-                                    MainDataStore.canNotConnectedBuildingID[data.m_targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[vehicleID]] = data.m_sourceBuilding;
+                                    MainDataStore.canNotConnectedBuildingID[data.m_targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding]] = data.m_sourceBuilding;
                                     MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding]++;
+                                    if (MoreEffectiveTransfer.debugMode)
+                                    {
+                                        var building1 = Singleton<BuildingManager>.instance.m_buildings.m_buffer[data.m_targetBuilding];
+                                        var building2 = Singleton<BuildingManager>.instance.m_buildings.m_buffer[data.m_sourceBuilding];
+                                        DebugLog.LogToFileOnly("Connect failed begin, count = " + MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding].ToString());
+                                        DebugLog.LogToFileOnly("DebugInfo: m_targetBuilding m_class is " + building1.Info.m_class.ToString());
+                                        DebugLog.LogToFileOnly("DebugInfo: m_targetBuilding name is " + building1.Info.name.ToString());
+                                        DebugLog.LogToFileOnly("DebugInfo: m_targetBuilding id is " + data.m_targetBuilding.ToString());
+                                        DebugLog.LogToFileOnly("DebugInfo: m_sourceBuilding m_class is " + building2.Info.m_class.ToString());
+                                        DebugLog.LogToFileOnly("DebugInfo: m_sourceBuilding name is " + building2.Info.name.ToString());
+                                        DebugLog.LogToFileOnly("DebugInfo: m_sourceBuilding id is " + data.m_sourceBuilding.ToString());
+                                        DebugLog.LogToFileOnly("Connect failed end");
+                                    }
                                 }
                                 else
-                                { 
-                                    DebugLog.LogToFileOnly("Error: Max canNotConnectedBuildingIDCount 255 reached, Please check your roadnetwork");
-                                    var building1 = Singleton<BuildingManager>.instance.m_buildings.m_buffer[data.m_targetBuilding];
-                                    DebugLog.LogToFileOnly("DebugInfo: building m_class is " + building1.Info.m_class.ToString());
-                                    DebugLog.LogToFileOnly("DebugInfo: building name is " + building1.Info.name.ToString());
-                                    DebugLog.LogToFileOnly("DebugInfo: building id is " + data.m_targetBuilding.ToString());
-                                    DebugLog.LogToFileOnly("Error: Max canNotConnectedBuildingIDCount 255 reached, End");
+                                {
+                                    if (MoreEffectiveTransfer.debugMode)
+                                    {
+                                        DebugLog.LogToFileOnly("Error: Max canNotConnectedBuildingIDCount 255 reached, Please check your roadnetwork");
+                                        var building1 = Singleton<BuildingManager>.instance.m_buildings.m_buffer[data.m_targetBuilding];
+                                        DebugLog.LogToFileOnly("DebugInfo: building m_class is " + building1.Info.m_class.ToString());
+                                        DebugLog.LogToFileOnly("DebugInfo: building name is " + building1.Info.name.ToString());
+                                        DebugLog.LogToFileOnly("DebugInfo: building id is " + data.m_targetBuilding.ToString());
+                                        DebugLog.LogToFileOnly("Error: Max canNotConnectedBuildingIDCount 255 reached, End");
+                                    }
                                 }
                             }
                         }
@@ -105,14 +121,18 @@ namespace MoreEffectiveTransfer.CustomAI
                 {
                     if (MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding] != 0)
                     {
-                        if (MainDataStore.refreshCanNotConnectedBuildingIDCount[data.m_targetBuilding] > 32)
+                        if (MainDataStore.refreshCanNotConnectedBuildingIDCount[data.m_targetBuilding] > 64)
                         {
-                            if (data.m_sourceBuilding != 0)
+                            //After several times we can refresh fail building list.
+                            MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding]--;
+                            MainDataStore.canNotConnectedBuildingID[data.m_targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding]] = 0;
+                            if (MoreEffectiveTransfer.debugMode)
                             {
-                                //After several times we can refresh fail building list.
-                                MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding] --;
-                                MainDataStore.canNotConnectedBuildingID[data.m_targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding]] = 0;
+                                DebugLog.LogToFileOnly("Outside connect ignore begin, count = " + MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding].ToString());
+                                DebugLog.LogToFileOnly("DebugInfo: m_targetBuilding id is " + data.m_targetBuilding.ToString());
+                                DebugLog.LogToFileOnly("Outside connect ignore end");
                             }
+                            MainDataStore.refreshCanNotConnectedBuildingIDCount[data.m_targetBuilding] = 0;
                         }
                         else
                         {
