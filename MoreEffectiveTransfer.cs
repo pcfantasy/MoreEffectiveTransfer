@@ -12,7 +12,7 @@ namespace MoreEffectiveTransfer
         public static bool debugMode = false;
         public static bool preferLocalDemand = false;
         public static bool preferVehicle = false;
-        public static bool applyPriority = false;
+        //public static bool applyPriority = false;
 
         public string Name
         {
@@ -43,7 +43,7 @@ namespace MoreEffectiveTransfer
             streamWriter.WriteLine(fixUnRouteTransfer);
             streamWriter.WriteLine(debugMode);
             streamWriter.WriteLine(preferLocalDemand);
-            streamWriter.WriteLine(applyPriority);
+            streamWriter.WriteLine("false");
             streamWriter.WriteLine(preferVehicle);
             streamWriter.Flush();
             fs.Close();
@@ -86,14 +86,7 @@ namespace MoreEffectiveTransfer
                 }
 
                 strLine = sr.ReadLine();
-                if (strLine == "True")
-                {
-                    applyPriority = true;
-                }
-                else
-                {
-                    applyPriority = false;
-                }
+                //reserved
 
                 strLine = sr.ReadLine();
                 if (strLine == "True")
@@ -119,7 +112,7 @@ namespace MoreEffectiveTransfer
             group2.AddCheckbox(Localization.Get("DEBUG_MODE_DESCRIPTION_ENALBE"), debugMode, (index) => debugModeEnable(index));
             UIHelperBase group3 = helper.AddGroup(Localization.Get("EXPERIMENTAL_FEATURES"));
             group3.AddCheckbox(Localization.Get("PREFER_LOCAL"), preferLocalDemand, (index) => preferLocalDemandEnable(index));
-            group3.AddCheckbox(Localization.Get("APPLY_PRIORITY"), applyPriority, (index) => applyPriorityEnable(index));
+            //group3.AddCheckbox(Localization.Get("APPLY_PRIORITY"), applyPriority, (index) => applyPriorityEnable(index));
             group3.AddCheckbox(Localization.Get("PREFER_VEHICLE"), preferVehicle, (index) => preferVehicleEnable(index));
             SaveSetting();
         }
@@ -142,11 +135,11 @@ namespace MoreEffectiveTransfer
             SaveSetting();
         }
 
-        public void applyPriorityEnable(bool index)
+        /*public void applyPriorityEnable(bool index)
         {
             applyPriority = index;
             SaveSetting();
-        }
+        }*/
 
         public void preferVehicleEnable(bool index)
         {

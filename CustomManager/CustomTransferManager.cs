@@ -397,13 +397,13 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Snow:
                 case TransferReason.RoadMaintenance:
                 case TransferReason.ParkMaintenance:
-                    return 2;
                 case TransferReason.Crime:
                 case TransferReason.Fire:
+                case TransferReason.Dead:
+                    return 2;
                 case TransferReason.GarbageMove:
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
-                case TransferReason.Dead:
                 case TransferReason.SnowMove:
                     return 1;
                 case TransferReason.Taxi:
@@ -476,7 +476,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
             if (canApplyPriority)
             {
-                if (MoreEffectiveTransfer.applyPriority)
+                /*if (MoreEffectiveTransfer.applyPriority)
                 {
                     if (offerIn.Building != 0)
                     {
@@ -525,7 +525,7 @@ namespace MoreEffectiveTransfer.CustomManager
                             }
                         }
                     }
-                }
+                }*/
 
                 if (MoreEffectiveTransfer.preferVehicle)
                 {
@@ -537,7 +537,10 @@ namespace MoreEffectiveTransfer.CustomManager
 
                 if (MoreEffectiveTransfer.preferLocalDemand)
                 {
-                    priority *= 3f;
+                    if (Singleton<BuildingManager>.instance.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Untouchable) || Singleton<BuildingManager>.instance.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Untouchable))
+                    {
+                        priority *= 3f;
+                    }
                 }
             }
             return priority;
