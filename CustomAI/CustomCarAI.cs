@@ -112,40 +112,5 @@ namespace MoreEffectiveTransfer.CustomAI
                 }
             }
         }
-
-        public static void ForgetFailedBuilding(ushort vehicleID, ref Vehicle data)
-        {
-            if (MoreEffectiveTransfer.fixUnRouteTransfer)
-            {
-                if (data.m_targetBuilding != 0)
-                {
-                    if (MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding] != 0)
-                    {
-                        if (MainDataStore.refreshCanNotConnectedBuildingIDCount[data.m_targetBuilding] > 64)
-                        {
-                            //After several times we can refresh fail building list.
-                            MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding]--;
-                            MainDataStore.canNotConnectedBuildingID[data.m_targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding]] = 0;
-                            if (MoreEffectiveTransfer.debugMode)
-                            {
-                                DebugLog.LogToFileOnly("Outside connect ignore begin, count = " + MainDataStore.canNotConnectedBuildingIDCount[data.m_targetBuilding].ToString());
-                                DebugLog.LogToFileOnly("DebugInfo: m_targetBuilding id is " + data.m_targetBuilding.ToString());
-                                DebugLog.LogToFileOnly("Outside connect ignore end");
-                            }
-                            MainDataStore.refreshCanNotConnectedBuildingIDCount[data.m_targetBuilding] = 0;
-                        }
-                        else
-                        {
-                            MainDataStore.refreshCanNotConnectedBuildingIDCount[data.m_targetBuilding]++;
-                        }
-                    }
-                }
-            }
-        }
-
-        public static void CarAIPathfindSuccessPostFix(ushort vehicleID, ref Vehicle data)
-        {
-            ForgetFailedBuilding(vehicleID, ref data);
-        }
     }
 }

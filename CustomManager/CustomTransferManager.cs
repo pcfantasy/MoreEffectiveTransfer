@@ -546,6 +546,37 @@ namespace MoreEffectiveTransfer.CustomManager
             return priority;
         }
 
+        public void ForgetFailedBuilding(ushort targetBuilding, int idex)
+        {
+            if (MoreEffectiveTransfer.fixUnRouteTransfer)
+            {
+                if (targetBuilding != 0)
+                {
+                    if (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] != 0)
+                    {
+                        if (MainDataStore.refreshCanNotConnectedBuildingIDCount[targetBuilding] > 64)
+                        {
+                            //After several times we can refresh fail building list.
+                            MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]--;
+                            MainDataStore.canNotConnectedBuildingID[targetBuilding, idex] = MainDataStore.canNotConnectedBuildingID[targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]];
+                            MainDataStore.canNotConnectedBuildingID[targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]] = 0;
+                            if (MoreEffectiveTransfer.debugMode)
+                            {
+                                DebugLog.LogToFileOnly("ForgetFailedBuilding begin, count = " + MainDataStore.canNotConnectedBuildingIDCount[targetBuilding].ToString());
+                                DebugLog.LogToFileOnly("DebugInfo: m_targetBuilding id is " + targetBuilding.ToString());
+                                DebugLog.LogToFileOnly("ForgetFailedBuilding end");
+                            }
+                            MainDataStore.refreshCanNotConnectedBuildingIDCount[targetBuilding] = 0;
+                        }
+                        else
+                        {
+                            MainDataStore.refreshCanNotConnectedBuildingIDCount[targetBuilding]++;
+                        }
+                    }
+                }
+            }
+        }
+
         private bool IsUnRoutedMatch(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
             if (!MoreEffectiveTransfer.fixUnRouteTransfer)
@@ -569,6 +600,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
+                            ForgetFailedBuilding(targetBuilding, j);
                             return true;
                         }
                     }
@@ -588,6 +620,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
+                            ForgetFailedBuilding(targetBuilding, j);
                             return true;
                         }
                     }
@@ -617,6 +650,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
+                            ForgetFailedBuilding(targetBuilding, j);
                             return true;
                         }
                     }
@@ -636,6 +670,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
+                            ForgetFailedBuilding(targetBuilding, j);
                             return true;
                         }
                     }

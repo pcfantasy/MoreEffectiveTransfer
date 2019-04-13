@@ -49,18 +49,12 @@ namespace MoreEffectiveTransfer.Util
                 null,
                 new HarmonyMethod(carAIPathfindFailurePostFix));
             //2
-            var carAIPathfindSuccess = typeof(CarAI).GetMethod("PathfindSuccess", BindingFlags.NonPublic | BindingFlags.Instance);
-            var carAIPathfindSuccessPostFix = typeof(CustomCarAI).GetMethod("CarAIPathfindSuccessPostFix");
-            harmony.ConditionalPatch(carAIPathfindSuccess,
-                null,
-                new HarmonyMethod(carAIPathfindSuccessPostFix));
-            //3
             var transferManagerAddOutgoingOffer = typeof(TransferManager).GetMethod("AddOutgoingOffer", BindingFlags.Public | BindingFlags.Instance);
             var transferManagerAddOutgoingOfferPrefix = typeof(CustomTransferManager).GetMethod("TransferManagerAddOutgoingOfferPrefix");
             harmony.ConditionalPatch(transferManagerAddOutgoingOffer,
                 new HarmonyMethod(transferManagerAddOutgoingOfferPrefix),
                 null);
-            //4
+            //3
             var helicopterDepotAISimulationStep = typeof(HelicopterDepotAI).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(ushort), typeof(Building).MakeByRefType(), typeof(Building.Frame).MakeByRefType() }, null);
             var helicopterDepotAISimulationStepPostFix = typeof(CustomHelicopterDepotAI).GetMethod("HelicopterDepotAISimulationStepPostFix");
             harmony.ConditionalPatch(helicopterDepotAISimulationStep,
@@ -79,18 +73,12 @@ namespace MoreEffectiveTransfer.Util
                 null,
                 new HarmonyMethod(carAIPathfindFailurePostFix));
             //2
-            var carAIPathfindSuccess = typeof(CarAI).GetMethod("PathfindSuccess", BindingFlags.NonPublic | BindingFlags.Instance);
-            var carAIPathfindSuccessPostFix = typeof(CustomCarAI).GetMethod("CarAIPathfindSuccessPostFix");
-            harmony.ConditionalUnPatch(carAIPathfindSuccess,
-                null,
-                new HarmonyMethod(carAIPathfindSuccessPostFix));
-            //3
             var transferManagerAddOutgoingOffer = typeof(TransferManager).GetMethod("AddOutgoingOffer", BindingFlags.Public | BindingFlags.Instance);
             var transferManagerAddOutgoingOfferPrefix = typeof(CustomTransferManager).GetMethod("TransferManagerAddOutgoingOfferPrefix");
             harmony.ConditionalUnPatch(transferManagerAddOutgoingOffer,
                 new HarmonyMethod(transferManagerAddOutgoingOfferPrefix),
                 null);
-            //4
+            //3
             var helicopterDepotAISimulationStep = typeof(HelicopterDepotAI).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(ushort), typeof(Building).MakeByRefType(), typeof(Building.Frame).MakeByRefType() }, null);
             var helicopterDepotAISimulationStepPostFix = typeof(CustomHelicopterDepotAI).GetMethod("HelicopterDepotAISimulationStepPostFix");
             harmony.ConditionalUnPatch(helicopterDepotAISimulationStep,
