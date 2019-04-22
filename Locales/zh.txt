@@ -5,6 +5,4 @@ DEBUG_MODE_DESCRIPTION_ENALBE	打开调试模式
 FAILED_BUILDING_COUNT	无法连接的建筑数量
 GENERATE_DETAIL_REPORT	把无法连接的建筑的详细信息打印到MoreEffectiveTransfer.txt
 EXPERIMENTAL_FEATURES	实验性功能
-PREFER_LOCAL	货物运输优先选择本地匹配
-APPLY_PRIORITY	对外运输优先级(飞机 > 轮船 > 火车 > 道路)
-PREFER_VEHICLE	服务运输优先选择运行中的车辆
+CONSIDER_PROIRITY	运输匹配考虑距离和优先级

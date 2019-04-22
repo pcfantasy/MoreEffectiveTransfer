@@ -10,9 +10,7 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool fixUnRouteTransfer = false;
         public static bool debugMode = false;
-        public static bool preferLocalDemand = false;
-        public static bool preferVehicle = false;
-        //public static bool applyPriority = false;
+        public static bool considerProirity = false;
 
         public string Name
         {
@@ -42,9 +40,7 @@ namespace MoreEffectiveTransfer
             StreamWriter streamWriter = new StreamWriter(fs);
             streamWriter.WriteLine(fixUnRouteTransfer);
             streamWriter.WriteLine(debugMode);
-            streamWriter.WriteLine(preferLocalDemand);
-            streamWriter.WriteLine("false");
-            streamWriter.WriteLine(preferVehicle);
+            streamWriter.WriteLine(considerProirity);
             streamWriter.Flush();
             fs.Close();
         }
@@ -78,24 +74,11 @@ namespace MoreEffectiveTransfer
                 strLine = sr.ReadLine();
                 if (strLine == "True")
                 {
-                    preferLocalDemand = true;
+                    considerProirity = true;
                 }
                 else
                 {
-                    preferLocalDemand = false;
-                }
-
-                strLine = sr.ReadLine();
-                //reserved
-
-                strLine = sr.ReadLine();
-                if (strLine == "True")
-                {
-                    preferVehicle = true;
-                }
-                else
-                {
-                    preferVehicle = false;
+                    considerProirity = false;
                 }
 
                 sr.Close();
@@ -111,9 +94,7 @@ namespace MoreEffectiveTransfer
             UIHelperBase group2 = helper.AddGroup(Localization.Get("DEBUG_MODE_DESCRIPTION"));
             group2.AddCheckbox(Localization.Get("DEBUG_MODE_DESCRIPTION_ENALBE"), debugMode, (index) => debugModeEnable(index));
             UIHelperBase group3 = helper.AddGroup(Localization.Get("EXPERIMENTAL_FEATURES"));
-            group3.AddCheckbox(Localization.Get("PREFER_LOCAL"), preferLocalDemand, (index) => preferLocalDemandEnable(index));
-            //group3.AddCheckbox(Localization.Get("APPLY_PRIORITY"), applyPriority, (index) => applyPriorityEnable(index));
-            group3.AddCheckbox(Localization.Get("PREFER_VEHICLE"), preferVehicle, (index) => preferVehicleEnable(index));
+            group3.AddCheckbox(Localization.Get("CONSIDER_PROIRITY"), considerProirity, (index) => considerProirityEnable(index));
             SaveSetting();
         }
 
@@ -129,21 +110,9 @@ namespace MoreEffectiveTransfer
             SaveSetting();
         }
 
-        public void preferLocalDemandEnable(bool index)
+        public void considerProirityEnable(bool index)
         {
-            preferLocalDemand = index;
-            SaveSetting();
-        }
-
-        /*public void applyPriorityEnable(bool index)
-        {
-            applyPriority = index;
-            SaveSetting();
-        }*/
-
-        public void preferVehicleEnable(bool index)
-        {
-            preferVehicle = index;
+            considerProirity = index;
             SaveSetting();
         }
     }

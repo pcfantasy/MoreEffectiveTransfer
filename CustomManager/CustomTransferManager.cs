@@ -400,14 +400,13 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Crime:
                 case TransferReason.Fire:
                 case TransferReason.Dead:
+                case TransferReason.Taxi:
                     return 2;
                 case TransferReason.GarbageMove:
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
                 case TransferReason.SnowMove:
                     return 1;
-                case TransferReason.Taxi:
-                    return 0;
                 default: return 2;
             }
         }
@@ -426,7 +425,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        private float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        private float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material, bool isOfferIn)
         {
             bool canApplyPriority = false;
             switch (material)
@@ -449,13 +448,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Glass:
                 case TransferReason.PlanedTimber:
                 case TransferReason.Paper:
-                    canApplyPriority = true; break;
-                default: canApplyPriority = false; break;
-            }
-
-            bool canApplyVehicle = false;
-            switch (material)
-            {
                 case TransferReason.Garbage:
                 case TransferReason.Snow:
                 case TransferReason.RoadMaintenance:
@@ -468,79 +460,21 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Dead:
                 case TransferReason.SnowMove:
                 case TransferReason.Taxi:
-                    canApplyVehicle = true; break;
-                default: canApplyVehicle = false; break;
+                    canApplyPriority = true; break;
+                default: canApplyPriority = false; break;
             }
 
             float priority = 1f;
 
             if (canApplyPriority)
             {
-                /*if (MoreEffectiveTransfer.applyPriority)
+                if (isOfferIn)
                 {
-                    if (offerIn.Building != 0)
-                    {
-                        Building buildingData = Singleton<BuildingManager>.instance.m_buildings.m_buffer[offerIn.Building];
-                        if (buildingData.m_flags.IsFlagSet(Building.Flags.Untouchable))
-                        {
-                            if (buildingData.Info.m_class.m_service == ItemClass.Service.Road)
-                            {
-                                priority = 1f;
-                            }
-                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportTrain)
-                            {
-                                priority = 0.8f;
-                            }
-                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportShip)
-                            {
-                                priority = 0.6f;
-                            }
-                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportPlane)
-                            {
-                                priority = 0.4f;
-                            }
-                        }
-                    }
-
-                    if (offerOut.Building != 0)
-                    {
-                        Building buildingData = Singleton<BuildingManager>.instance.m_buildings.m_buffer[offerOut.Building];
-                        if (buildingData.m_flags.IsFlagSet(Building.Flags.Untouchable))
-                        {
-                            if (buildingData.Info.m_class.m_service == ItemClass.Service.Road)
-                            {
-                                priority = 1f;
-                            }
-                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportTrain)
-                            {
-                                priority = 0.8f;
-                            }
-                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportShip)
-                            {
-                                priority = 0.6f;
-                            }
-                            else if (buildingData.Info.m_class.m_subService == ItemClass.SubService.PublicTransportPlane)
-                            {
-                                priority = 0.4f;
-                            }
-                        }
-                    }
-                }*/
-
-                if (MoreEffectiveTransfer.preferVehicle)
-                {
-                    if (canApplyVehicle)
-                    {
-                        priority *= 0.2f;
-                    }
+                    priority = offerIn.Priority;
                 }
-
-                if (MoreEffectiveTransfer.preferLocalDemand)
+                else
                 {
-                    if (Singleton<BuildingManager>.instance.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Untouchable) || Singleton<BuildingManager>.instance.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Untouchable))
-                    {
-                        priority *= 3f;
-                    }
+                    priority = offerOut.Priority;
                 }
             }
             return priority;
@@ -779,7 +713,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 if (canUseNewMatchOffers)
                                                 {
                                                     //ApplyPriority
-                                                    incomingOutgoingDistance *= ApplyPriority(incomingOffer, outgoingOfferPre, material);
+                                                    incomingOutgoingDistance /= ApplyPriority(incomingOffer, outgoingOfferPre, material, false);
                                                     if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                     {
                                                         if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material))
@@ -934,7 +868,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 if (canUseNewMatchOffers)
                                                 {
                                                     //ApplyPriority
-                                                    incomingOutgoingDistance *= ApplyPriority(incomingOfferPre, outgoingOffer, material);
+                                                    incomingOutgoingDistance /= ApplyPriority(incomingOfferPre, outgoingOffer, material, true);
                                                     //Fix warehouse always import issue;
                                                     bool wareHouseStopIncoming = false;
                                                     if (incomingOfferPre.Building!= 0)
