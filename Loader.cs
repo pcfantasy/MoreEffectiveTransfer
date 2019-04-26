@@ -418,7 +418,7 @@ namespace MoreEffectiveTransfer
 
         private bool CheckEmployOvereducatedWorkersRunningIsLoaded()
         {
-            return this.Check3rdPartyModLoaded("EmployOvereducatedWorkersRunning", true);
+            return this.Check3rdPartyModLoaded("EmployOvereducatedWorkers", true);
         }
     }
 }

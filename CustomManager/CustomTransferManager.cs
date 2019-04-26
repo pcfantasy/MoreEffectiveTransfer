@@ -470,11 +470,11 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 if (isOfferIn)
                 {
-                    priority = offerIn.Priority;
+                    priority = offerIn.Priority + 1f;
                 }
                 else
                 {
-                    priority = offerOut.Priority;
+                    priority = offerOut.Priority + 1f;
                 }
             }
             return priority;
@@ -713,7 +713,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 if (canUseNewMatchOffers)
                                                 {
                                                     //ApplyPriority
-                                                    incomingOutgoingDistance /= ApplyPriority(incomingOffer, outgoingOfferPre, material, false);
+                                                    incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOffer, outgoingOfferPre, material, false);
                                                     if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                     {
                                                         if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material))
@@ -868,7 +868,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 if (canUseNewMatchOffers)
                                                 {
                                                     //ApplyPriority
-                                                    incomingOutgoingDistance /= ApplyPriority(incomingOfferPre, outgoingOffer, material, true);
+                                                    incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOfferPre, outgoingOffer, material, true);
                                                     //Fix warehouse always import issue;
                                                     bool wareHouseStopIncoming = false;
                                                     if (incomingOfferPre.Building!= 0)
