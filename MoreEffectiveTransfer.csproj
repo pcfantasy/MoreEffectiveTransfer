@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,18 +32,25 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup>
+    <CitiesSkylinesInstallPath>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 255710', 'InstallLocation', null, RegistryView.Registry64, RegistryView.Registry32))\</CitiesSkylinesInstallPath>
+    <CitiesSkylinesModsPath>$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\</CitiesSkylinesModsPath>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\0Harmony.dll</HintPath>
+    <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Lib.Harmony.1.2.0.1\lib\net35\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>F:\SteamLibrary\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(CitiesSkylinesInstallPath)Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ColossalManaged">
-      <HintPath>F:\SteamLibrary\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
+      <HintPath>$(CitiesSkylinesInstallPath)Cities_Data\Managed\ColossalManaged.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ICities">
-      <HintPath>F:\SteamLibrary\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
+      <HintPath>$(CitiesSkylinesInstallPath)Cities_Data\Managed\ICities.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -50,10 +58,10 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>F:\SteamLibrary\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>$(CitiesSkylinesInstallPath)Cities_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -75,22 +83,21 @@
     <Compile Include="UI\WareHouseUI.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Locales\zh.txt" />
-    <Content Include="Locales\en.txt" />
+    <Content Include="Locales\**\*.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>copy "D:\Mod\MoreEffectiveTransfer\bin\Release\MoreEffectiveTransfer.dll" "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\MoreEffectiveTransfer.dll"
-copy "D:\Mod\MoreEffectiveTransfer\bin\Release\0Harmony.dll"  "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\0Harmony.dll"
-rd /q /s "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\Locales"
-mkdir "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\Locales"
-copy "D:\Mod\MoreEffectiveTransfer\Locales\*.txt" "F:\SteamLibrary\steamapps\workshop\content\255710\1680840913\Locales"</PostBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
+
+  <!-- Copy all build outputs to mods folder using standard MSBuild Copy task. -->
   <Target Name="AfterBuild">
+    <ItemGroup>
+      <OutputFiles Include="$(OutDir)**\*"/>
+    </ItemGroup>  
+    <Message Text="Ensuring @(OutputFiles) are in $(CitiesSkylinesModsPath)$(SolutionName)\%(RecursiveDir)" Importance="high"/>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(CitiesSkylinesModsPath)$(SolutionName)\%(RecursiveDir)" ContinueOnError="false" OverwriteReadOnlyFiles="true"/>
   </Target>
-  -->
 </Project>
