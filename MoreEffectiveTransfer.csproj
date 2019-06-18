@@ -33,10 +33,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
+      <!-- Steam install path - currently unused -->
+    <SteamInstallPath>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\Valve\Steam', 'SteamPath', null, RegistryView.Registry64, RegistryView.Registry32))\</SteamInstallPath>
     <CitiesSkylinesInstallPath>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 255710', 'InstallLocation', null, RegistryView.Registry64, RegistryView.Registry32))\</CitiesSkylinesInstallPath>
     <!-- <CitiesSkylinesModsPath>$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\</CitiesSkylinesModsPath>-->
-    <SteamInstallPath>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\Valve\Steam', 'SteamPath', null, RegistryView.Registry64, RegistryView.Registry32))\</SteamInstallPath>
-    <CitiesSkylinesModsPath>$(SteamInstallPath)SteamApps\workshop\content\255710\1680840913\</CitiesSkylinesModsPath>
+    <CitiesSkylinesModsPath>$(CitiesSkylinesInstallPath)..\..\workshop\content\255710\1680840913\</CitiesSkylinesModsPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
