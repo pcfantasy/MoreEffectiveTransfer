@@ -33,13 +33,13 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
+      <!-- Steam install path - currently unused -->
+    <SteamInstallPath>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\Valve\Steam', 'SteamPath', null, RegistryView.Registry64, RegistryView.Registry32))\</SteamInstallPath>
     <CitiesSkylinesInstallPath>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 255710', 'InstallLocation', null, RegistryView.Registry64, RegistryView.Registry32))\</CitiesSkylinesInstallPath>
-    <CitiesSkylinesModsPath>$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\</CitiesSkylinesModsPath>
+    <!-- <CitiesSkylinesModsPath>$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\</CitiesSkylinesModsPath>-->
+    <CitiesSkylinesModsPath>$(CitiesSkylinesInstallPath)..\..\workshop\content\255710\1680840913\</CitiesSkylinesModsPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\Lib.Harmony.1.2.0.1\lib\net35\0Harmony.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(CitiesSkylinesInstallPath)Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -88,16 +88,19 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <PackageReference Include="Lib.Harmony">
+      <Version>1.2.0.1</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-
   <!-- Copy all build outputs to mods folder using standard MSBuild Copy task. -->
   <Target Name="AfterBuild">
     <ItemGroup>
-      <OutputFiles Include="$(OutDir)**\*"/>
-    </ItemGroup>  
-    <Message Text="Ensuring @(OutputFiles) are in $(CitiesSkylinesModsPath)$(SolutionName)\%(RecursiveDir)" Importance="high"/>
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(CitiesSkylinesModsPath)$(SolutionName)\%(RecursiveDir)" ContinueOnError="false" OverwriteReadOnlyFiles="true"/>
+      <OutputFiles Include="$(OutDir)**\*" />
+    </ItemGroup>
+    <!-- <Message Text="Ensuring @(OutputFiles) are in $(CitiesSkylinesModsPath)$(SolutionName)\%(RecursiveDir)" Importance="high" />-->
+    <!-- <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(CitiesSkylinesModsPath)$(SolutionName)\%(RecursiveDir)" ContinueOnError="false" OverwriteReadOnlyFiles="true" />-->
+    <Message Text="Ensuring @(OutputFiles) are in $(CitiesSkylinesModsPath)%(RecursiveDir)" Importance="high" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(CitiesSkylinesModsPath)%(RecursiveDir)" ContinueOnError="false" OverwriteReadOnlyFiles="true" />
   </Target>
 </Project>
