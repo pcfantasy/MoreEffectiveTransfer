@@ -1,0 +1,8 @@
+﻿FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION	Исправление доставки в изолированные от региональных дорог районы
+FIX_UNROUTED_TRANSFER_MATCH_ENALBE	Включить Исправление доставки
+DEBUG_MODE_DESCRIPTION	Показать изолированные здания в BuildingUI
+DEBUG_MODE_DESCRIPTION_ENALBE	Включить режим отладки
+FAILED_BUILDING_COUNT	Количество зданий которые нельзя подключить
+GENERATE_DETAIL_REPORT	Создать подробный отчет в MoreEffectiveTransfer.txt
+EXPERIMENTAL_FEATURES	Экспериментальные функции
+CONSIDER_PROIRITY	Учитывать приоритет и расстояние
