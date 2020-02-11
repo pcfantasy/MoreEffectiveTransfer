@@ -413,12 +413,12 @@ namespace MoreEffectiveTransfer
 
         private bool CheckRealCityIsLoaded()
         {
-            return this.Check3rdPartyModLoaded("RealCity", true);
+            return this.Check3rdPartyModLoaded("RealCity", false);
         }
 
         private bool CheckEmployOvereducatedWorkersRunningIsLoaded()
         {
-            return this.Check3rdPartyModLoaded("EmployOvereducatedWorkers", true);
+            return this.Check3rdPartyModLoaded("EmployOvereducatedWorkers", false);
         }
     }
 }
