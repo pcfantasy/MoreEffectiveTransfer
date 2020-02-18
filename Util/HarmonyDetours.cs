@@ -7,9 +7,8 @@ using MoreEffectiveTransfer.CustomManager;
 
 namespace MoreEffectiveTransfer.Util
 {
-    public static class HarmonyDetours
+    internal static class HarmonyDetours
     {
-        private static HarmonyInstance harmony = null;
         private static void ConditionalPatch(this HarmonyInstance harmony, MethodBase method, HarmonyMethod prefix, HarmonyMethod postfix)
         {
             var fullMethodName = string.Format("{0}.{1}", method.ReflectedType?.Name ?? "(null)", method.Name);
@@ -41,7 +40,7 @@ namespace MoreEffectiveTransfer.Util
 
         public static void Apply()
         {
-            harmony = HarmonyInstance.Create("MoreEffectiveTransfer");
+            var harmony = HarmonyInstance.Create("MoreEffectiveTransfer");
             //1
             var carAIPathfindFailure = typeof(CarAI).GetMethod("PathfindFailure", BindingFlags.NonPublic | BindingFlags.Instance);
             var carAIPathfindFailurePostFix = typeof(CustomCarAI).GetMethod("CarAIPathfindFailurePostFix");
@@ -66,6 +65,7 @@ namespace MoreEffectiveTransfer.Util
 
         public static void DeApply()
         {
+            var harmony = HarmonyInstance.Create("MoreEffectiveTransfer");
             //1
             var carAIPathfindFailure = typeof(CarAI).GetMethod("PathfindFailure", BindingFlags.NonPublic | BindingFlags.Instance);
             var carAIPathfindFailurePostFix = typeof(CustomCarAI).GetMethod("CarAIPathfindFailurePostFix");

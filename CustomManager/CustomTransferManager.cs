@@ -692,7 +692,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                     int outgoingIdexInsideIncoming = outgoingIdex;
                                     for (int incomingPriorityInside = priority; incomingPriorityInside >= incomingPriority; incomingPriorityInside--)
                                     {
-                                        int outgoingIdexWithPriority = (int)material * 8 + incomingPriorityInside;
+                                        int outgoingIdexWithPriority = (int)material2 * 8 + incomingPriorityInside;
                                         int outgoingCountWithPriority = m_outgoingCount[outgoingIdexWithPriority];
                                         //To let incomingPriorityInsideFloat!=0
                                         float incomingPriorityInsideFloat = (float)incomingPriorityInside + 0.1f;
@@ -713,10 +713,10 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 if (canUseNewMatchOffers)
                                                 {
                                                     //ApplyPriority
-                                                    incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOffer, outgoingOfferPre, material, false);
+                                                    incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOffer, outgoingOfferPre, material2, false);
                                                     if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                     {
-                                                        if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material))
+                                                        if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material2))
                                                         {
                                                             validPriority = incomingPriorityInside;
                                                             validOutgoingIdex = i;
@@ -751,13 +751,13 @@ namespace MoreEffectiveTransfer.CustomManager
                                         break;
                                     }
                                     //Find a validPriority, get outgoingOffer
-                                    int matchedOutgoingOfferIdex = (int)material * 8 + validPriority;
+                                    int matchedOutgoingOfferIdex = (int)material2 * 8 + validPriority;
                                     TransferOffer outgoingOffer = m_outgoingOffers[matchedOutgoingOfferIdex * 256 + validOutgoingIdex];
                                     int outgoingOfferAmount = outgoingOffer.Amount;
                                     int matchedOfferAmount = Mathf.Min(incomingOfferAmount, outgoingOfferAmount);
                                     if (matchedOfferAmount != 0)
                                     {
-                                        StartTransfer(material, outgoingOffer, incomingOffer, matchedOfferAmount);
+                                        StartTransfer(material2, outgoingOffer, incomingOffer, matchedOfferAmount);
                                     }
                                     incomingOfferAmount -= matchedOfferAmount;
                                     outgoingOfferAmount -= matchedOfferAmount;
@@ -849,7 +849,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                     int incomingIdexInsideOutgoing = incomingIdex;
                                     for (int outgoingPriorityInside = priority; outgoingPriorityInside >= outgoingPriority; outgoingPriorityInside--)
                                     {
-                                        int incomingIdexWithPriority = (int)material * 8 + outgoingPriorityInside;
+                                        int incomingIdexWithPriority = (int)material2 * 8 + outgoingPriorityInside;
                                         int incomingCountWithPriority = m_incomingCount[incomingIdexWithPriority];
                                         //To let outgoingPriorityInsideFloat!=0
                                         float outgoingPriorityInsideFloat = (float)outgoingPriorityInside + 0.1f;
@@ -868,7 +868,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 if (canUseNewMatchOffers)
                                                 {
                                                     //ApplyPriority
-                                                    incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOfferPre, outgoingOffer, material, true);
+                                                    incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOfferPre, outgoingOffer, material2, true);
                                                     //Fix warehouse always import issue;
                                                     bool wareHouseStopIncoming = false;
                                                     if (incomingOfferPre.Building!= 0)
@@ -880,7 +880,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                                 wareHouseStopIncoming = true;
                                                             }
                                                         }
-                                                        else if (RejectLowPriority(material))
+                                                        else if (RejectLowPriority(material2))
                                                         {
                                                             if (incomingOfferPre.Priority == 0)
                                                             {
@@ -890,7 +890,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                     }
                                                     if (((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1) && !wareHouseStopIncoming)
                                                     {
-                                                        if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer, material))
+                                                        if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer, material2))
                                                         {
                                                             validPriority = outgoingPriorityInside;
                                                             validIncomingIdex = j;
@@ -925,13 +925,13 @@ namespace MoreEffectiveTransfer.CustomManager
                                         break;
                                     }
                                     //Find a validPriority, get incomingOffer
-                                    int matchedIncomingOfferIdex = (int)material * 8 + validPriority;
+                                    int matchedIncomingOfferIdex = (int)material2 * 8 + validPriority;
                                     TransferOffer incomingOffers = m_incomingOffers[matchedIncomingOfferIdex * 256 + validIncomingIdex];
                                     int incomingOffersAmount = incomingOffers.Amount;
                                     int matchedOfferAmount = Mathf.Min(outgoingOfferAmount, incomingOffersAmount);
                                     if (matchedOfferAmount != 0)
                                     {
-                                        StartTransfer(material, outgoingOffer, incomingOffers, matchedOfferAmount);
+                                        StartTransfer(material2, outgoingOffer, incomingOffers, matchedOfferAmount);
                                     }
                                     outgoingOfferAmount -= matchedOfferAmount;
                                     incomingOffersAmount -= matchedOfferAmount;
