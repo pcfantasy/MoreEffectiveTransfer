@@ -10,6 +10,12 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool fixUnRouteTransfer = false;
         public static bool debugMode = false;
+        public static byte policeMode = 2;
+        public static byte fireMode = 2;
+        public static byte deadMode = 2;
+        public static byte taxiMode = 2;
+        public static byte garbageMode = 2;
+
 
         public string Name
         {
@@ -39,6 +45,11 @@ namespace MoreEffectiveTransfer
             StreamWriter streamWriter = new StreamWriter(fs);
             streamWriter.WriteLine(fixUnRouteTransfer);
             streamWriter.WriteLine(debugMode);
+            streamWriter.WriteLine(policeMode);
+            streamWriter.WriteLine(fireMode);
+            streamWriter.WriteLine(deadMode);
+            streamWriter.WriteLine(taxiMode);
+            streamWriter.WriteLine(garbageMode);
             streamWriter.Flush();
             fs.Close();
         }
@@ -50,24 +61,19 @@ namespace MoreEffectiveTransfer
                 FileStream fs = new FileStream("MoreEffectiveTransfer_setting.txt", FileMode.Open);
                 StreamReader sr = new StreamReader(fs);
                 string strLine = sr.ReadLine();
-                if (strLine == "True")
-                {
-                    fixUnRouteTransfer = true;
-                }
-                else
-                {
-                    fixUnRouteTransfer = false;
-                }
-
+                fixUnRouteTransfer = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
-                if (strLine == "True")
-                {
-                    debugMode = true;
-                }
-                else
-                {
-                    debugMode = false;
-                }
+                debugMode = (strLine == "True") ? true : false;
+                strLine = sr.ReadLine();
+                if (!byte.TryParse(strLine, out policeMode)) policeMode = 2;
+                strLine = sr.ReadLine();
+                if (!byte.TryParse(strLine, out fireMode)) fireMode = 2;
+                strLine = sr.ReadLine();
+                if (!byte.TryParse(strLine, out deadMode)) deadMode = 2;
+                strLine = sr.ReadLine();
+                if (!byte.TryParse(strLine, out taxiMode)) taxiMode = 2;
+                strLine = sr.ReadLine();
+                if (!byte.TryParse(strLine, out garbageMode)) garbageMode = 2;
 
                 sr.Close();
                 fs.Close();
@@ -81,6 +87,12 @@ namespace MoreEffectiveTransfer
             group1.AddCheckbox(Localization.Get("FIX_UNROUTED_TRANSFER_MATCH_ENALBE"), fixUnRouteTransfer, (index) => fixUnRouteTransferEnable(index));
             UIHelperBase group2 = helper.AddGroup(Localization.Get("DEBUG_MODE_DESCRIPTION"));
             group2.AddCheckbox(Localization.Get("DEBUG_MODE_DESCRIPTION_ENALBE"), debugMode, (index) => debugModeEnable(index));
+            UIHelperBase group3 = helper.AddGroup(Localization.Get("TRANSFER_MATCH_MODE"));
+            group3.AddDropdown(Localization.Get("POLICE"), new string[] { Localization.Get("INCOMING_ONLY"), Localization.Get("OUTGOING_ONLY"), Localization.Get("BALANCE"), Localization.Get("INCOMING_FIRST") }, policeMode, (index) => GetEffortIdex(index));
+            group3.AddDropdown(Localization.Get("FIRETRUCK"), new string[] { Localization.Get("INCOMING_ONLY"), Localization.Get("OUTGOING_ONLY"), Localization.Get("BALANCE"), Localization.Get("INCOMING_FIRST") }, fireMode, (index) => GetEffortIdex1(index));
+            group3.AddDropdown(Localization.Get("HEARSE"), new string[] { Localization.Get("INCOMING_ONLY"), Localization.Get("OUTGOING_ONLY"), Localization.Get("BALANCE"), Localization.Get("INCOMING_FIRST") }, deadMode, (index) => GetEffortIdex2(index));
+            group3.AddDropdown(Localization.Get("TAXI"), new string[] { Localization.Get("INCOMING_ONLY"), Localization.Get("OUTGOING_ONLY"), Localization.Get("BALANCE"), Localization.Get("INCOMING_FIRST") }, taxiMode, (index) => GetEffortIdex3(index));
+            group3.AddDropdown(Localization.Get("GARBAGE"), new string[] { Localization.Get("INCOMING_ONLY"), Localization.Get("OUTGOING_ONLY"), Localization.Get("BALANCE"), Localization.Get("INCOMING_FIRST") }, garbageMode, (index) => GetEffortIdex4(index));
             SaveSetting();
         }
 
@@ -93,6 +105,36 @@ namespace MoreEffectiveTransfer
         public void debugModeEnable(bool index)
         {
             debugMode = index;
+            SaveSetting();
+        }
+
+        public void GetEffortIdex(int index)
+        {
+            policeMode = (byte)index;
+            SaveSetting();
+        }
+
+        public void GetEffortIdex1(int index1)
+        {
+            fireMode = (byte)index1;
+            SaveSetting();
+        }
+
+        public void GetEffortIdex2(int index2)
+        {
+            deadMode = (byte)index2;
+            SaveSetting();
+        }
+
+        public void GetEffortIdex3(int index3)
+        {
+            taxiMode = (byte)index3;
+            SaveSetting();
+        }
+
+        public void GetEffortIdex4(int index4)
+        {
+            garbageMode = (byte)index4;
             SaveSetting();
         }
     }

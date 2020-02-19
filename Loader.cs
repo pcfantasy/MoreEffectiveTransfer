@@ -71,6 +71,7 @@ namespace MoreEffectiveTransfer
                     HarmonyInitDetour();
                     SetupGui();
                     MoreEffectiveTransfer.LoadSetting();
+                    MoreEffectiveTransfer.debugMode = false;
                     if (mode == LoadMode.NewGame)
                     {
                         DebugLog.LogToFileOnly("New Game");

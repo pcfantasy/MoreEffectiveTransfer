@@ -370,9 +370,10 @@ namespace MoreEffectiveTransfer.CustomManager
 
         private byte MatchOffersMode(TransferReason material)
         {
-            //incoming first mode 0
-            //outgoing first mode 1
+            //incoming only mode 0
+            //outgoing only mode 1
             //balanced mode 2
+            //incoming first mode 3
             switch (material)
             {
                 case TransferReason.Oil:
@@ -393,15 +394,20 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Glass:
                 case TransferReason.PlanedTimber:
                 case TransferReason.Paper:
-                case TransferReason.Garbage:
                 case TransferReason.Snow:
                 case TransferReason.RoadMaintenance:
                 case TransferReason.ParkMaintenance:
-                case TransferReason.Crime:
-                case TransferReason.Fire:
-                case TransferReason.Dead:
-                case TransferReason.Taxi:
                     return 2;
+                case TransferReason.Garbage:
+                    return MoreEffectiveTransfer.garbageMode;
+                case TransferReason.Crime:
+                    return MoreEffectiveTransfer.policeMode;
+                case TransferReason.Fire:
+                    return MoreEffectiveTransfer.fireMode;
+                case TransferReason.Dead:
+                    return MoreEffectiveTransfer.deadMode;
+                case TransferReason.Taxi:
+                    return MoreEffectiveTransfer.garbageMode;
                 case TransferReason.GarbageMove:
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
@@ -637,7 +643,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     // NON-STOCK CODE START
                     byte matchOffersMode = MatchOffersMode(material);
                     bool isLoopValid = false;
-                    if (matchOffersMode == 2)
+                    if ((matchOffersMode == 2) || (matchOffersMode == 3))
                     {
                         isLoopValid = (incomingIdex < incomingCount || outgoingIdex < outgoingCount);
                     }
@@ -654,7 +660,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     while (isLoopValid)
                     {
                         //use incomingOffer to match outgoingOffer
-                        if (incomingIdex < incomingCount && (matchOffersMode != 1))
+                        if ((incomingIdex < incomingCount) && (matchOffersMode != 1))
                         {
                             TransferOffer incomingOffer = m_incomingOffers[offerIdex * 256 + incomingIdex];
                             // NON-STOCK CODE START
@@ -811,7 +817,7 @@ namespace MoreEffectiveTransfer.CustomManager
                         }
                         //For RealConstruction, We only satisify incoming building
                         //use outgoingOffer to match incomingOffer
-                        if (outgoingIdex < outgoingCount && (matchOffersMode != 0))
+                        if ((outgoingIdex < outgoingCount) && (matchOffersMode != 0))
                         {
                             TransferOffer outgoingOffer = m_outgoingOffers[offerIdex * 256 + outgoingIdex];
                             // NON-STOCK CODE START
@@ -830,7 +836,8 @@ namespace MoreEffectiveTransfer.CustomManager
                                     int outgoingPriorityExclude = (!outgoingOffer.Exclude) ? outgoingPriority : Mathf.Max(0, 3 - priority);
                                     // NON-STOCK CODE START
                                     float currentShortestDistance = -1f;
-                                    if (canUseNewMatchOffers)
+                                    //incoming first mode can only match lower priority
+                                    if (canUseNewMatchOffers && (matchOffersMode != 3))
                                     {
                                         priority = 7;
                                         outgoingPriority = Mathf.Max(0, 2 - oldPriority);
@@ -986,7 +993,7 @@ namespace MoreEffectiveTransfer.CustomManager
                         }
 
                         // NON-STOCK CODE START
-                        if (matchOffersMode == 2)
+                        if ((matchOffersMode == 2) || (matchOffersMode == 3))
                         {
                             isLoopValid = (incomingIdex < incomingCount || outgoingIdex < outgoingCount);
                         }
