@@ -8,7 +8,7 @@ namespace MoreEffectiveTransfer
     public class MoreEffectiveTransfer : IUserMod
     {
         public static bool IsEnabled = false;
-        public static bool fixUnRouteTransfer = false;
+        public static bool fixUnRouteTransfer = true;
         public static bool debugMode = false;
         public static byte policeMode = 2;
         public static byte fireMode = 2;

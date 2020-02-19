@@ -1,4 +1,4 @@
-FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION	거리에 따른 도로 통신망이 고장났을 경우 경로가 미 지정된 수송 매치를 수정 할 수 있음
+FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION	Fix UnRouted Transfer Match(See User Guide for detail)
 FIX_UNROUTED_TRANSFER_MATCH_ENALBE	경로가 미 지정된 수송 매치 수정 활성화
 DEBUG_MODE_DESCRIPTION	건물UI에 활성화된 수송 매치 수와 로그 여부를 표시함(렉을 유발 할 수 있음)
 DEBUG_MODE_DESCRIPTION_ENALBE	디버그 모드 활성화
@@ -6,3 +6,13 @@ FAILED_BUILDING_COUNT	해당 건물에 경로가 미 지정된 수송 매치 수
 GENERATE_DETAIL_REPORT	MoreEffectiveTransfer.txt 파일을 생성합니다
 EXPERIMENTAL_FEATURES	실험 기능
 CONSIDER_PROIRITY	MatchOffer 기능이 우선순위와 거리를 결정함
+POLICE	Police
+FIRETRUCK	Firetruck
+HEARSE	Hearse
+TAXI	Taxi
+GARBAGE	Garbage
+INCOMING_ONLY	Incoming only mode
+OUTGOING_ONLY	Outgoing only mode
+BALANCE	Balance mode
+INCOMING_FIRST	Incoming first mode
+TRANSFER_MATCH_MODE	Match mode(See User Guide for detail)
