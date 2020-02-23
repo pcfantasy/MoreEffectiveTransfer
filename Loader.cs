@@ -18,7 +18,6 @@ namespace MoreEffectiveTransfer
     public class Loader : LoadingExtensionBase
     {
         public static LoadMode CurrentLoadMode;
-        public static bool isRealCityRunning = false;
         public static bool isEmployOvereducatedWorkersRunning = false;
         public class Detour
         {
@@ -330,7 +329,6 @@ namespace MoreEffectiveTransfer
 
         public void InitDetour()
         {
-            isRealCityRunning = CheckRealCityIsLoaded();
             isEmployOvereducatedWorkersRunning = CheckEmployOvereducatedWorkersRunningIsLoaded();
             if (!DetourInited)
             {
@@ -410,11 +408,6 @@ namespace MoreEffectiveTransfer
             }
 
             return thirdPartyModLoaded;
-        }
-
-        private bool CheckRealCityIsLoaded()
-        {
-            return this.Check3rdPartyModLoaded("RealCity", false);
         }
 
         private bool CheckEmployOvereducatedWorkersRunningIsLoaded()
