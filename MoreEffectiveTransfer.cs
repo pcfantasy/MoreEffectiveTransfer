@@ -10,11 +10,11 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool fixUnRouteTransfer = true;
         public static bool debugMode = false;
-        public static byte policeMode = 2;
-        public static byte fireMode = 2;
-        public static byte deadMode = 2;
-        public static byte taxiMode = 2;
-        public static byte garbageMode = 2;
+        public static byte policeMode = 3;
+        public static byte fireMode = 3;
+        public static byte deadMode = 3;
+        public static byte taxiMode = 3;
+        public static byte garbageMode = 3;
 
 
         public string Name
@@ -65,15 +65,15 @@ namespace MoreEffectiveTransfer
                 strLine = sr.ReadLine();
                 debugMode = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
-                if (!byte.TryParse(strLine, out policeMode)) policeMode = 2;
+                if (!byte.TryParse(strLine, out policeMode)) policeMode = 3;
                 strLine = sr.ReadLine();
-                if (!byte.TryParse(strLine, out fireMode)) fireMode = 2;
+                if (!byte.TryParse(strLine, out fireMode)) fireMode = 3;
                 strLine = sr.ReadLine();
-                if (!byte.TryParse(strLine, out deadMode)) deadMode = 2;
+                if (!byte.TryParse(strLine, out deadMode)) deadMode = 3;
                 strLine = sr.ReadLine();
-                if (!byte.TryParse(strLine, out taxiMode)) taxiMode = 2;
+                if (!byte.TryParse(strLine, out taxiMode)) taxiMode = 3;
                 strLine = sr.ReadLine();
-                if (!byte.TryParse(strLine, out garbageMode)) garbageMode = 2;
+                if (!byte.TryParse(strLine, out garbageMode)) garbageMode = 3;
 
                 sr.Close();
                 fs.Close();
