@@ -83,35 +83,15 @@ namespace MoreEffectiveTransfer.CustomManager
             InitDelegate();
         }
 
-        private static TransferManager.TransferOffer[] m_outgoingOffers;
-        private static TransferManager.TransferOffer[] m_incomingOffers;
-        private static ushort[] m_outgoingCount;
-        private static ushort[] m_incomingCount;
-        private static int[] m_outgoingAmount;
-        private static int[] m_incomingAmount;
+        public static TransferManager.TransferOffer[] m_outgoingOffers;
+        public static TransferManager.TransferOffer[] m_incomingOffers;
+        public static ushort[] m_outgoingCount;
+        public static ushort[] m_incomingCount;
+        public static int[] m_outgoingAmount;
+        public static int[] m_incomingAmount;
 
-        private bool CanUseNewMatchOffers(ushort buildingID, TransferReason material)
+        public static bool CanUseNewMatchOffers(TransferReason material)
         {
-            //For outside building, do not use NewMatchOffers
-            BuildingManager bM = Singleton<BuildingManager>.instance;
-            if (bM.m_buildings.m_buffer[buildingID].m_flags.IsFlagSet(Building.Flags.Untouchable))
-            {
-                //For more outside connection MOD
-                switch (material)
-                {
-                    case TransferReason.Fire:
-                    case TransferReason.Garbage:
-                    case TransferReason.GarbageMove:
-                    case TransferReason.Crime:
-                    case TransferReason.DeadMove:
-                        return true;
-                    default: return false;
-                }
-            }
-            if (bM.m_buildings.m_buffer[buildingID].Info.m_buildingAI is WarehouseAI)
-            {
-                return false;
-            }
             switch (material)
             {
                 case TransferReason.Oil:
@@ -149,7 +129,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        private byte MatchOffersMode(TransferReason material)
+        public static byte MatchOffersMode(TransferReason material)
         {
             //incoming only mode 0
             //outgoing only mode 1
@@ -180,15 +160,11 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.ParkMaintenance:
                     return 2;
                 case TransferReason.Garbage:
-                    return MoreEffectiveTransfer.garbageMode;
                 case TransferReason.Crime:
-                    return MoreEffectiveTransfer.policeMode;
                 case TransferReason.Fire:
-                    return MoreEffectiveTransfer.fireMode;
                 case TransferReason.Dead:
-                    return MoreEffectiveTransfer.deadMode;
                 case TransferReason.Taxi:
-                    return MoreEffectiveTransfer.garbageMode;
+                    return 3;
                 case TransferReason.GarbageMove:
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
@@ -198,7 +174,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        private bool RejectLowPriority(TransferReason material)
+        public static bool RejectLowPriority(TransferReason material)
         {
             switch (material)
             {
@@ -212,7 +188,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        private float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material, bool isOfferIn)
+        public static float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material, bool isOfferIn)
         {
             bool canApplyPriority = false;
             switch (material)
@@ -267,7 +243,7 @@ namespace MoreEffectiveTransfer.CustomManager
             return priority;
         }
 
-        public void ForgetFailedBuilding(ushort targetBuilding, int idex)
+        public static void ForgetFailedBuilding(ushort targetBuilding, int idex)
         {
             if (MoreEffectiveTransfer.fixUnRouteTransfer)
             {
@@ -298,7 +274,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        private bool IsUnRoutedMatch(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        public static bool IsUnRoutedMatch(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
             if (!MoreEffectiveTransfer.fixUnRouteTransfer)
             {
@@ -402,7 +378,20 @@ namespace MoreEffectiveTransfer.CustomManager
             return false;
         }
 
-        private void MatchOffers(TransferReason material)
+        public static bool TransferManagerMatchOffersPrefix(TransferReason material)
+        {
+            if (CanUseNewMatchOffers(material))
+            {
+                MatchOffers(material);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static void MatchOffers(TransferReason material)
         {
             if (!_init)
             {
@@ -445,145 +434,129 @@ namespace MoreEffectiveTransfer.CustomManager
                         {
                             TransferOffer incomingOffer = m_incomingOffers[offerIdex * 256 + incomingIdex];
                             // NON-STOCK CODE START
-                            bool canUseNewMatchOffers = CanUseNewMatchOffers(incomingOffer.Building, material);
+                            bool canUseNewMatchOffers = CanUseNewMatchOffers(material);
                             // NON-STOCK CODE END
                             Vector3 incomingPosition = incomingOffer.Position;
                             int incomingOfferAmount = incomingOffer.Amount;
-                            // NON-STOCK CODE START
-                            TransferReason material2 = material;
                             do
                             {
-                                // NON-STOCK CODE END
-                                do
-                                {
-                                    int incomingPriority = Mathf.Max(0, 2 - priority);
-                                    int incomingPriorityExclude = (!incomingOffer.Exclude) ? incomingPriority : Mathf.Max(0, 3 - priority);
-                                    // NON-STOCK CODE START
-                                    float currentShortestDistance = -1f;
-                                    if (canUseNewMatchOffers)
-                                    {
-                                        priority = 7;
-                                        incomingPriority = Mathf.Max(0, 2 - oldPriority);
-                                        incomingPriorityExclude = (!incomingOffer.Exclude) ? incomingPriority : Mathf.Max(0, 3 - oldPriority);
-                                    }
-                                    else
-                                    {
-                                        priority = oldPriority;
-                                        incomingPriority = Mathf.Max(0, 2 - priority);
-                                        incomingPriorityExclude = (!incomingOffer.Exclude) ? incomingPriority : Mathf.Max(0, 3 - priority);
-                                    }
-                                    // NON-STOCK CODE END
-                                    int validPriority = -1;
-                                    int validOutgoingIdex = -1;
-                                    float distanceOffsetPre = -1f;
-                                    int outgoingIdexInsideIncoming = outgoingIdex;
-                                    for (int incomingPriorityInside = priority; incomingPriorityInside >= incomingPriority; incomingPriorityInside--)
-                                    {
-                                        int outgoingIdexWithPriority = (int)material2 * 8 + incomingPriorityInside;
-                                        int outgoingCountWithPriority = m_outgoingCount[outgoingIdexWithPriority];
-                                        //To let incomingPriorityInsideFloat!=0
-                                        float incomingPriorityInsideFloat = (float)incomingPriorityInside + 0.1f;
-                                        //Higher priority will get more chance to match
-                                        //UseNewMatchOffers to find the shortest transfer building
-                                        if ((distanceOffsetPre >= incomingPriorityInsideFloat) && !canUseNewMatchOffers)
-                                        {
-                                            break;
-                                        }
-                                        //Find the nearest offer to match in every priority.
-                                        for (int i = outgoingIdexInsideIncoming; i < outgoingCountWithPriority; i++)
-                                        {
-                                            TransferOffer outgoingOfferPre = m_outgoingOffers[outgoingIdexWithPriority * 256 + i];
-                                            if (incomingOffer.m_object != outgoingOfferPre.m_object && (!outgoingOfferPre.Exclude || incomingPriorityInside >= incomingPriorityExclude))
-                                            {
-                                                float incomingOutgoingDistance = Vector3.SqrMagnitude(outgoingOfferPre.Position - incomingPosition);
-                                                // NON-STOCK CODE START
-                                                if (canUseNewMatchOffers)
-                                                {
-                                                    //ApplyPriority
-                                                    incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOffer, outgoingOfferPre, material2, false);
-                                                    if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
-                                                    {
-                                                        if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material2))
-                                                        {
-                                                            validPriority = incomingPriorityInside;
-                                                            validOutgoingIdex = i;
-                                                            currentShortestDistance = incomingOutgoingDistance;
-                                                        }
-                                                    }
-                                                }
-                                                // NON-STOCK CODE END
-                                                float distanceOffset = (!(distanceMultiplier < 0f)) ? (incomingPriorityInsideFloat / (1f + incomingOutgoingDistance * distanceMultiplier)) : (incomingPriorityInsideFloat - incomingPriorityInsideFloat / (1f - incomingOutgoingDistance * distanceMultiplier));
-                                                if ((distanceOffset > distanceOffsetPre) && !canUseNewMatchOffers)
-                                                {
-                                                    validPriority = incomingPriorityInside;
-                                                    validOutgoingIdex = i;
-                                                    distanceOffsetPre = distanceOffset;
-                                                    if ((incomingOutgoingDistance < maxDistance))
-                                                    {
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        outgoingIdexInsideIncoming = 0;
-                                    }
-                                    // NON-STOCK CODE START
-                                    if (canUseNewMatchOffers)
-                                    {
-                                        priority = oldPriority;
-                                    }
-                                    // NON-STOCK CODE END
-                                    if (validPriority == -1)
-                                    {
-                                        break;
-                                    }
-                                    //Find a validPriority, get outgoingOffer
-                                    int matchedOutgoingOfferIdex = (int)material2 * 8 + validPriority;
-                                    TransferOffer outgoingOffer = m_outgoingOffers[matchedOutgoingOfferIdex * 256 + validOutgoingIdex];
-                                    int outgoingOfferAmount = outgoingOffer.Amount;
-                                    int matchedOfferAmount = Mathf.Min(incomingOfferAmount, outgoingOfferAmount);
-                                    if (matchedOfferAmount != 0)
-                                    {
-                                        TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material2, outgoingOffer, incomingOffer, matchedOfferAmount);
-                                    }
-                                    incomingOfferAmount -= matchedOfferAmount;
-                                    outgoingOfferAmount -= matchedOfferAmount;
-                                    //matched outgoingOffer is empty now
-                                    if (outgoingOfferAmount == 0)
-                                    {
-                                        int outgoingCountPost = m_outgoingCount[matchedOutgoingOfferIdex] - 1;
-                                        m_outgoingCount[matchedOutgoingOfferIdex] = (ushort)outgoingCountPost;
-                                        m_outgoingOffers[matchedOutgoingOfferIdex * 256 + validOutgoingIdex] = m_outgoingOffers[matchedOutgoingOfferIdex * 256 + outgoingCountPost];
-                                        if (matchedOutgoingOfferIdex == offerIdex)
-                                        {
-                                            outgoingCount = outgoingCountPost;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        outgoingOffer.Amount = outgoingOfferAmount;
-                                        m_outgoingOffers[matchedOutgoingOfferIdex * 256 + validOutgoingIdex] = outgoingOffer;
-                                    }
-                                    incomingOffer.Amount = incomingOfferAmount;
-                                }
-                                while (incomingOfferAmount != 0);
+                                int incomingPriority = Mathf.Max(0, 2 - priority);
+                                int incomingPriorityExclude = (!incomingOffer.Exclude) ? incomingPriority : Mathf.Max(0, 3 - priority);
                                 // NON-STOCK CODE START
-                                if (Loader.isEmployOvereducatedWorkersRunning)
+                                float currentShortestDistance = -1f;
+                                if (canUseNewMatchOffers && (matchOffersMode != 2))
                                 {
-                                    if (incomingOfferAmount == 0 || material2 < TransferManager.TransferReason.Worker0 || TransferManager.TransferReason.Worker3 <= material2)
-                                    {
-                                        break;
-                                    }
-                                    material2++;
+                                    //incoming only mode 0
+                                    //outgoing only mode 1
+                                    //balanced mode 2
+                                    //incoming first mode 3
+                                    priority = 7;
+                                    incomingPriority = Mathf.Max(0, 2 - oldPriority);
+                                    incomingPriorityExclude = (!incomingOffer.Exclude) ? incomingPriority : Mathf.Max(0, 3 - oldPriority);
                                 }
                                 else
                                 {
+                                    priority = oldPriority;
+                                    incomingPriority = Mathf.Max(0, 2 - priority);
+                                    incomingPriorityExclude = (!incomingOffer.Exclude) ? incomingPriority : Mathf.Max(0, 3 - priority);
+                                }
+                                // NON-STOCK CODE END
+                                int validPriority = -1;
+                                int validOutgoingIdex = -1;
+                                float distanceOffsetPre = -1f;
+                                int outgoingIdexInsideIncoming = outgoingIdex;
+                                for (int incomingPriorityInside = priority; incomingPriorityInside >= incomingPriority; incomingPriorityInside--)
+                                {
+                                    int outgoingIdexWithPriority = (int)material * 8 + incomingPriorityInside;
+                                    int outgoingCountWithPriority = m_outgoingCount[outgoingIdexWithPriority];
+                                    //To let incomingPriorityInsideFloat!=0
+                                    float incomingPriorityInsideFloat = (float)incomingPriorityInside + 0.1f;
+                                    //Higher priority will get more chance to match
+                                    //UseNewMatchOffers to find the shortest transfer building
+                                    if ((distanceOffsetPre >= incomingPriorityInsideFloat) && !canUseNewMatchOffers)
+                                    {
+                                        break;
+                                    }
+                                    //Find the nearest offer to match in every priority.
+                                    for (int i = outgoingIdexInsideIncoming; i < outgoingCountWithPriority; i++)
+                                    {
+                                        TransferOffer outgoingOfferPre = m_outgoingOffers[outgoingIdexWithPriority * 256 + i];
+                                        if (incomingOffer.m_object != outgoingOfferPre.m_object && (!outgoingOfferPre.Exclude || incomingPriorityInside >= incomingPriorityExclude))
+                                        {
+                                            float incomingOutgoingDistance = Vector3.SqrMagnitude(outgoingOfferPre.Position - incomingPosition);
+                                            // NON-STOCK CODE START
+                                            if (canUseNewMatchOffers)
+                                            {
+                                                //ApplyPriority
+                                                incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOffer, outgoingOfferPre, material, false);
+                                                if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
+                                                {
+                                                    if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material))
+                                                    {
+                                                        validPriority = incomingPriorityInside;
+                                                        validOutgoingIdex = i;
+                                                        currentShortestDistance = incomingOutgoingDistance;
+                                                    }
+                                                }
+                                            }
+                                            // NON-STOCK CODE END
+                                            float distanceOffset = (!(distanceMultiplier < 0f)) ? (incomingPriorityInsideFloat / (1f + incomingOutgoingDistance * distanceMultiplier)) : (incomingPriorityInsideFloat - incomingPriorityInsideFloat / (1f - incomingOutgoingDistance * distanceMultiplier));
+                                            if ((distanceOffset > distanceOffsetPre) && !canUseNewMatchOffers)
+                                            {
+                                                validPriority = incomingPriorityInside;
+                                                validOutgoingIdex = i;
+                                                distanceOffsetPre = distanceOffset;
+                                                if ((incomingOutgoingDistance < maxDistance))
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    outgoingIdexInsideIncoming = 0;
+                                }
+                                // NON-STOCK CODE START
+                                if (canUseNewMatchOffers)
+                                {
+                                    priority = oldPriority;
+                                }
+                                // NON-STOCK CODE END
+                                if (validPriority == -1)
+                                {
                                     break;
                                 }
-                            } while (true);
-                        // NON-STOCK CODE END
-                        //matched incomingOffer is empty now
-                        if (incomingOfferAmount == 0)
+                                //Find a validPriority, get outgoingOffer
+                                int matchedOutgoingOfferIdex = (int)material * 8 + validPriority;
+                                TransferOffer outgoingOffer = m_outgoingOffers[matchedOutgoingOfferIdex * 256 + validOutgoingIdex];
+                                int outgoingOfferAmount = outgoingOffer.Amount;
+                                int matchedOfferAmount = Mathf.Min(incomingOfferAmount, outgoingOfferAmount);
+                                if (matchedOfferAmount != 0)
+                                {
+                                    TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, outgoingOffer, incomingOffer, matchedOfferAmount);
+                                }
+                                incomingOfferAmount -= matchedOfferAmount;
+                                outgoingOfferAmount -= matchedOfferAmount;
+                                //matched outgoingOffer is empty now
+                                if (outgoingOfferAmount == 0)
+                                {
+                                    int outgoingCountPost = m_outgoingCount[matchedOutgoingOfferIdex] - 1;
+                                    m_outgoingCount[matchedOutgoingOfferIdex] = (ushort)outgoingCountPost;
+                                    m_outgoingOffers[matchedOutgoingOfferIdex * 256 + validOutgoingIdex] = m_outgoingOffers[matchedOutgoingOfferIdex * 256 + outgoingCountPost];
+                                    if (matchedOutgoingOfferIdex == offerIdex)
+                                    {
+                                        outgoingCount = outgoingCountPost;
+                                    }
+                                }
+                                else
+                                {
+                                    outgoingOffer.Amount = outgoingOfferAmount;
+                                    m_outgoingOffers[matchedOutgoingOfferIdex * 256 + validOutgoingIdex] = outgoingOffer;
+                                }
+                                incomingOffer.Amount = incomingOfferAmount;
+                            }
+                            while (incomingOfferAmount != 0);
+                            //matched incomingOffer is empty now
+                            if (incomingOfferAmount == 0)
                             {
                                 incomingCount--;
                                 m_incomingCount[offerIdex] = (ushort)incomingCount;
@@ -602,162 +575,136 @@ namespace MoreEffectiveTransfer.CustomManager
                         {
                             TransferOffer outgoingOffer = m_outgoingOffers[offerIdex * 256 + outgoingIdex];
                             // NON-STOCK CODE START
-                            bool canUseNewMatchOffers = CanUseNewMatchOffers(outgoingOffer.Building, material);
+                            bool canUseNewMatchOffers = CanUseNewMatchOffers(material);
                             // NON-STOCK CODE END
                             Vector3 outgoingPosition = outgoingOffer.Position;
                             int outgoingOfferAmount = outgoingOffer.Amount;
-                            // NON-STOCK CODE START
-                            TransferReason material2 = material;
                             do
                             {
-                                // NON-STOCK CODE END
-                                do
-                                {
-                                    int outgoingPriority = Mathf.Max(0, 2 - priority);
-                                    int outgoingPriorityExclude = (!outgoingOffer.Exclude) ? outgoingPriority : Mathf.Max(0, 3 - priority);
-                                    // NON-STOCK CODE START
-                                    float currentShortestDistance = -1f;
-                                    //incoming first mode can only match lower priority
-                                    if (canUseNewMatchOffers && (matchOffersMode != 3))
-                                    {
-                                        priority = 7;
-                                        outgoingPriority = Mathf.Max(0, 2 - oldPriority);
-                                        outgoingPriorityExclude = (!outgoingOffer.Exclude) ? outgoingPriority : Mathf.Max(0, 3 - oldPriority);
-                                    }
-                                    else
-                                    {
-                                        priority = oldPriority;
-                                        outgoingPriority = Mathf.Max(0, 2 - priority);
-                                        outgoingPriorityExclude = (!outgoingOffer.Exclude) ? outgoingPriority : Mathf.Max(0, 3 - priority);
-                                    }
-                                    // NON-STOCK CODE END
-                                    int validPriority = -1;
-                                    int validIncomingIdex = -1;
-                                    float distanceOffsetPre = -1f;
-                                    int incomingIdexInsideOutgoing = incomingIdex;
-                                    for (int outgoingPriorityInside = priority; outgoingPriorityInside >= outgoingPriority; outgoingPriorityInside--)
-                                    {
-                                        int incomingIdexWithPriority = (int)material2 * 8 + outgoingPriorityInside;
-                                        int incomingCountWithPriority = m_incomingCount[incomingIdexWithPriority];
-                                        //To let outgoingPriorityInsideFloat!=0
-                                        float outgoingPriorityInsideFloat = (float)outgoingPriorityInside + 0.1f;
-                                        //Higher priority will get more chance to match
-                                        if ((distanceOffsetPre >= outgoingPriorityInsideFloat) && !canUseNewMatchOffers)
-                                        {
-                                            break;
-                                        }
-                                        for (int j = incomingIdexInsideOutgoing; j < incomingCountWithPriority; j++)
-                                        {
-                                            TransferOffer incomingOfferPre = m_incomingOffers[incomingIdexWithPriority * 256 + j];
-                                            if (outgoingOffer.m_object != incomingOfferPre.m_object && (!incomingOfferPre.Exclude || outgoingPriorityInside >= outgoingPriorityExclude))
-                                            {
-                                                float incomingOutgoingDistance = Vector3.SqrMagnitude(incomingOfferPre.Position - outgoingPosition);
-                                                // NON-STOCK CODE START
-                                                if (canUseNewMatchOffers)
-                                                {
-                                                    //ApplyPriority
-                                                    incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOfferPre, outgoingOffer, material2, true);
-                                                    //Fix warehouse always import issue;
-                                                    bool wareHouseStopIncoming = false;
-                                                    if (incomingOfferPre.Building!= 0)
-                                                    {
-                                                        if (Singleton<BuildingManager>.instance.m_buildings.m_buffer[incomingOfferPre.Building].Info.m_buildingAI is WarehouseAI)
-                                                        {
-                                                            if (incomingOfferPre.Priority == 0 && (outgoingOffer.Priority == 0 || outgoingOffer.Priority == 1))
-                                                            {
-                                                                wareHouseStopIncoming = true;
-                                                            }
-                                                        }
-                                                        else if (RejectLowPriority(material2))
-                                                        {
-                                                            if (incomingOfferPre.Priority == 0)
-                                                            {
-                                                                incomingOutgoingDistance = incomingOutgoingDistance * 10000f;
-                                                            }
-                                                        }
-                                                    }
-                                                    if (((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1) && !wareHouseStopIncoming)
-                                                    {
-                                                        if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer, material2))
-                                                        {
-                                                            validPriority = outgoingPriorityInside;
-                                                            validIncomingIdex = j;
-                                                            currentShortestDistance = incomingOutgoingDistance;
-                                                        }
-                                                    }
-                                                }
-                                                // NON-STOCK CODE END
-                                                float distanceOffset = (!(distanceMultiplier < 0f)) ? (outgoingPriorityInsideFloat / (1f + incomingOutgoingDistance * distanceMultiplier)) : (outgoingPriorityInsideFloat - outgoingPriorityInsideFloat / (1f - incomingOutgoingDistance * distanceMultiplier));
-                                                if ((distanceOffset > distanceOffsetPre) && !canUseNewMatchOffers)
-                                                {
-                                                    validPriority = outgoingPriorityInside;
-                                                    validIncomingIdex = j;
-                                                    distanceOffsetPre = distanceOffset;
-                                                    if (incomingOutgoingDistance < maxDistance)
-                                                    {
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        incomingIdexInsideOutgoing = 0;
-                                    }
-                                    // NON-STOCK CODE START
-                                    if (canUseNewMatchOffers)
-                                    {
-                                        priority = oldPriority;
-                                    }
-                                    // NON-STOCK CODE END
-                                    if (validPriority == -1)
-                                    {
-                                        break;
-                                    }
-                                    //Find a validPriority, get incomingOffer
-                                    int matchedIncomingOfferIdex = (int)material2 * 8 + validPriority;
-                                    TransferOffer incomingOffers = m_incomingOffers[matchedIncomingOfferIdex * 256 + validIncomingIdex];
-                                    int incomingOffersAmount = incomingOffers.Amount;
-                                    int matchedOfferAmount = Mathf.Min(outgoingOfferAmount, incomingOffersAmount);
-                                    if (matchedOfferAmount != 0)
-                                    {
-                                        TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material2, outgoingOffer, incomingOffers, matchedOfferAmount);
-                                    }
-                                    outgoingOfferAmount -= matchedOfferAmount;
-                                    incomingOffersAmount -= matchedOfferAmount;
-                                    //matched incomingOffer is empty now
-                                    if (incomingOffersAmount == 0)
-                                    {
-                                        int incomingCountPost = m_incomingCount[matchedIncomingOfferIdex] - 1;
-                                        m_incomingCount[matchedIncomingOfferIdex] = (ushort)incomingCountPost;
-                                        m_incomingOffers[matchedIncomingOfferIdex * 256 + validIncomingIdex] = m_incomingOffers[matchedIncomingOfferIdex * 256 + incomingCountPost];
-                                        if (matchedIncomingOfferIdex == offerIdex)
-                                        {
-                                            incomingCount = incomingCountPost;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        incomingOffers.Amount = incomingOffersAmount;
-                                        m_incomingOffers[matchedIncomingOfferIdex * 256 + validIncomingIdex] = incomingOffers;
-                                    }
-                                    outgoingOffer.Amount = outgoingOfferAmount;
-                                }
-                                while (outgoingOfferAmount != 0);
+                                int outgoingPriority = Mathf.Max(0, 2 - priority);
+                                int outgoingPriorityExclude = (!outgoingOffer.Exclude) ? outgoingPriority : Mathf.Max(0, 3 - priority);
                                 // NON-STOCK CODE START
-                                // EmployOvereducatedWorkers function
-                                if (Loader.isEmployOvereducatedWorkersRunning)
+                                float currentShortestDistance = -1f;
+                                //incoming first mode can only match lower priority
+                                if (canUseNewMatchOffers && (matchOffersMode == 1))
                                 {
-                                    if (outgoingOfferAmount == 0 || material2 < TransferManager.TransferReason.Worker0 || TransferManager.TransferReason.Worker3 <= material2)
-                                    {
-                                        break;
-                                    }
-                                    material2++;
+                                    //incoming only mode 0
+                                    //outgoing only mode 1
+                                    //balanced mode 2
+                                    //incoming first mode 3
+                                    priority = 7;
+                                    outgoingPriority = Mathf.Max(0, 2 - oldPriority);
+                                    outgoingPriorityExclude = (!outgoingOffer.Exclude) ? outgoingPriority : Mathf.Max(0, 3 - oldPriority);
                                 }
                                 else
                                 {
+                                    priority = oldPriority;
+                                    outgoingPriority = Mathf.Max(0, 2 - priority);
+                                    outgoingPriorityExclude = (!outgoingOffer.Exclude) ? outgoingPriority : Mathf.Max(0, 3 - priority);
+                                }
+                                // NON-STOCK CODE END
+                                int validPriority = -1;
+                                int validIncomingIdex = -1;
+                                float distanceOffsetPre = -1f;
+                                int incomingIdexInsideOutgoing = incomingIdex;
+                                for (int outgoingPriorityInside = priority; outgoingPriorityInside >= outgoingPriority; outgoingPriorityInside--)
+                                {
+                                    int incomingIdexWithPriority = (int)material * 8 + outgoingPriorityInside;
+                                    int incomingCountWithPriority = m_incomingCount[incomingIdexWithPriority];
+                                    //To let outgoingPriorityInsideFloat!=0
+                                    float outgoingPriorityInsideFloat = (float)outgoingPriorityInside + 0.1f;
+                                    //Higher priority will get more chance to match
+                                    if ((distanceOffsetPre >= outgoingPriorityInsideFloat) && !canUseNewMatchOffers)
+                                    {
+                                        break;
+                                    }
+                                    for (int j = incomingIdexInsideOutgoing; j < incomingCountWithPriority; j++)
+                                    {
+                                        TransferOffer incomingOfferPre = m_incomingOffers[incomingIdexWithPriority * 256 + j];
+                                        if (outgoingOffer.m_object != incomingOfferPre.m_object && (!incomingOfferPre.Exclude || outgoingPriorityInside >= outgoingPriorityExclude))
+                                        {
+                                            float incomingOutgoingDistance = Vector3.SqrMagnitude(incomingOfferPre.Position - outgoingPosition);
+                                            // NON-STOCK CODE START
+                                            if (canUseNewMatchOffers)
+                                            {
+                                                //ApplyPriority
+                                                incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOfferPre, outgoingOffer, material, true);
+                                                if (incomingOfferPre.Building != 0)
+                                                {
+                                                    if (RejectLowPriority(material))
+                                                    {
+                                                        if (incomingOfferPre.Priority == 0)
+                                                        {
+                                                            incomingOutgoingDistance = incomingOutgoingDistance * 10000f;
+                                                        }
+                                                    }
+                                                }
+                                                if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
+                                                {
+                                                    if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer, material))
+                                                    {
+                                                        validPriority = outgoingPriorityInside;
+                                                        validIncomingIdex = j;
+                                                        currentShortestDistance = incomingOutgoingDistance;
+                                                    }
+                                                }
+                                            }
+                                            // NON-STOCK CODE END
+                                            float distanceOffset = (!(distanceMultiplier < 0f)) ? (outgoingPriorityInsideFloat / (1f + incomingOutgoingDistance * distanceMultiplier)) : (outgoingPriorityInsideFloat - outgoingPriorityInsideFloat / (1f - incomingOutgoingDistance * distanceMultiplier));
+                                            if ((distanceOffset > distanceOffsetPre) && !canUseNewMatchOffers)
+                                            {
+                                                validPriority = outgoingPriorityInside;
+                                                validIncomingIdex = j;
+                                                distanceOffsetPre = distanceOffset;
+                                                if (incomingOutgoingDistance < maxDistance)
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    incomingIdexInsideOutgoing = 0;
+                                }
+                                // NON-STOCK CODE START
+                                if (canUseNewMatchOffers)
+                                {
+                                    priority = oldPriority;
+                                }
+                                // NON-STOCK CODE END
+                                if (validPriority == -1)
+                                {
                                     break;
                                 }
-                            } while (true);
-                            // NON-STOCK CODE END
+                                //Find a validPriority, get incomingOffer
+                                int matchedIncomingOfferIdex = (int)material * 8 + validPriority;
+                                TransferOffer incomingOffers = m_incomingOffers[matchedIncomingOfferIdex * 256 + validIncomingIdex];
+                                int incomingOffersAmount = incomingOffers.Amount;
+                                int matchedOfferAmount = Mathf.Min(outgoingOfferAmount, incomingOffersAmount);
+                                if (matchedOfferAmount != 0)
+                                {
+                                    TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, outgoingOffer, incomingOffers, matchedOfferAmount);
+                                }
+                                outgoingOfferAmount -= matchedOfferAmount;
+                                incomingOffersAmount -= matchedOfferAmount;
+                                //matched incomingOffer is empty now
+                                if (incomingOffersAmount == 0)
+                                {
+                                    int incomingCountPost = m_incomingCount[matchedIncomingOfferIdex] - 1;
+                                    m_incomingCount[matchedIncomingOfferIdex] = (ushort)incomingCountPost;
+                                    m_incomingOffers[matchedIncomingOfferIdex * 256 + validIncomingIdex] = m_incomingOffers[matchedIncomingOfferIdex * 256 + incomingCountPost];
+                                    if (matchedIncomingOfferIdex == offerIdex)
+                                    {
+                                        incomingCount = incomingCountPost;
+                                    }
+                                }
+                                else
+                                {
+                                    incomingOffers.Amount = incomingOffersAmount;
+                                    m_incomingOffers[matchedIncomingOfferIdex * 256 + validIncomingIdex] = incomingOffers;
+                                }
+                                outgoingOffer.Amount = outgoingOfferAmount;
+                            }
+                            while (outgoingOfferAmount != 0);
                             //matched outgoingOffer is empty now
                             if (outgoingOfferAmount == 0)
                             {

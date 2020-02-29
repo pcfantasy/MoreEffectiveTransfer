@@ -4,15 +4,3 @@ DEBUG_MODE_DESCRIPTION	Показать изолированные здания 
 DEBUG_MODE_DESCRIPTION_ENALBE	Включить режим отладки
 FAILED_BUILDING_COUNT	Количество зданий которые нельзя подключить
 GENERATE_DETAIL_REPORT	Создать подробный отчет в MoreEffectiveTransfer.txt
-EXPERIMENTAL_FEATURES	Экспериментальные функции
-CONSIDER_PROIRITY	Учитывать приоритет и расстояние
-POLICE	Police
-FIRETRUCK	Firetruck
-HEARSE	Hearse
-TAXI	Taxi
-GARBAGE	Garbage
-INCOMING_ONLY	Incoming only mode
-OUTGOING_ONLY	Outgoing only mode
-BALANCE	Balance mode
-INCOMING_FIRST	Incoming first mode
-TRANSFER_MATCH_MODE	Match mode(See User Guide for detail)

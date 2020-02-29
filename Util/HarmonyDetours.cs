@@ -59,6 +59,12 @@ namespace MoreEffectiveTransfer.Util
             harmony.ConditionalPatch(helicopterDepotAISimulationStep,
                 null,
                 new HarmonyMethod(helicopterDepotAISimulationStepPostFix));
+            //4
+            var transferManagerMatchOffers = typeof(TransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance);
+            var transferManagerMatchOffersPrefix = typeof(CustomTransferManager).GetMethod("TransferManagerMatchOffersPrefix");
+            harmony.ConditionalPatch(transferManagerMatchOffers,
+                new HarmonyMethod(transferManagerMatchOffersPrefix),
+                null);
             Loader.HarmonyDetourFailed = false;
             DebugLog.LogToFileOnly("Harmony patches applied");
         }
@@ -84,6 +90,12 @@ namespace MoreEffectiveTransfer.Util
             harmony.ConditionalUnPatch(helicopterDepotAISimulationStep,
                 null,
                 new HarmonyMethod(helicopterDepotAISimulationStepPostFix));
+            //4
+            var transferManagerMatchOffers = typeof(TransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance);
+            var transferManagerMatchOffersPrefix = typeof(CustomTransferManager).GetMethod("TransferManagerMatchOffersPrefix");
+            harmony.ConditionalUnPatch(transferManagerMatchOffers,
+                new HarmonyMethod(transferManagerMatchOffersPrefix),
+                null);
             DebugLog.LogToFileOnly("Harmony patches DeApplied");
         }
     }

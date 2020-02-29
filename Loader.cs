@@ -18,21 +18,6 @@ namespace MoreEffectiveTransfer
     public class Loader : LoadingExtensionBase
     {
         public static LoadMode CurrentLoadMode;
-        public static bool isEmployOvereducatedWorkersRunning = false;
-        public class Detour
-        {
-            public MethodInfo OriginalMethod;
-            public MethodInfo CustomMethod;
-            public RedirectCallsState Redirect;
-
-            public Detour(MethodInfo originalMethod, MethodInfo customMethod)
-            {
-                this.OriginalMethod = originalMethod;
-                this.CustomMethod = customMethod;
-                this.Redirect = RedirectionHelper.RedirectCalls(originalMethod, customMethod);
-            }
-        }
-        public static List<Detour> Detours { get; set; }
         public static bool DetourInited = false;
         public static bool HarmonyDetourInited = false;
         public static bool HarmonyDetourFailed = true;
@@ -52,7 +37,6 @@ namespace MoreEffectiveTransfer
 
         public override void OnCreated(ILoading loading)
         {
-            Detours = new List<Detour>();
             base.OnCreated(loading);
         }
 
@@ -329,33 +313,9 @@ namespace MoreEffectiveTransfer
 
         public void InitDetour()
         {
-            isEmployOvereducatedWorkersRunning = CheckEmployOvereducatedWorkersRunningIsLoaded();
             if (!DetourInited)
             {
                 DebugLog.LogToFileOnly("Init detours");
-                bool detourFailed = false;
-
-                //1
-                DebugLog.LogToFileOnly("Detour TransferManager::MatchOffers calls");
-                try
-                {
-                    Detours.Add(new Detour(typeof(TransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance),
-                                           typeof(CustomTransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance)));
-                }
-                catch (Exception)
-                {
-                    DebugLog.LogToFileOnly("Could not detour TransferManager::MatchOffers");
-                    detourFailed = true;
-                }
-
-                if (detourFailed)
-                {
-                    DebugLog.LogToFileOnly("Detours failed");
-                }
-                else
-                {
-                    DebugLog.LogToFileOnly("Detours successful");
-                }
                 DetourInited = true;
             }
         }
@@ -365,54 +325,9 @@ namespace MoreEffectiveTransfer
             if (DetourInited)
             {
                 DebugLog.LogToFileOnly("Revert detours");
-                Detours.Reverse();
-                foreach (Detour d in Detours)
-                {
-                    RedirectionHelper.RevertRedirect(d.OriginalMethod, d.Redirect);
-                }
                 DetourInited = false;
-                Detours.Clear();
-                DebugLog.LogToFileOnly("Reverting detours finished.");
             }
             MoreEffectiveTransferThreading.isFirstTime = true;
-        }
-
-        private bool Check3rdPartyModLoaded(string namespaceStr, bool printAll = false)
-        {
-            bool thirdPartyModLoaded = false;
-
-            var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
-            List<ILoadingExtension> loadingExtensions = (List<ILoadingExtension>)loadingWrapperLoadingExtensionsField.GetValue(Singleton<LoadingManager>.instance.m_LoadingWrapper);
-
-            if (loadingExtensions != null)
-            {
-                foreach (ILoadingExtension extension in loadingExtensions)
-                {
-                    if (printAll)
-                        DebugLog.LogToFileOnly($"Detected extension: {extension.GetType().Name} in namespace {extension.GetType().Namespace}");
-                    if (extension.GetType().Namespace == null)
-                        continue;
-
-                    var nsStr = extension.GetType().Namespace.ToString();
-                    if (namespaceStr.Equals(nsStr))
-                    {
-                        DebugLog.LogToFileOnly($"The mod '{namespaceStr}' has been detected.");
-                        thirdPartyModLoaded = true;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                DebugLog.LogToFileOnly("Could not get loading extensions");
-            }
-
-            return thirdPartyModLoaded;
-        }
-
-        private bool CheckEmployOvereducatedWorkersRunningIsLoaded()
-        {
-            return this.Check3rdPartyModLoaded("EmployOvereducatedWorkers", false);
         }
     }
 }

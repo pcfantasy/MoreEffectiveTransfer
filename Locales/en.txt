@@ -4,15 +4,3 @@ DEBUG_MODE_DESCRIPTION	Show Debug Info in BuildingUI and Log(Will impact perform
 DEBUG_MODE_DESCRIPTION_ENALBE	Debug Mode Enable
 FAILED_BUILDING_COUNT	UnRouted Transfer Match Building Count
 GENERATE_DETAIL_REPORT	Generate detailed report in MoreEffectiveTransfer.txt
-EXPERIMENTAL_FEATURES	Experimental features
-CONSIDER_PROIRITY	MatchOffer consider proirity and distance
-POLICE	Police
-FIRETRUCK	Firetruck
-HEARSE	Hearse
-TAXI	Taxi
-GARBAGE	Garbage
-INCOMING_ONLY	Incoming only mode
-OUTGOING_ONLY	Outgoing only mode
-BALANCE	Balance mode
-INCOMING_FIRST	Incoming first mode
-TRANSFER_MATCH_MODE	Match mode(See User Guide for detail)
