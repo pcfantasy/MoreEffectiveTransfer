@@ -4,3 +4,5 @@ DEBUG_MODE_DESCRIPTION	在BuildingUI和log里显示调试信息(会影响游戏�
 DEBUG_MODE_DESCRIPTION_ENALBE	打开调试模式
 FAILED_BUILDING_COUNT	无法连接的建筑数量
 GENERATE_DETAIL_REPORT	把无法连接的建筑的详细信息打印到MoreEffectiveTransfer.txt
+CONSIDER_PROIRITY	运输匹配不仅考虑距离还考虑优先级
+WAREHOUSE_FIRST	仓库优先

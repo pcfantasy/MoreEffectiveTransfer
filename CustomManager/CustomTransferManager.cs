@@ -188,8 +188,60 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
+        public static float WareHouseFirst(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        {
+            if (!MoreEffectiveTransfer.warehouseFirst)
+            {
+                return 1f;
+            }
+
+            switch (material)
+            {
+                case TransferReason.Oil:
+                case TransferReason.Ore:
+                case TransferReason.Coal:
+                case TransferReason.Petrol:
+                case TransferReason.Food:
+                case TransferReason.Grain:
+                case TransferReason.Lumber:
+                case TransferReason.Logs:
+                case TransferReason.Goods:
+                case TransferReason.LuxuryProducts:
+                case TransferReason.AnimalProducts:
+                case TransferReason.Flours:
+                case TransferReason.Petroleum:
+                case TransferReason.Plastics:
+                case TransferReason.Metals:
+                case TransferReason.Glass:
+                case TransferReason.PlanedTimber:
+                case TransferReason.Paper:
+                    break;
+                default:
+                    return 1f;
+            }
+
+
+            BuildingManager bM = Singleton<BuildingManager>.instance;
+            if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
+            {
+                return 1000f;
+            }
+
+            if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
+            {
+                return 1000f;
+            }
+
+            return 1f;
+        }
+
         public static float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material, bool isOfferIn)
         {
+            if (!MoreEffectiveTransfer.applyPrority)
+            {
+                return 1f;
+            }
+
             bool canApplyPriority = false;
             switch (material)
             {
@@ -489,6 +541,8 @@ namespace MoreEffectiveTransfer.CustomManager
                                             {
                                                 //ApplyPriority
                                                 incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOffer, outgoingOfferPre, material, false);
+                                                //WareHouse first
+                                                incomingOutgoingDistance = incomingOutgoingDistance / WareHouseFirst(incomingOffer, outgoingOfferPre, material);
                                                 if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                 {
                                                     if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material))
@@ -629,6 +683,8 @@ namespace MoreEffectiveTransfer.CustomManager
                                             {
                                                 //ApplyPriority
                                                 incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOfferPre, outgoingOffer, material, true);
+                                                //WareHouse first
+                                                incomingOutgoingDistance = incomingOutgoingDistance / WareHouseFirst(incomingOfferPre, outgoingOffer, material);
                                                 if (incomingOfferPre.Building != 0)
                                                 {
                                                     if (RejectLowPriority(material))

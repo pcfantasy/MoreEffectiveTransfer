@@ -4,3 +4,5 @@ DEBUG_MODE_DESCRIPTION	Показать изолированные здания 
 DEBUG_MODE_DESCRIPTION_ENALBE	Включить режим отладки
 FAILED_BUILDING_COUNT	Количество зданий которые нельзя подключить
 GENERATE_DETAIL_REPORT	Создать подробный отчет в MoreEffectiveTransfer.txt
+CONSIDER_PROIRITY	Учитывать приоритет и расстояние
+WAREHOUSE_FIRST	Warehouse first!

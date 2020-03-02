@@ -10,6 +10,8 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool fixUnRouteTransfer = true;
         public static bool debugMode = false;
+        public static bool applyPrority = false;
+        public static bool warehouseFirst = false;
 
         public string Name
         {
@@ -39,6 +41,8 @@ namespace MoreEffectiveTransfer
             StreamWriter streamWriter = new StreamWriter(fs);
             streamWriter.WriteLine(fixUnRouteTransfer);
             streamWriter.WriteLine(debugMode);
+            streamWriter.WriteLine(applyPrority);
+            streamWriter.WriteLine(warehouseFirst);
             streamWriter.Flush();
             fs.Close();
         }
@@ -53,6 +57,10 @@ namespace MoreEffectiveTransfer
                 fixUnRouteTransfer = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
                 debugMode = (strLine == "True") ? true : false;
+                strLine = sr.ReadLine();
+                applyPrority = (strLine == "True") ? true : false;
+                strLine = sr.ReadLine();
+                warehouseFirst = (strLine == "True") ? true : false;
 
                 sr.Close();
                 fs.Close();
@@ -65,7 +73,11 @@ namespace MoreEffectiveTransfer
             UIHelperBase group1 = helper.AddGroup(Localization.Get("FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION"));
             group1.AddCheckbox(Localization.Get("FIX_UNROUTED_TRANSFER_MATCH_ENALBE"), fixUnRouteTransfer, (index) => fixUnRouteTransferEnable(index));
             UIHelperBase group2 = helper.AddGroup(Localization.Get("DEBUG_MODE_DESCRIPTION"));
-            group2.AddCheckbox(Localization.Get("DEBUG_MODE_DESCRIPTION_ENALBE"), debugMode, (index) => debugModeEnable(index));       
+            group2.AddCheckbox(Localization.Get("DEBUG_MODE_DESCRIPTION_ENALBE"), debugMode, (index) => debugModeEnable(index));
+            UIHelperBase group3 = helper.AddGroup(Localization.Get("CONSIDER_PROIRITY"));
+            group3.AddCheckbox(Localization.Get("CONSIDER_PROIRITY"), applyPrority, (index) => applyProrityEnable(index));
+            UIHelperBase group4 = helper.AddGroup(Localization.Get("WAREHOUSE_FIRST"));
+            group4.AddCheckbox(Localization.Get("WAREHOUSE_FIRST"), warehouseFirst, (index) => warehouseFirstEnable(index));
             SaveSetting();
         }
 
@@ -78,6 +90,18 @@ namespace MoreEffectiveTransfer
         public void debugModeEnable(bool index)
         {
             debugMode = index;
+            SaveSetting();
+        }
+
+        public void applyProrityEnable(bool index)
+        {
+            applyPrority = index;
+            SaveSetting();
+        }
+
+        public void warehouseFirstEnable(bool index)
+        {
+            warehouseFirst = index;
             SaveSetting();
         }
     }

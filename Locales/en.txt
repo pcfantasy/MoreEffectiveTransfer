@@ -4,3 +4,5 @@ DEBUG_MODE_DESCRIPTION	Show Debug Info in BuildingUI and Log(Will impact perform
 DEBUG_MODE_DESCRIPTION_ENALBE	Debug Mode Enable
 FAILED_BUILDING_COUNT	UnRouted Transfer Match Building Count
 GENERATE_DETAIL_REPORT	Generate detailed report in MoreEffectiveTransfer.txt
+CONSIDER_PROIRITY	MatchOffer consider proirity and distance
+WAREHOUSE_FIRST	Warehouse first!
