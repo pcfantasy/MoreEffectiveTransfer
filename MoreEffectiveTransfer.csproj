@@ -64,9 +64,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomAI\CustomCarAI.cs" />
-    <Compile Include="CustomAI\CustomHelicopterDepotAI.cs" />
+    <Compile Include="Patch\CarAIPathfindFailurePatch.cs" />
+    <Compile Include="Patch\HelicopterDepotAISimulationStepPatch.cs" />
     <Compile Include="CustomManager\CustomTransferManager.cs" />
+    <Compile Include="Patch\TransferManagerMatchOfferPatch.cs" />
+    <Compile Include="Patch\TransferManagerAddOutgoingOfferPatch.cs" />
     <Compile Include="UI\BuildingUI.cs" />
     <Compile Include="Util\FastDelegateFactory.cs" />
     <Compile Include="Util\DebugLog.cs" />

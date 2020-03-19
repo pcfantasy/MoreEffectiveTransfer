@@ -12,6 +12,7 @@ namespace MoreEffectiveTransfer
         public static bool debugMode = false;
         public static bool applyPrority = false;
         public static bool warehouseFirst = false;
+        public static bool warehouseOnlyForCity = false;
 
         public string Name
         {
@@ -43,6 +44,7 @@ namespace MoreEffectiveTransfer
             streamWriter.WriteLine(debugMode);
             streamWriter.WriteLine(applyPrority);
             streamWriter.WriteLine(warehouseFirst);
+            streamWriter.WriteLine(warehouseOnlyForCity);
             streamWriter.Flush();
             fs.Close();
         }
@@ -61,6 +63,8 @@ namespace MoreEffectiveTransfer
                 applyPrority = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
                 warehouseFirst = (strLine == "True") ? true : false;
+                strLine = sr.ReadLine();
+                warehouseOnlyForCity = (strLine == "True") ? true : false;
 
                 sr.Close();
                 fs.Close();
@@ -78,6 +82,8 @@ namespace MoreEffectiveTransfer
             group3.AddCheckbox(Localization.Get("CONSIDER_PROIRITY"), applyPrority, (index) => applyProrityEnable(index));
             UIHelperBase group4 = helper.AddGroup(Localization.Get("WAREHOUSE_FIRST"));
             group4.AddCheckbox(Localization.Get("WAREHOUSE_FIRST"), warehouseFirst, (index) => warehouseFirstEnable(index));
+            UIHelperBase group5 = helper.AddGroup(Localization.Get("WAREHOUSE_FORCITY"));
+            group5.AddCheckbox(Localization.Get("WAREHOUSE_FORCITY"), warehouseOnlyForCity, (index) => warehouseOnlyForCityEnable(index));
             SaveSetting();
         }
 
@@ -102,6 +108,12 @@ namespace MoreEffectiveTransfer
         public void warehouseFirstEnable(bool index)
         {
             warehouseFirst = index;
+            SaveSetting();
+        }
+
+        public void warehouseOnlyForCityEnable(bool index)
+        {
+            warehouseOnlyForCity = index;
             SaveSetting();
         }
     }

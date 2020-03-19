@@ -1,15 +1,18 @@
 ﻿using ColossalFramework;
+using Harmony;
 using MoreEffectiveTransfer.Util;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Reflection;
 
-namespace MoreEffectiveTransfer.CustomAI
+namespace MoreEffectiveTransfer.Patch
 {
-    public class CustomCarAI
+    [HarmonyPatch]
+    public class CarAIPathfindFailurePatch
     {
-        public static void CarAIPathfindFailurePostFix(ushort vehicleID, ref Vehicle data)
+        public static MethodBase TargetMethod()
+        {
+            return typeof(CarAI).GetMethod("PathfindFailure", BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+        public static void Postfix(ushort vehicleID, ref Vehicle data)
         {
             RecordFailedBuilding(vehicleID, ref data);
         }

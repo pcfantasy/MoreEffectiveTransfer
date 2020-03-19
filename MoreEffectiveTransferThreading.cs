@@ -1,22 +1,17 @@
 ﻿using ColossalFramework;
-using ColossalFramework.Globalization;
 using ColossalFramework.UI;
+using Harmony;
 using ICities;
-using MoreEffectiveTransfer.CustomAI;
+using MoreEffectiveTransfer.Patch;
 using MoreEffectiveTransfer.UI;
 using MoreEffectiveTransfer.Util;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using UnityEngine;
 
 namespace MoreEffectiveTransfer
 {
     public class MoreEffectiveTransferThreading : ThreadingExtensionBase
     {
         public static bool isFirstTime = true;
+        public const int HarmonyPatchNum = 5;
         public override void OnBeforeSimulationFrame()
         {
             base.OnBeforeSimulationFrame();
@@ -32,10 +27,8 @@ namespace MoreEffectiveTransfer
                         PlayerBuildingUI.refeshOnce = true;
                         UniqueFactoryUI.refeshOnce = true;
                         WareHouseUI.refeshOnce = true;
-                        CustomHelicopterDepotAI.haveFireHelicopterDepotFinal = CustomHelicopterDepotAI.haveFireHelicopterDepot;
-                        CustomHelicopterDepotAI.haveFireHelicopterDepot = false;
-                        CustomHelicopterDepotAI.haveSickHelicopterDepotFinal = CustomHelicopterDepotAI.haveSickHelicopterDepot;
-                        CustomHelicopterDepotAI.haveSickHelicopterDepot = false;
+                        HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepotFinal = HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot;
+                        HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot = false;
                     }
                     CheckDetour();
                 }
@@ -52,9 +45,39 @@ namespace MoreEffectiveTransfer
                     DebugLog.LogToFileOnly("ThreadingExtension.OnBeforeSimulationFrame: First frame detected. Checking detours.");
                     if (Loader.HarmonyDetourFailed)
                     {
-                        string error = "MoreEffectiveTransferManager HarmonyDetourInit is failed, Send MoreEffectiveTransferManager.txt to Author.";
+                        string error = "MoreEffectiveTransfer HarmonyDetourInit is failed, Send MoreEffectiveTransfer.txt to Author.";
                         DebugLog.LogToFileOnly(error);
                         UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", error, true);
+                    }
+                    else
+                    {
+                        var harmony = HarmonyInstance.Create(HarmonyDetours.ID);
+                        var methods = harmony.GetPatchedMethods();
+                        int i = 0;
+                        foreach (var method in methods)
+                        {
+                            var info = harmony.GetPatchInfo(method);
+                            if (info.Owners?.Contains(harmony.Id) == true)
+                            {
+                                DebugLog.LogToFileOnly("Harmony patch method = " + method.Name.ToString());
+                                if (info.Prefixes.Count != 0)
+                                {
+                                    DebugLog.LogToFileOnly("Harmony patch method has PreFix");
+                                }
+                                if (info.Postfixes.Count != 0)
+                                {
+                                    DebugLog.LogToFileOnly("Harmony patch method has PostFix");
+                                }
+                                i++;
+                            }
+                        }
+
+                        if (i != HarmonyPatchNum)
+                        {
+                            string error = $"MoreEffectiveTransfer HarmonyDetour Patch Num is {i}, Right Num is {HarmonyPatchNum} Send MoreEffectiveTransfer.txt to Author.";
+                            DebugLog.LogToFileOnly(error);
+                            UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", error, true);
+                        }
                     }
                 }
             }

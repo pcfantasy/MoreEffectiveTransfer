@@ -1,8 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Plugins;
-using MoreEffectiveTransfer.CustomAI;
 using MoreEffectiveTransfer.Util;
-using System;
 using System.Reflection;
 using UnityEngine;
 
@@ -10,55 +8,9 @@ namespace MoreEffectiveTransfer.CustomManager
 {
     public class CustomTransferManager : TransferManager
     {
-        private static bool _init = false;
+        public static bool _init = false;
 
-        public static void TransferManagerAddOutgoingOfferPrefix(TransferManager.TransferReason material, TransferManager.TransferOffer offer)
-        {
-            //If no HelicopterDepot, change offer type.
-            if (!CustomHelicopterDepotAI.haveFireHelicopterDepotFinal)
-            {
-                if (material == TransferReason.Fire2)
-                {
-                    material = TransferReason.Fire;
-                    for (int i = offer.Priority; i >= 0; i--)
-                    {
-                        int num = (int)((byte)material * 8 + i);
-                        int num2 = (int)m_outgoingCount[num];
-                        if (num2 < 256)
-                        {
-                            int num3 = num * 256 + num2;
-                            m_outgoingOffers[num3] = offer;
-                            m_outgoingCount[num] = (ushort)(num2 + 1);
-                            m_outgoingAmount[(int)material] += offer.Amount;
-                            return;
-                        }
-                    }
-                }
-            }
-
-            if (!CustomHelicopterDepotAI.haveSickHelicopterDepotFinal)
-            {
-                if (material == TransferReason.Sick2)
-                {
-                    material = TransferReason.Sick;
-                    for (int i = offer.Priority; i >= 0; i--)
-                    {
-                        int num = (int)((byte)material * 8 + i);
-                        int num2 = (int)m_outgoingCount[num];
-                        if (num2 < 256)
-                        {
-                            int num3 = num * 256 + num2;
-                            m_outgoingOffers[num3] = offer;
-                            m_outgoingCount[num] = (ushort)(num2 + 1);
-                            m_outgoingAmount[(int)material] += offer.Amount;
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        private static void Init()
+        public static void Init()
         {
             var inst = Singleton<TransferManager>.instance;
             var incomingCount = typeof(TransferManager).GetField("m_incomingCount", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -188,6 +140,28 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
+        public static bool CheckWareHouseForCity(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        {
+            if (!MoreEffectiveTransfer.warehouseOnlyForCity)
+            {
+                return false;
+            }
+
+            BuildingManager bM = Singleton<BuildingManager>.instance;
+            if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
+            {
+                if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is OutsideConnectionAI)
+                    return true;
+            }
+            else if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
+            {
+                if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is OutsideConnectionAI)
+                    return true;
+            }
+
+            return false;
+        }
+
         public static float WareHouseFirst(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
             if (!MoreEffectiveTransfer.warehouseFirst)
@@ -226,8 +200,7 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 return 1000f;
             }
-
-            if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
+            else if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
             {
                 return 1000f;
             }
@@ -303,7 +276,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 {
                     if (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] != 0)
                     {
-                        if (MainDataStore.refreshCanNotConnectedBuildingIDCount[targetBuilding] > 64)
+                        if (MainDataStore.refreshCanNotConnectedBuildingIDCount[targetBuilding] > 8)
                         {
                             //After several times we can refresh fail building list.
                             MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]--;
@@ -430,19 +403,6 @@ namespace MoreEffectiveTransfer.CustomManager
             return false;
         }
 
-        public static bool TransferManagerMatchOffersPrefix(TransferReason material)
-        {
-            if (CanUseNewMatchOffers(material))
-            {
-                MatchOffers(material);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
         public static void MatchOffers(TransferReason material)
         {
             if (!_init)
@@ -545,7 +505,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 incomingOutgoingDistance = incomingOutgoingDistance / WareHouseFirst(incomingOffer, outgoingOfferPre, material);
                                                 if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                 {
-                                                    if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material))
+                                                    if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material) && !CheckWareHouseForCity(incomingOffer, outgoingOfferPre, material))
                                                     {
                                                         validPriority = incomingPriorityInside;
                                                         validOutgoingIdex = i;
@@ -697,7 +657,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 }
                                                 if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                 {
-                                                    if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer, material))
+                                                    if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer, material) && !CheckWareHouseForCity(incomingOfferPre, outgoingOffer, material))
                                                     {
                                                         validPriority = outgoingPriorityInside;
                                                         validIncomingIdex = j;

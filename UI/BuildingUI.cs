@@ -118,6 +118,7 @@ namespace MoreEffectiveTransfer.UI
                 {
                     MainDataStore.lastBuildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
                     this.failedBuildingCount.text = Localization.Get("FAILED_BUILDING_COUNT") + ":" + MainDataStore.canNotConnectedBuildingIDCount[MainDataStore.lastBuildingID].ToString();
+                    this.failedBuildingCount.text += $" refreshCount = {MainDataStore.refreshCanNotConnectedBuildingIDCount[MainDataStore.lastBuildingID]}";
                     if (generateDetail.isChecked == true)
                     {
                         generateDetail.isChecked = false;
