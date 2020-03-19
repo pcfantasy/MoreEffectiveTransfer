@@ -6,3 +6,4 @@ FAILED_BUILDING_COUNT	无法连接的建筑数量
 GENERATE_DETAIL_REPORT	把无法连接的建筑的详细信息打印到MoreEffectiveTransfer.txt
 CONSIDER_PROIRITY	运输匹配不仅考虑距离还考虑优先级
 WAREHOUSE_FIRST	仓库优先
+ADVANCED_WAREHOUSE	高级仓库策略(详细请看说明书)

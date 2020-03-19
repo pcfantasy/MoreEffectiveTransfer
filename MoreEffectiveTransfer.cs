@@ -12,7 +12,7 @@ namespace MoreEffectiveTransfer
         public static bool debugMode = false;
         public static bool applyPrority = false;
         public static bool warehouseFirst = false;
-        public static bool warehouseOnlyForCity = false;
+        public static bool advancedWarehouse = false;
 
         public string Name
         {
@@ -44,7 +44,7 @@ namespace MoreEffectiveTransfer
             streamWriter.WriteLine(debugMode);
             streamWriter.WriteLine(applyPrority);
             streamWriter.WriteLine(warehouseFirst);
-            streamWriter.WriteLine(warehouseOnlyForCity);
+            streamWriter.WriteLine(advancedWarehouse);
             streamWriter.Flush();
             fs.Close();
         }
@@ -64,7 +64,7 @@ namespace MoreEffectiveTransfer
                 strLine = sr.ReadLine();
                 warehouseFirst = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
-                warehouseOnlyForCity = (strLine == "True") ? true : false;
+                advancedWarehouse = (strLine == "True") ? true : false;
 
                 sr.Close();
                 fs.Close();
@@ -82,8 +82,8 @@ namespace MoreEffectiveTransfer
             group3.AddCheckbox(Localization.Get("CONSIDER_PROIRITY"), applyPrority, (index) => applyProrityEnable(index));
             UIHelperBase group4 = helper.AddGroup(Localization.Get("WAREHOUSE_FIRST"));
             group4.AddCheckbox(Localization.Get("WAREHOUSE_FIRST"), warehouseFirst, (index) => warehouseFirstEnable(index));
-            UIHelperBase group5 = helper.AddGroup(Localization.Get("WAREHOUSE_FORCITY"));
-            group5.AddCheckbox(Localization.Get("WAREHOUSE_FORCITY"), warehouseOnlyForCity, (index) => warehouseOnlyForCityEnable(index));
+            UIHelperBase group5 = helper.AddGroup(Localization.Get("ADVANCED_WAREHOUSE"));
+            group5.AddCheckbox(Localization.Get("ADVANCED_WAREHOUSE"), advancedWarehouse, (index) => advancedWarehouseEnable(index));
             SaveSetting();
         }
 
@@ -111,9 +111,9 @@ namespace MoreEffectiveTransfer
             SaveSetting();
         }
 
-        public void warehouseOnlyForCityEnable(bool index)
+        public void advancedWarehouseEnable(bool index)
         {
-            warehouseOnlyForCity = index;
+            advancedWarehouse = index;
             SaveSetting();
         }
     }

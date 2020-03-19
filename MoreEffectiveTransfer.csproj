@@ -40,6 +40,9 @@
     <CitiesSkylinesModsPath>$(CitiesSkylinesInstallPath)..\..\workshop\content\255710\1680840913\</CitiesSkylinesModsPath>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony1.9">
+      <HintPath>..\0Harmony1.9.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(CitiesSkylinesInstallPath)Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -65,6 +68,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Patch\CarAIPathfindFailurePatch.cs" />
+    <Compile Include="Patch\CargoTruckAIArriveAtTargetPatch.cs" />
+    <Compile Include="Patch\WarehouseAICalculateUnSpawnPositionPatch.cs" />
+    <Compile Include="Patch\WarehouseAICalculateSpawnPositionPatch.cs" />
     <Compile Include="Patch\HelicopterDepotAISimulationStepPatch.cs" />
     <Compile Include="CustomManager\CustomTransferManager.cs" />
     <Compile Include="Patch\TransferManagerMatchOfferPatch.cs" />
@@ -90,11 +96,6 @@
     <Content Include="PreviewImage.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Lib.Harmony">
-      <Version>1.2.0.1</Version>
-    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- Copy all build outputs to mods folder using standard MSBuild Copy task. -->

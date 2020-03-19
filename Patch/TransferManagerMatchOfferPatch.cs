@@ -9,10 +9,10 @@ namespace MoreEffectiveTransfer.Patch
     {
         public static MethodBase TargetMethod()
         {
-            return typeof(TransferManager).GetMethod("MatchOffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            return typeof(TransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
-        public static bool Prefix(ref TransferManager.TransferReason material, ref TransferManager.TransferOffer offer)
+        public static bool Prefix(TransferManager.TransferReason material)
         {
             if (CustomTransferManager.CanUseNewMatchOffers(material))
             {

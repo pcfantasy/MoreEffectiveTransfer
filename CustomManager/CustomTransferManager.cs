@@ -142,7 +142,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
         public static bool CheckWareHouseForCity(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
-            if (!MoreEffectiveTransfer.warehouseOnlyForCity)
+            if (!MoreEffectiveTransfer.advancedWarehouse)
             {
                 return false;
             }
@@ -151,12 +151,18 @@ namespace MoreEffectiveTransfer.CustomManager
             if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
             {
                 if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is OutsideConnectionAI)
-                    return true;
+                {
+                    if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading))
+                        return true;
+                }
             }
             else if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
             {
                 if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is OutsideConnectionAI)
-                    return true;
+                {
+                    if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading))
+                        return true;
+                }
             }
 
             return false;

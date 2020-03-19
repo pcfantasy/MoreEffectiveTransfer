@@ -6,3 +6,4 @@ FAILED_BUILDING_COUNT	Количество зданий которые нель�
 GENERATE_DETAIL_REPORT	Создать подробный отчет в MoreEffectiveTransfer.txt
 CONSIDER_PROIRITY	Учитывать приоритет и расстояние
 WAREHOUSE_FIRST	Warehouse first!
+ADVANCED_WAREHOUSE	Advanced warehouse(See User Guide for detail)
