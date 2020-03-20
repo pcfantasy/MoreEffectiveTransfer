@@ -18,11 +18,12 @@ namespace MoreEffectiveTransfer.Patch
             if (MoreEffectiveTransfer.advancedWarehouse)
             {
                 //Move SpawnPosition
+                var moveDistance = data.Width * 8f / 3f;
                 var vector = position - data.m_position;
                 vector = VectorUtils.NormalizeXZ(vector);
                 vector = new Vector3(vector.z, 0, -vector.x);
-                position += 8 * vector;
-                target += 8 * vector;
+                position += moveDistance * vector;
+                target += moveDistance * vector;
 
                 vector = data.m_position - position;
                 vector = VectorUtils.NormalizeXZ(vector);
