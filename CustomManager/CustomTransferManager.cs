@@ -110,6 +110,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Snow:
                 case TransferReason.RoadMaintenance:
                 case TransferReason.ParkMaintenance:
+                case TransferReason.Fish:
                     return 2;
                 case TransferReason.Garbage:
                 case TransferReason.Crime:
@@ -142,26 +143,53 @@ namespace MoreEffectiveTransfer.CustomManager
 
         public static bool CheckWareHouseForCity(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
-            if (!MoreEffectiveTransfer.advancedWarehouse)
-            {
-                return false;
-            }
-
             BuildingManager bM = Singleton<BuildingManager>.instance;
             if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
             {
                 if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is OutsideConnectionAI)
                 {
                     if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading))
-                        return true;
+                    {
+                        if (MoreEffectiveTransfer.warehouseOutsideControl)
+                            return true;
+                        else
+                            return false;
+                    }
                 }
             }
-            else if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
+            else
+            {
+                if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is OutsideConnectionAI)
+                {
+                    if (MoreEffectiveTransfer.warehouseTransfer)
+                        return true;
+                    else
+                        return false;
+                }
+            }
+
+
+            if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
             {
                 if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is OutsideConnectionAI)
                 {
                     if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading))
+                    {
+                        if (MoreEffectiveTransfer.warehouseOutsideControl)
+                            return true;
+                        else
+                            return false;
+                    }
+                }
+            }
+            else
+            {
+                if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is OutsideConnectionAI)
+                {
+                    if (MoreEffectiveTransfer.warehouseTransfer)
                         return true;
+                    else
+                        return false;
                 }
             }
 

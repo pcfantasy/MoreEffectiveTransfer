@@ -12,7 +12,9 @@ namespace MoreEffectiveTransfer
         public static bool debugMode = false;
         public static bool applyPrority = false;
         public static bool warehouseFirst = false;
-        public static bool advancedWarehouse = false;
+        public static bool warehouseOutsideControl = false;
+        public static bool warehouseSpawnUnSpawnFix = false;
+        public static bool warehouseTransfer = false;
 
         public string Name
         {
@@ -44,7 +46,9 @@ namespace MoreEffectiveTransfer
             streamWriter.WriteLine(debugMode);
             streamWriter.WriteLine(applyPrority);
             streamWriter.WriteLine(warehouseFirst);
-            streamWriter.WriteLine(advancedWarehouse);
+            streamWriter.WriteLine(warehouseOutsideControl);
+            streamWriter.WriteLine(warehouseSpawnUnSpawnFix);
+            streamWriter.WriteLine(warehouseTransfer);
             streamWriter.Flush();
             fs.Close();
         }
@@ -64,7 +68,11 @@ namespace MoreEffectiveTransfer
                 strLine = sr.ReadLine();
                 warehouseFirst = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
-                advancedWarehouse = (strLine == "True") ? true : false;
+                warehouseOutsideControl = (strLine == "True") ? true : false;
+                strLine = sr.ReadLine();
+                warehouseSpawnUnSpawnFix = (strLine == "True") ? true : false;
+                strLine = sr.ReadLine();
+                warehouseTransfer = (strLine == "True") ? true : false;
 
                 sr.Close();
                 fs.Close();
@@ -80,10 +88,11 @@ namespace MoreEffectiveTransfer
             group2.AddCheckbox(Localization.Get("DEBUG_MODE_DESCRIPTION_ENALBE"), debugMode, (index) => debugModeEnable(index));
             UIHelperBase group3 = helper.AddGroup(Localization.Get("CONSIDER_PROIRITY"));
             group3.AddCheckbox(Localization.Get("CONSIDER_PROIRITY"), applyPrority, (index) => applyProrityEnable(index));
-            UIHelperBase group4 = helper.AddGroup(Localization.Get("WAREHOUSE_FIRST"));
+            UIHelperBase group4 = helper.AddGroup(Localization.Get("ADVANCED_WAREHOUSE"));
             group4.AddCheckbox(Localization.Get("WAREHOUSE_FIRST"), warehouseFirst, (index) => warehouseFirstEnable(index));
-            UIHelperBase group5 = helper.AddGroup(Localization.Get("ADVANCED_WAREHOUSE"));
-            group5.AddCheckbox(Localization.Get("ADVANCED_WAREHOUSE"), advancedWarehouse, (index) => advancedWarehouseEnable(index));
+            group4.AddCheckbox(Localization.Get("WAREHOUSE_OUTSIDE"), warehouseOutsideControl, (index) => warehouseOutsideControlEnable(index));
+            group4.AddCheckbox(Localization.Get("WAREHOUSE_SPAWN_UNSPAWN"), warehouseSpawnUnSpawnFix, (index) => warehouseSpawnUnSpawnFixEnable(index));
+            group4.AddCheckbox(Localization.Get("WAREHOUSE_TRANSFER"), warehouseTransfer, (index) => warehouseTransferEnable(index));
             SaveSetting();
         }
 
@@ -111,10 +120,23 @@ namespace MoreEffectiveTransfer
             SaveSetting();
         }
 
-        public void advancedWarehouseEnable(bool index)
+        public void warehouseOutsideControlEnable(bool index)
         {
-            advancedWarehouse = index;
+            warehouseOutsideControl = index;
             SaveSetting();
         }
+
+        public void warehouseSpawnUnSpawnFixEnable(bool index)
+        {
+            warehouseSpawnUnSpawnFix = index;
+            SaveSetting();
+        }
+
+        public void warehouseTransferEnable(bool index)
+        {
+            warehouseTransfer = index;
+            SaveSetting();
+        }
+
     }
 }

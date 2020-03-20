@@ -15,7 +15,7 @@ namespace MoreEffectiveTransfer.Patch
         }
         public static void Postfix(ref Building data, ref Vector3 position, ref Vector3 target)
         {
-            if (MoreEffectiveTransfer.advancedWarehouse)
+            if (MoreEffectiveTransfer.warehouseSpawnUnSpawnFix)
             {
                 //Move UnspawnPosition
                 var moveDistance = data.Width * 8f / 3f;
