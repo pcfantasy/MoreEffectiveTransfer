@@ -7,6 +7,5 @@ GENERATE_DETAIL_REPORT	把无法连接的建筑的详细信息打印到MoreEffec
 CONSIDER_PROIRITY	运输匹配不仅考虑距离还考虑优先级
 WAREHOUSE_FIRST	仓库优先
 ADVANCED_WAREHOUSE	高级仓库策略(详细请看说明书)
-WAREHOUSE_OUTSIDE	控制仓库和外部连接模式
 WAREHOUSE_TRANSFER	强制仓库作为工商业楼和外部连接的中转站
 WAREHOUSE_SPAWN_UNSPAWN	分开仓库车辆的消失点和出生点

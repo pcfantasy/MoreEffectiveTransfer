@@ -7,6 +7,5 @@ GENERATE_DETAIL_REPORT	Создать подробный отчет в MoreEffec
 CONSIDER_PROIRITY	Учитывать приоритет и расстояние
 WAREHOUSE_FIRST	Warehouse first!
 ADVANCED_WAREHOUSE	Advanced warehouse(See User Guide for detail)
-WAREHOUSE_OUTSIDE	Control Warehouse with outside
 WAREHOUSE_TRANSFER	Force Warehouse as a relay bettween IC building and outside
 WAREHOUSE_SPAWN_UNSPAWN	Fix Warehouse Spawn and Unspawn position

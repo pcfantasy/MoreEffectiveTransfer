@@ -12,7 +12,6 @@ namespace MoreEffectiveTransfer
         public static bool debugMode = false;
         public static bool applyPrority = false;
         public static bool warehouseFirst = false;
-        public static bool warehouseOutsideControl = false;
         public static bool warehouseSpawnUnSpawnFix = false;
         public static bool warehouseTransfer = false;
 
@@ -46,7 +45,6 @@ namespace MoreEffectiveTransfer
             streamWriter.WriteLine(debugMode);
             streamWriter.WriteLine(applyPrority);
             streamWriter.WriteLine(warehouseFirst);
-            streamWriter.WriteLine(warehouseOutsideControl);
             streamWriter.WriteLine(warehouseSpawnUnSpawnFix);
             streamWriter.WriteLine(warehouseTransfer);
             streamWriter.Flush();
@@ -68,8 +66,6 @@ namespace MoreEffectiveTransfer
                 strLine = sr.ReadLine();
                 warehouseFirst = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
-                warehouseOutsideControl = (strLine == "True") ? true : false;
-                strLine = sr.ReadLine();
                 warehouseSpawnUnSpawnFix = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
                 warehouseTransfer = (strLine == "True") ? true : false;
@@ -90,7 +86,6 @@ namespace MoreEffectiveTransfer
             group3.AddCheckbox(Localization.Get("CONSIDER_PROIRITY"), applyPrority, (index) => applyProrityEnable(index));
             UIHelperBase group4 = helper.AddGroup(Localization.Get("ADVANCED_WAREHOUSE"));
             group4.AddCheckbox(Localization.Get("WAREHOUSE_FIRST"), warehouseFirst, (index) => warehouseFirstEnable(index));
-            group4.AddCheckbox(Localization.Get("WAREHOUSE_OUTSIDE"), warehouseOutsideControl, (index) => warehouseOutsideControlEnable(index));
             group4.AddCheckbox(Localization.Get("WAREHOUSE_SPAWN_UNSPAWN"), warehouseSpawnUnSpawnFix, (index) => warehouseSpawnUnSpawnFixEnable(index));
             group4.AddCheckbox(Localization.Get("WAREHOUSE_TRANSFER"), warehouseTransfer, (index) => warehouseTransferEnable(index));
             SaveSetting();
@@ -117,12 +112,6 @@ namespace MoreEffectiveTransfer
         public void warehouseFirstEnable(bool index)
         {
             warehouseFirst = index;
-            SaveSetting();
-        }
-
-        public void warehouseOutsideControlEnable(bool index)
-        {
-            warehouseOutsideControl = index;
             SaveSetting();
         }
 
