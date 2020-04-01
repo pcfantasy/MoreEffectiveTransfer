@@ -222,66 +222,6 @@ namespace MoreEffectiveTransfer.CustomManager
             return 1f;
         }
 
-        public static float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material, bool isOfferIn)
-        {
-            if (!MoreEffectiveTransfer.applyPrority)
-            {
-                return 1f;
-            }
-
-            bool canApplyPriority = false;
-            switch (material)
-            {
-                case TransferReason.Oil:
-                case TransferReason.Ore:
-                case TransferReason.Coal:
-                case TransferReason.Petrol:
-                case TransferReason.Food:
-                case TransferReason.Grain:
-                case TransferReason.Lumber:
-                case TransferReason.Logs:
-                case TransferReason.Goods:
-                case TransferReason.LuxuryProducts:
-                case TransferReason.AnimalProducts:
-                case TransferReason.Flours:
-                case TransferReason.Petroleum:
-                case TransferReason.Plastics:
-                case TransferReason.Metals:
-                case TransferReason.Glass:
-                case TransferReason.PlanedTimber:
-                case TransferReason.Paper:
-                case TransferReason.Garbage:
-                case TransferReason.Snow:
-                case TransferReason.RoadMaintenance:
-                case TransferReason.ParkMaintenance:
-                case TransferReason.Crime:
-                case TransferReason.Fire:
-                case TransferReason.GarbageMove:
-                case TransferReason.CriminalMove:
-                case TransferReason.DeadMove:
-                case TransferReason.Dead:
-                case TransferReason.SnowMove:
-                case TransferReason.Taxi:
-                    canApplyPriority = true; break;
-                default: canApplyPriority = false; break;
-            }
-
-            float priority = 1f;
-
-            if (canApplyPriority)
-            {
-                if (isOfferIn)
-                {
-                    priority = offerIn.Priority + 1f;
-                }
-                else
-                {
-                    priority = offerOut.Priority + 1f;
-                }
-            }
-            return priority;
-        }
-
         public static void ForgetFailedBuilding(ushort targetBuilding, int idex)
         {
             if (MoreEffectiveTransfer.fixUnRouteTransfer)
@@ -513,8 +453,6 @@ namespace MoreEffectiveTransfer.CustomManager
                                             // NON-STOCK CODE START
                                             if (canUseNewMatchOffers)
                                             {
-                                                //ApplyPriority
-                                                incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOffer, outgoingOfferPre, material, false);
                                                 //WareHouse first
                                                 incomingOutgoingDistance = incomingOutgoingDistance / WareHouseFirst(incomingOffer, outgoingOfferPre, material);
                                                 if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
@@ -655,8 +593,6 @@ namespace MoreEffectiveTransfer.CustomManager
                                             // NON-STOCK CODE START
                                             if (canUseNewMatchOffers)
                                             {
-                                                //ApplyPriority
-                                                incomingOutgoingDistance = incomingOutgoingDistance / ApplyPriority(incomingOfferPre, outgoingOffer, material, true);
                                                 //WareHouse first
                                                 incomingOutgoingDistance = incomingOutgoingDistance / WareHouseFirst(incomingOfferPre, outgoingOffer, material);
                                                 if (incomingOfferPre.Building != 0)

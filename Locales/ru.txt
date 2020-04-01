@@ -1,11 +1,10 @@
-﻿FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION	Fix UnRouted Transfer Match(See User Guide for detail)
+﻿FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION	Исправить недоступность для транспорта(Подробности в User Guide)
 FIX_UNROUTED_TRANSFER_MATCH_ENALBE	Включить Исправление доставки
 DEBUG_MODE_DESCRIPTION	Показать изолированные здания в BuildingUI
 DEBUG_MODE_DESCRIPTION_ENALBE	Включить режим отладки
 FAILED_BUILDING_COUNT	Количество зданий которые нельзя подключить
 GENERATE_DETAIL_REPORT	Создать подробный отчет в MoreEffectiveTransfer.txt
-CONSIDER_PROIRITY	Учитывать приоритет и расстояние
-WAREHOUSE_FIRST	Warehouse first!
-ADVANCED_WAREHOUSE	Advanced warehouse(See User Guide for detail)
-WAREHOUSE_TRANSFER	Force Warehouse as a relay bettween IC building and outside
-WAREHOUSE_SPAWN_UNSPAWN	Fix Warehouse Spawn and Unspawn position
+WAREHOUSE_FIRST	Сначала на склад!
+ADVANCED_WAREHOUSE	Улучшенные функции склада(Подробности в User Guide)
+WAREHOUSE_TRANSFER	Склад – обязат. транзитный пункт для пром. и комм. зданий и внешн. связей
+WAREHOUSE_SPAWN_UNSPAWN	Изменение Spawn и Unspawn точек склада
