@@ -40,8 +40,8 @@
     <CitiesSkylinesModsPath>$(CitiesSkylinesInstallPath)..\..\workshop\content\255710\1680840913\</CitiesSkylinesModsPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony1.9">
-      <HintPath>..\0Harmony1.9.dll</HintPath>
+    <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Lib.Harmony.1.2.0.1\lib\net35\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(CitiesSkylinesInstallPath)Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
@@ -96,6 +96,9 @@
     <Content Include="PreviewImage.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- Copy all build outputs to mods folder using standard MSBuild Copy task. -->

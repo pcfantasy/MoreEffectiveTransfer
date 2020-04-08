@@ -1,8 +1,5 @@
 ﻿using Harmony;
-using System;
 using System.Reflection;
-using ColossalFramework;
-using ColossalFramework.Math;
 using MoreEffectiveTransfer.CustomManager;
 
 namespace MoreEffectiveTransfer.Patch

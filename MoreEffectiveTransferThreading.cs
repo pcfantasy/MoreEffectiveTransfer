@@ -51,12 +51,12 @@ namespace MoreEffectiveTransfer
                     }
                     else
                     {
-                        var harmony = new Harmony.Harmony(HarmonyDetours.ID);
+                        var harmony = HarmonyInstance.Create(HarmonyDetours.ID);
                         var methods = harmony.GetPatchedMethods();
                         int i = 0;
                         foreach (var method in methods)
                         {
-                            var info = Harmony.Harmony.GetPatchInfo(method);
+                            var info = harmony.GetPatchInfo(method);
                             if (info.Owners?.Contains(harmony.Id) == true)
                             {
                                 DebugLog.LogToFileOnly("Harmony patch method = " + method.Name.ToString());
