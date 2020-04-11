@@ -144,6 +144,16 @@ namespace MoreEffectiveTransfer.CustomManager
         public static bool CheckWareHouseForCity(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
             BuildingManager bM = Singleton<BuildingManager>.instance;
+            if (offerIn.Building == 0 || offerIn.Building > Singleton<BuildingManager>.instance.m_buildings.m_size)
+            {
+                return false;
+            }
+
+            if (offerOut.Building == 0 || offerOut.Building > Singleton<BuildingManager>.instance.m_buildings.m_size)
+            {
+                return false;
+            }
+
             if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
             {
             }
