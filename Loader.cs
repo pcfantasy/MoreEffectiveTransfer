@@ -12,6 +12,7 @@ using ColossalFramework.PlatformServices;
 using MoreEffectiveTransfer.Util;
 using MoreEffectiveTransfer.UI;
 using MoreEffectiveTransfer.CustomManager;
+using CitiesHarmony.API;
 
 namespace MoreEffectiveTransfer
 {
@@ -292,22 +293,28 @@ namespace MoreEffectiveTransfer
 
         public void HarmonyInitDetour()
         {
-            if (!HarmonyDetourInited)
+            if (HarmonyHelper.IsHarmonyInstalled)
             {
-                DebugLog.LogToFileOnly("Init harmony detours");
-                HarmonyDetours.Apply();
-                HarmonyDetourInited = true;
+                if (!HarmonyDetourInited)
+                {
+                    DebugLog.LogToFileOnly("Init harmony detours");
+                    HarmonyDetours.Apply();
+                    HarmonyDetourInited = true;
+                }
             }
         }
 
         public void HarmonyRevertDetour()
         {
-            if (HarmonyDetourInited)
+            if (HarmonyHelper.IsHarmonyInstalled)
             {
-                DebugLog.LogToFileOnly("Revert harmony detours");
-                HarmonyDetours.DeApply();
-                HarmonyDetourInited = false;
-                HarmonyDetourFailed = true;
+                if (HarmonyDetourInited)
+                {
+                    DebugLog.LogToFileOnly("Revert harmony detours");
+                    HarmonyDetours.DeApply();
+                    HarmonyDetourInited = false;
+                    HarmonyDetourFailed = true;
+                }
             }
         }
 
