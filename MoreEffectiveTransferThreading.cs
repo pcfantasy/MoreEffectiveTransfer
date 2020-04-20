@@ -1,6 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.UI;
-using Harmony;
+using HarmonyLib;
 using ICities;
 using MoreEffectiveTransfer.Patch;
 using MoreEffectiveTransfer.UI;
@@ -51,12 +51,12 @@ namespace MoreEffectiveTransfer
                     }
                     else
                     {
-                        var harmony = HarmonyInstance.Create(HarmonyDetours.ID);
+                        var harmony = new Harmony(HarmonyDetours.ID);
                         var methods = harmony.GetPatchedMethods();
                         int i = 0;
                         foreach (var method in methods)
                         {
-                            var info = harmony.GetPatchInfo(method);
+                            var info = Harmony.GetPatchInfo(method);
                             if (info.Owners?.Contains(harmony.Id) == true)
                             {
                                 DebugLog.LogToFileOnly($"Harmony patch method = {method.FullDescription()}");

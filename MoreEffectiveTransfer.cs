@@ -1,4 +1,5 @@
-﻿using ICities;
+﻿using CitiesHarmony.API;
+using ICities;
 using MoreEffectiveTransfer.Util;
 using System.IO;
 
@@ -29,6 +30,7 @@ namespace MoreEffectiveTransfer
             IsEnabled = true;
             FileStream fs = File.Create("MoreEffectiveTransfer.txt");
             fs.Close();
+            HarmonyHelper.EnsureHarmonyInstalled();
         }
 
         public void OnDisabled()
