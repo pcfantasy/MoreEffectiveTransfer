@@ -14,6 +14,7 @@ namespace MoreEffectiveTransfer
         public static bool warehouseFirst = false;
         public static bool warehouseSpawnUnSpawnFix = false;
         public static bool warehouseTransfer = false;
+        public static bool warehouseAdvancedBalance = false;
 
         public string Name
         {
@@ -44,7 +45,7 @@ namespace MoreEffectiveTransfer
             StreamWriter streamWriter = new StreamWriter(fs);
             streamWriter.WriteLine(fixUnRouteTransfer);
             streamWriter.WriteLine(debugMode);
-            streamWriter.WriteLine("false");//preserve
+            streamWriter.WriteLine(warehouseAdvancedBalance);
             streamWriter.WriteLine(warehouseFirst);
             streamWriter.WriteLine(warehouseSpawnUnSpawnFix);
             streamWriter.WriteLine(warehouseTransfer);
@@ -62,7 +63,7 @@ namespace MoreEffectiveTransfer
                 fixUnRouteTransfer = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
                 debugMode = (strLine == "True") ? true : false;
-                sr.ReadLine(); //Preserve
+                warehouseAdvancedBalance = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
                 warehouseFirst = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
@@ -86,6 +87,7 @@ namespace MoreEffectiveTransfer
             group3.AddCheckbox(Localization.Get("WAREHOUSE_FIRST"), warehouseFirst, (index) => warehouseFirstEnable(index));
             group3.AddCheckbox(Localization.Get("WAREHOUSE_SPAWN_UNSPAWN"), warehouseSpawnUnSpawnFix, (index) => warehouseSpawnUnSpawnFixEnable(index));
             group3.AddCheckbox(Localization.Get("WAREHOUSE_TRANSFER"), warehouseTransfer, (index) => warehouseTransferEnable(index));
+            group3.AddCheckbox(Localization.Get("WAREHOUSE_ADVANCED_BALANCE"), warehouseAdvancedBalance, (index) => warehouseAdvancedBalanceEnable(index));
             SaveSetting();
         }
 
@@ -116,6 +118,12 @@ namespace MoreEffectiveTransfer
         public void warehouseTransferEnable(bool index)
         {
             warehouseTransfer = index;
+            SaveSetting();
+        }
+
+        public void warehouseAdvancedBalanceEnable(bool index)
+        {
+            warehouseAdvancedBalance = index;
             SaveSetting();
         }
 

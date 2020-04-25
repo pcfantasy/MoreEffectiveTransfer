@@ -141,49 +141,75 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        public static bool CheckWareHouseForCity(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        public static bool CanWareHouseTransfer(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
             BuildingManager bM = Singleton<BuildingManager>.instance;
             if (offerIn.Building == 0 || offerIn.Building > Singleton<BuildingManager>.instance.m_buildings.m_size)
             {
-                return false;
+                return true;
             }
 
             if (offerOut.Building == 0 || offerOut.Building > Singleton<BuildingManager>.instance.m_buildings.m_size)
             {
-                return false;
+                return true;
             }
 
             if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
             {
+                if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is OutsideConnectionAI)
+                {
+                    if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling))
+                    {
+                    }
+                    else
+                    {
+                        if (MoreEffectiveTransfer.warehouseAdvancedBalance)
+                            return false;
+                        else
+                            return true;
+                    }
+                }
             }
             else
             {
                 if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is OutsideConnectionAI)
                 {
                     if (MoreEffectiveTransfer.warehouseTransfer)
-                        return true;
-                    else
                         return false;
+                    else
+                        return true;
                 }
             }
 
 
             if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
-            { 
+            {
+                if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is OutsideConnectionAI)
+                {
+                    if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling))
+                    {
+                    }
+                    else
+                    {
+                        if (MoreEffectiveTransfer.warehouseAdvancedBalance)
+                            return false;
+                        else
+                            return true;
+                    }
+                }
             }
             else
             {
                 if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is OutsideConnectionAI)
                 {
                     if (MoreEffectiveTransfer.warehouseTransfer)
-                        return true;
-                    else
                         return false;
+                    else
+                        return true;
                 }
             }
 
-            return false;
+            return true;
         }
 
         public static float WareHouseFirst(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
@@ -467,7 +493,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 incomingOutgoingDistance = incomingOutgoingDistance / WareHouseFirst(incomingOffer, outgoingOfferPre, material);
                                                 if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                 {
-                                                    if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material) && !CheckWareHouseForCity(incomingOffer, outgoingOfferPre, material))
+                                                    if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material) && CanWareHouseTransfer(incomingOffer, outgoingOfferPre, material))
                                                     {
                                                         validPriority = incomingPriorityInside;
                                                         validOutgoingIdex = i;
@@ -617,7 +643,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 }
                                                 if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                 {
-                                                    if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer, material) && !CheckWareHouseForCity(incomingOfferPre, outgoingOffer, material))
+                                                    if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer, material) && CanWareHouseTransfer(incomingOfferPre, outgoingOffer, material))
                                                     {
                                                         validPriority = outgoingPriorityInside;
                                                         validIncomingIdex = j;
