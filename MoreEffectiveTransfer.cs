@@ -63,6 +63,7 @@ namespace MoreEffectiveTransfer
                 fixUnRouteTransfer = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
                 debugMode = (strLine == "True") ? true : false;
+                strLine = sr.ReadLine();
                 warehouseAdvancedBalance = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
                 warehouseFirst = (strLine == "True") ? true : false;
