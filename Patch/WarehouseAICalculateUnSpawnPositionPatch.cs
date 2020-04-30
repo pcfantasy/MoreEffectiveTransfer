@@ -17,19 +17,22 @@ namespace MoreEffectiveTransfer.Patch
         {
             if (MoreEffectiveTransfer.warehouseSpawnUnSpawnFix)
             {
-                //Move UnspawnPosition
-                var moveDistance = data.Width * 8f / 3f;
-                var vector = position - data.m_position;
-                vector = VectorUtils.NormalizeXZ(vector);
-                vector = new Vector3(-vector.z, 0, vector.x);
-                position += moveDistance * vector;
-                target += moveDistance * vector;
+                if (data.Info.m_buildingAI is WarehouseAI)
+                {
+                    //Move UnspawnPosition
+                    var moveDistance = data.Width * 8f / 3f;
+                    var vector = position - data.m_position;
+                    vector = VectorUtils.NormalizeXZ(vector);
+                    vector = new Vector3(-vector.z, 0, vector.x);
+                    position += moveDistance * vector;
+                    target += moveDistance * vector;
 
-                vector = data.m_position - position;
-                vector = VectorUtils.NormalizeXZ(vector);
-                vector = new Vector3(vector.x, 0, vector.z);
-                position += 8 * vector;
-                target += 8 * vector;
+                    vector = data.m_position - position;
+                    vector = VectorUtils.NormalizeXZ(vector);
+                    vector = new Vector3(vector.x, 0, vector.z);
+                    position += 8 * vector;
+                    target += 8 * vector;
+                }
             }
         }
     }
