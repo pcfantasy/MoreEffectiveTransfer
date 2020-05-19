@@ -70,6 +70,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomAI\CustomCommonBuildingAI.cs" />
     <Compile Include="Patch\CarAIPathfindFailurePatch.cs" />
     <Compile Include="Patch\CargoTruckAIArriveAtTargetPatch.cs" />
     <Compile Include="Patch\WarehouseAICalculateUnSpawnPositionPatch.cs" />

@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Plugins;
+using MoreEffectiveTransfer.CustomAI;
 using MoreEffectiveTransfer.Util;
 using System.Reflection;
 using UnityEngine;
@@ -156,19 +157,6 @@ namespace MoreEffectiveTransfer.CustomManager
 
             if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
             {
-                if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is OutsideConnectionAI)
-                {
-                    if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling))
-                    {
-                    }
-                    else
-                    {
-                        if (MoreEffectiveTransfer.warehouseAdvancedBalance)
-                            return false;
-                        else
-                            return true;
-                    }
-                }
             }
             else
             {
@@ -192,7 +180,26 @@ namespace MoreEffectiveTransfer.CustomManager
                     else
                     {
                         if (MoreEffectiveTransfer.warehouseAdvancedBalance)
-                            return false;
+                        {
+                            var AI = bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI as WarehouseAI;
+                            TransferManager.TransferReason actualTransferReason = AI.GetActualTransferReason(offerOut.Building, ref bM.m_buildings.m_buffer[offerOut.Building]);
+                            if (actualTransferReason != TransferManager.TransferReason.None)
+                            {
+                                int budget = Singleton<EconomyManager>.instance.GetBudget(AI.m_info.m_class);
+                                int productionRate = PlayerBuildingAI.GetProductionRate(100, budget);
+                                int num = (productionRate * AI.m_truckCount + 99) / 100;
+                                int num2 = 0;
+                                int num3 = 0;
+                                int num4 = 0;
+                                int num5 = 0;
+                                CustomCommonBuildingAI.InitDelegate();
+                                CustomCommonBuildingAI.CalculateOwnVehicles(AI, offerOut.Building, ref bM.m_buildings.m_buffer[offerOut.Building], actualTransferReason, ref num2, ref num3, ref num4, ref num5);
+                                if (num2 * 1.25f > (num - 1))
+                                    return false;
+                                else
+                                    return true;
+                            }
+                        }
                         else
                             return true;
                     }
