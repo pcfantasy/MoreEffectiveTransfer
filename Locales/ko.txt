@@ -8,4 +8,4 @@ WAREHOUSE_FIRST	창고를 최우선으로!
 ADVANCED_WAREHOUSE	발전된 창고(유저 가이드 참조)
 WAREHOUSE_TRANSFER	창고를 산업 건물들과 외부도로의 중계지점으로 만듭니다
 WAREHOUSE_SPAWN_UNSPAWN	창고 소환/미소환 장소 수정
-WAREHOUSE_ADVANCED_BALANCE	Apply Advanced balance strategy for warehouse
+WAREHOUSE_ADVANCED_BALANCE	발전된 창고 밸런스 전략 적용
