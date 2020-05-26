@@ -88,7 +88,7 @@ namespace MoreEffectiveTransfer
             group3.AddCheckbox(Localization.Get("WAREHOUSE_FIRST"), warehouseFirst, (index) => warehouseFirstEnable(index));
             group3.AddCheckbox(Localization.Get("WAREHOUSE_SPAWN_UNSPAWN"), warehouseSpawnUnSpawnFix, (index) => warehouseSpawnUnSpawnFixEnable(index));
             group3.AddCheckbox(Localization.Get("WAREHOUSE_TRANSFER"), warehouseTransfer, (index) => warehouseTransferEnable(index));
-            group3.AddCheckbox(Localization.Get("WAREHOUSE_ADVANCED_BALANCE"), warehouseAdvancedBalance, (index) => warehouseAdvancedBalanceEnable(index));
+            group3.AddCheckbox(Localization.Get("WAREHOUSE_RESEVER_FOR_CITY"), warehouseAdvancedBalance, (index) => warehouseAdvancedBalanceEnable(index));
             SaveSetting();
         }
 

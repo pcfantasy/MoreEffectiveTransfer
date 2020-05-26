@@ -8,4 +8,4 @@ WAREHOUSE_FIRST	Warehouse first!
 ADVANCED_WAREHOUSE	Advanced warehouse(See User Guide for detail)
 WAREHOUSE_TRANSFER	Force Warehouse as a relay bettween IC building and outside
 WAREHOUSE_SPAWN_UNSPAWN	Fix Warehouse Spawn and Unspawn position
-WAREHOUSE_ADVANCED_BALANCE	Apply Advanced balance strategy for warehouse
+WAREHOUSE_RESEVER_FOR_CITY	Reserve some warehouse cargo for inner-city transfer

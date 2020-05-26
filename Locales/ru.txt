@@ -8,4 +8,4 @@ WAREHOUSE_FIRST	Сначала на склад!
 ADVANCED_WAREHOUSE	Улучшенные функции склада(Подробности в User Guide)
 WAREHOUSE_TRANSFER	Склад – обязат. транзитный пункт для пром. и комм. зданий и внешн. связей
 WAREHOUSE_SPAWN_UNSPAWN	Изменение Spawn и Unspawn точек склада
-WAREHOUSE_ADVANCED_BALANCE	Apply Advanced balance strategy for warehouse
+WAREHOUSE_RESEVER_FOR_CITY	Reserve some warehouse cargo for inner-city transfer
