@@ -155,21 +155,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 return true;
             }
 
-            if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
-            {
-            }
-            else
-            {
-                if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is OutsideConnectionAI)
-                {
-                    if (MoreEffectiveTransfer.warehouseTransfer)
-                        return false;
-                    else
-                        return true;
-                }
-            }
-
-
             if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
             {
                 if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is OutsideConnectionAI)
@@ -195,16 +180,6 @@ namespace MoreEffectiveTransfer.CustomManager
                                 return true;
                         }
                     }
-                    else
-                        return true;
-                }
-            }
-            else
-            {
-                if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is OutsideConnectionAI)
-                {
-                    if (MoreEffectiveTransfer.warehouseTransfer)
-                        return false;
                     else
                         return true;
                 }

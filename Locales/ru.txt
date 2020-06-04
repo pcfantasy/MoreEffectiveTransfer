@@ -6,6 +6,5 @@ FAILED_BUILDING_COUNT	Количество зданий которые нель�
 GENERATE_DETAIL_REPORT	Создать подробный отчет в MoreEffectiveTransfer.txt
 WAREHOUSE_FIRST	Сначала на склад!
 ADVANCED_WAREHOUSE	Улучшенные функции склада(Подробности в User Guide)
-WAREHOUSE_TRANSFER	Склад – обязат. транзитный пункт для пром. и комм. зданий и внешн. связей
 WAREHOUSE_SPAWN_UNSPAWN	Изменение Spawn и Unspawn точек склада
-WAREHOUSE_RESEVER_FOR_CITY	Reserve some warehouse cargo for inner-city transfer
+WAREHOUSE_RESEVER_FOR_CITY	Зарезервируйте часть складских грузов для внутригородских перевозок

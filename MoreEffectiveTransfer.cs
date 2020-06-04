@@ -13,7 +13,6 @@ namespace MoreEffectiveTransfer
         public static bool debugMode = false;
         public static bool warehouseFirst = false;
         public static bool warehouseSpawnUnSpawnFix = false;
-        public static bool warehouseTransfer = false;
         public static bool warehouseAdvancedBalance = false;
 
         public string Name
@@ -48,7 +47,8 @@ namespace MoreEffectiveTransfer
             streamWriter.WriteLine(warehouseAdvancedBalance);
             streamWriter.WriteLine(warehouseFirst);
             streamWriter.WriteLine(warehouseSpawnUnSpawnFix);
-            streamWriter.WriteLine(warehouseTransfer);
+            //streamWriter.WriteLine(warehouseTransfer);
+            streamWriter.WriteLine("false"); //reserved
             streamWriter.Flush();
             fs.Close();
         }
@@ -69,8 +69,8 @@ namespace MoreEffectiveTransfer
                 warehouseFirst = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
                 warehouseSpawnUnSpawnFix = (strLine == "True") ? true : false;
-                strLine = sr.ReadLine();
-                warehouseTransfer = (strLine == "True") ? true : false;
+                //strLine = sr.ReadLine();
+                //warehouseTransfer = (strLine == "True") ? true : false;
 
                 sr.Close();
                 fs.Close();
@@ -87,7 +87,7 @@ namespace MoreEffectiveTransfer
             UIHelperBase group3 = helper.AddGroup(Localization.Get("ADVANCED_WAREHOUSE"));
             group3.AddCheckbox(Localization.Get("WAREHOUSE_FIRST"), warehouseFirst, (index) => warehouseFirstEnable(index));
             group3.AddCheckbox(Localization.Get("WAREHOUSE_SPAWN_UNSPAWN"), warehouseSpawnUnSpawnFix, (index) => warehouseSpawnUnSpawnFixEnable(index));
-            group3.AddCheckbox(Localization.Get("WAREHOUSE_TRANSFER"), warehouseTransfer, (index) => warehouseTransferEnable(index));
+            //group3.AddCheckbox(Localization.Get("WAREHOUSE_TRANSFER"), warehouseTransfer, (index) => warehouseTransferEnable(index));
             group3.AddCheckbox(Localization.Get("WAREHOUSE_RESEVER_FOR_CITY"), warehouseAdvancedBalance, (index) => warehouseAdvancedBalanceEnable(index));
             SaveSetting();
         }
@@ -116,11 +116,11 @@ namespace MoreEffectiveTransfer
             SaveSetting();
         }
 
-        public void warehouseTransferEnable(bool index)
-        {
-            warehouseTransfer = index;
-            SaveSetting();
-        }
+        //public void warehouseTransferEnable(bool index)
+        //{
+        //    warehouseTransfer = index;
+        //    SaveSetting();
+        //}
 
         public void warehouseAdvancedBalanceEnable(bool index)
         {
