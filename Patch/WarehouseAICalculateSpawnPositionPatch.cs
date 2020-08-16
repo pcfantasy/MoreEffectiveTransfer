@@ -1,4 +1,5 @@
-﻿using ColossalFramework.Math;
+﻿using ColossalFramework;
+using ColossalFramework.Math;
 using HarmonyLib;
 using System;
 using System.Reflection;
@@ -20,18 +21,24 @@ namespace MoreEffectiveTransfer.Patch
                 if (data.Info.m_buildingAI is WarehouseAI)
                 {
                     //Move SpawnPosition
-                    var moveDistance = data.Width * 8f / 3f;
-                    var vector = position - data.m_position;
-                    vector = VectorUtils.NormalizeXZ(vector);
-                    vector = new Vector3(vector.z, 0, -vector.x);
-                    position += moveDistance * vector;
-                    target += moveDistance * vector;
-
-                    vector = data.m_position - position;
+                    //First move inside building 1u
+                    var vector = data.m_position - position;
+                    var orgPosition = position;
                     vector = VectorUtils.NormalizeXZ(vector);
                     vector = new Vector3(vector.x, 0, vector.z);
                     position += 8 * vector;
                     target += 8 * vector;
+
+                    //Second move 1/3 width
+                    var moveDistance = data.Width * 8f / 3f;
+                    vector = orgPosition - data.m_position;
+                    vector = VectorUtils.NormalizeXZ(vector);
+                    vector = new Vector3(vector.z, 0, -vector.x);
+                    //left hand driver
+                    if (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True)
+                        vector = -vector;
+                    position += moveDistance * vector;
+                    target += moveDistance * vector;
                 }
             }
         }
