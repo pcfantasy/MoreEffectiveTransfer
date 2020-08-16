@@ -7,4 +7,4 @@ GENERATE_DETAIL_REPORT	Generate detailed report in MoreEffectiveTransfer.txt
 WAREHOUSE_FIRST	Warehouse first!
 ADVANCED_WAREHOUSE	Advanced warehouse(See User Guide for detail)
 WAREHOUSE_SPAWN_UNSPAWN	Fix Warehouse Spawn and Unspawn position
-WAREHOUSE_RESEVER_FOR_CITY	Reserve some warehouse cargo for inner-city transfer
+WAREHOUSE_RESEVER_FOR_CITY	Reserve warehouse cargo trucks for local transfer

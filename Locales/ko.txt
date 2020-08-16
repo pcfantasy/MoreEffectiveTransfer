@@ -7,4 +7,4 @@ GENERATE_DETAIL_REPORT	MoreEffectiveTransfer.txt 파일을 생성합니다
 WAREHOUSE_FIRST	창고를 최우선으로!
 ADVANCED_WAREHOUSE	발전된 창고(유저 가이드 참조)
 WAREHOUSE_SPAWN_UNSPAWN	창고 소환/미소환 장소 수정
-WAREHOUSE_RESEVER_FOR_CITY	Reserve some warehouse cargo for inner-city transfer
+WAREHOUSE_RESEVER_FOR_CITY	Reserve warehouse cargo trucks for local transfer
