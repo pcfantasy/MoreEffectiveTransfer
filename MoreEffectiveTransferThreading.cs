@@ -11,7 +11,7 @@ namespace MoreEffectiveTransfer
     public class MoreEffectiveTransferThreading : ThreadingExtensionBase
     {
         public static bool isFirstTime = true;
-        public const int HarmonyPatchNum = 7;
+        public const int HarmonyPatchNum = 8;
         public override void OnBeforeSimulationFrame()
         {
             base.OnBeforeSimulationFrame();

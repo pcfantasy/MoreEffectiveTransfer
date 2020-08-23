@@ -1,6 +1,7 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Plugins;
 using MoreEffectiveTransfer.CustomAI;
+using MoreEffectiveTransfer.Patch;
 using MoreEffectiveTransfer.Util;
 using System.Reflection;
 using UnityEngine;
@@ -224,14 +225,249 @@ namespace MoreEffectiveTransfer.CustomManager
             BuildingManager bM = Singleton<BuildingManager>.instance;
             if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
             {
-                return 1000f;
+                return 100f;
             }
             else if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
             {
-                return 1000f;
+                return 100f;
             }
 
             return 1f;
+        }
+
+        public static float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material, float preDistance)
+        {
+            if (!MoreEffectiveTransfer.preferShipPlaneTrain)
+            {
+                return preDistance;
+            }
+
+            switch (material)
+            {
+                case TransferReason.Oil:
+                case TransferReason.Ore:
+                case TransferReason.Coal:
+                case TransferReason.Petrol:
+                case TransferReason.Food:
+                case TransferReason.Grain:
+                case TransferReason.Lumber:
+                case TransferReason.Logs:
+                case TransferReason.Goods:
+                case TransferReason.LuxuryProducts:
+                case TransferReason.AnimalProducts:
+                case TransferReason.Flours:
+                case TransferReason.Petroleum:
+                case TransferReason.Plastics:
+                case TransferReason.Metals:
+                case TransferReason.Glass:
+                case TransferReason.PlanedTimber:
+                case TransferReason.Paper:
+                    break;
+                default:
+                    return preDistance;
+            }
+
+
+            BuildingManager bM = Singleton<BuildingManager>.instance;
+            bool offerInOutside = false;
+            bool offerInOutsidePlane = false;
+            bool offerInOutsideShip = false;
+            bool offerInOutsideTrain = false;
+            bool offerOutOutside = false;
+            bool offerOutOutsidePlane = false;
+            bool offerOutOutsideShip = false;
+            bool offerOutOutsideTrain = false;
+            if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Untouchable))
+            {
+                switch (bM.m_buildings.m_buffer[offerIn.Building].Info.m_class.m_subService)
+                {
+                    case ItemClass.SubService.PublicTransportPlane:
+                        offerInOutside = true;
+                        offerInOutsidePlane = true;
+                        break;
+                    case ItemClass.SubService.PublicTransportShip:
+                        offerInOutside = true;
+                        offerInOutsideShip = true;
+                        break;
+                    case ItemClass.SubService.PublicTransportTrain:
+                        offerInOutside = true;
+                        offerInOutsideTrain = true;
+                        break;
+                    default: break;
+                }
+            }
+
+            if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Untouchable))
+            {
+                switch (bM.m_buildings.m_buffer[offerOut.Building].Info.m_class.m_subService)
+                {
+                    case ItemClass.SubService.PublicTransportPlane:
+                        offerOutOutside = true;
+                        offerOutOutsidePlane = true;
+                        break;
+                    case ItemClass.SubService.PublicTransportShip:
+                        offerOutOutside = true;
+                        offerOutOutsideShip = true;
+                        break;
+                    case ItemClass.SubService.PublicTransportTrain:
+                        offerOutOutside = true;
+                        offerOutOutsideTrain = true;
+                        break;
+                    default: break;
+                }
+            }
+
+            float distance = 0xdeadbeaf;
+            if (offerInOutside && offerOutOutside)
+            {
+                DebugLog.LogToFileOnly("Error: offerInOutside && offerOutOutside, no such case");
+            }
+            else if (offerOutOutside)
+            {
+                if (offerOutOutsidePlane)
+                {
+                    for (int i = 0; i < CargoStationAISimulationStepPatch.stationBuildingNumFinal; i++)
+                    {
+                        if (bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].Info.m_class.m_subService == ItemClass.SubService.PublicTransportPlane)
+                        {
+                            var tempDistance = Vector3.SqrMagnitude(bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].m_position - offerIn.Position);
+                            if (distance > tempDistance)
+                            {
+                                distance = tempDistance;
+                            }
+                        }
+                    }
+
+                    if (distance != 0xdeadbeaf)
+                    {
+                        if (MoreEffectiveTransfer.debugMode)
+                        {
+                            DebugLog.LogToFileOnly($"Find offerOutOutside&offerOutOutsidePlane = {distance}, random = {CargoStationAISimulationStepPatch.planeStationDistanceRandom}");
+                        }
+                        return distance * CargoStationAISimulationStepPatch.planeStationDistanceRandom;
+                    }
+                } 
+                else if (offerOutOutsideShip)
+                {
+                    for (int i = 0; i < CargoStationAISimulationStepPatch.stationBuildingNumFinal; i++)
+                    {
+                        if (bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].Info.m_class.m_subService == ItemClass.SubService.PublicTransportShip)
+                        {
+                            var tempDistance = Vector3.SqrMagnitude(bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].m_position - offerIn.Position);
+                            if (distance > tempDistance)
+                            {
+                                distance = tempDistance;
+                            }
+                        }
+                    }
+
+                    if (distance != 0xdeadbeaf)
+                    {
+                        if (MoreEffectiveTransfer.debugMode)
+                        {
+                            DebugLog.LogToFileOnly($"Find offerOutOutside&offerOutOutsideShip = {distance}, random = {CargoStationAISimulationStepPatch.shipStationDistanceRandom}");
+                        }
+                        return distance * CargoStationAISimulationStepPatch.shipStationDistanceRandom;
+                    }
+                }
+                else if (offerOutOutsideTrain)
+                {
+                    for (int i = 0; i < CargoStationAISimulationStepPatch.stationBuildingNumFinal; i++)
+                    {
+                        if (bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].Info.m_class.m_subService == ItemClass.SubService.PublicTransportTrain)
+                        {
+                            var tempDistance = Vector3.SqrMagnitude(bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].m_position - offerIn.Position);
+                            if (distance > tempDistance)
+                            {
+                                distance = tempDistance;
+                            }
+                        }
+                    }
+
+                    if (distance != 0xdeadbeaf)
+                    {
+                        if (MoreEffectiveTransfer.debugMode)
+                        {
+                            DebugLog.LogToFileOnly($"Find offerOutOutside&offerOutOutsideTrain = {distance}, random = {CargoStationAISimulationStepPatch.trainStationDistanceRandom}");
+                        }
+                        return distance * CargoStationAISimulationStepPatch.trainStationDistanceRandom;
+                    }
+                }
+            } 
+            else if (offerInOutside)
+            {
+                if (offerInOutsidePlane)
+                {
+                    for (int i = 0; i < CargoStationAISimulationStepPatch.stationBuildingNumFinal; i++)
+                    {
+                        if (bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].Info.m_class.m_subService == ItemClass.SubService.PublicTransportPlane)
+                        {
+                            var tempDistance = Vector3.SqrMagnitude(bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].m_position - offerOut.Position);
+                            if (distance > tempDistance)
+                            {
+                                distance = tempDistance;
+                            }
+                        }
+                    }
+
+                    if (distance != 0xdeadbeaf)
+                    {
+                        if (MoreEffectiveTransfer.debugMode)
+                        {
+                            DebugLog.LogToFileOnly($"Find offerInOutside&offerInOutsidePlane = {distance}, random = {CargoStationAISimulationStepPatch.planeStationDistanceRandom}");
+                        }
+                        return distance * CargoStationAISimulationStepPatch.planeStationDistanceRandom;
+                    }
+                }
+                else if (offerInOutsideShip)
+                {
+                    for (int i = 0; i < CargoStationAISimulationStepPatch.stationBuildingNumFinal; i++)
+                    {
+                        if (bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].Info.m_class.m_subService == ItemClass.SubService.PublicTransportShip)
+                        {
+                            var tempDistance = Vector3.SqrMagnitude(bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].m_position - offerOut.Position);
+                            if (distance > tempDistance)
+                            {
+                                distance = tempDistance;
+                            }
+                        }
+                    }
+
+                    if (distance != 0xdeadbeaf)
+                    {
+                        if (MoreEffectiveTransfer.debugMode)
+                        {
+                            DebugLog.LogToFileOnly($"Find offerInOutside&offerInOutsideShip = {distance}, random = {CargoStationAISimulationStepPatch.shipStationDistanceRandom}");
+                        }
+                        return distance * CargoStationAISimulationStepPatch.shipStationDistanceRandom;
+                    }
+                }
+                else if (offerInOutsideTrain)
+                {
+                    for (int i = 0; i < CargoStationAISimulationStepPatch.stationBuildingNumFinal; i++)
+                    {
+                        if (bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].Info.m_class.m_subService == ItemClass.SubService.PublicTransportTrain)
+                        {
+                            var tempDistance = Vector3.SqrMagnitude(bM.m_buildings.m_buffer[CargoStationAISimulationStepPatch.stationBuildingIDFinal[i]].m_position - offerOut.Position);
+                            if (distance > tempDistance)
+                            {
+                                distance = tempDistance;
+                            }
+                        }
+                    }
+
+                    if (distance != 0xdeadbeaf)
+                    {
+                        if (MoreEffectiveTransfer.debugMode)
+                        {
+                            DebugLog.LogToFileOnly($"Find offerInOutside&offerInOutsideTrain = {distance}, random = {CargoStationAISimulationStepPatch.trainStationDistanceRandom}");
+                        }
+                        return distance * CargoStationAISimulationStepPatch.trainStationDistanceRandom;
+                    }
+                }
+            }
+            
+            return preDistance;
         }
 
         public static void ForgetFailedBuilding(ushort targetBuilding, int idex)
@@ -467,6 +703,8 @@ namespace MoreEffectiveTransfer.CustomManager
                                             {
                                                 //WareHouse first
                                                 incomingOutgoingDistance = incomingOutgoingDistance / WareHouseFirst(incomingOffer, outgoingOfferPre, material);
+                                                //Apply Priority
+                                                incomingOutgoingDistance = ApplyPriority(incomingOffer, outgoingOfferPre, material, incomingOutgoingDistance);
                                                 if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                 {
                                                     if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material) && CanWareHouseTransfer(incomingOffer, outgoingOfferPre, material))
@@ -607,6 +845,8 @@ namespace MoreEffectiveTransfer.CustomManager
                                             {
                                                 //WareHouse first
                                                 incomingOutgoingDistance = incomingOutgoingDistance / WareHouseFirst(incomingOfferPre, outgoingOffer, material);
+                                                //Apply Priority
+                                                incomingOutgoingDistance = ApplyPriority(incomingOfferPre, outgoingOffer, material, incomingOutgoingDistance);
                                                 if (incomingOfferPre.Building != 0)
                                                 {
                                                     if (RejectLowPriority(material))

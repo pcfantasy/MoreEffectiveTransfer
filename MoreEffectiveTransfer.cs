@@ -14,6 +14,7 @@ namespace MoreEffectiveTransfer
         public static bool warehouseFirst = false;
         public static bool warehouseSpawnUnSpawnFix = false;
         public static bool warehouseAdvancedBalance = false;
+        public static bool preferShipPlaneTrain = false;
 
         public string Name
         {
@@ -43,12 +44,11 @@ namespace MoreEffectiveTransfer
             FileStream fs = File.Create("MoreEffectiveTransfer_setting.txt");
             StreamWriter streamWriter = new StreamWriter(fs);
             streamWriter.WriteLine(fixUnRouteTransfer);
-            streamWriter.WriteLine(debugMode);
+            streamWriter.WriteLine(false); //debugMode default false
             streamWriter.WriteLine(warehouseAdvancedBalance);
             streamWriter.WriteLine(warehouseFirst);
             streamWriter.WriteLine(warehouseSpawnUnSpawnFix);
-            //streamWriter.WriteLine(warehouseTransfer);
-            streamWriter.WriteLine("false"); //reserved
+            streamWriter.WriteLine(preferShipPlaneTrain);
             streamWriter.Flush();
             fs.Close();
         }
@@ -62,15 +62,15 @@ namespace MoreEffectiveTransfer
                 string strLine = sr.ReadLine();
                 fixUnRouteTransfer = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
-                debugMode = (strLine == "True") ? true : false;
+                debugMode = false; //debugMode default false
                 strLine = sr.ReadLine();
                 warehouseAdvancedBalance = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
                 warehouseFirst = (strLine == "True") ? true : false;
                 strLine = sr.ReadLine();
                 warehouseSpawnUnSpawnFix = (strLine == "True") ? true : false;
-                //strLine = sr.ReadLine();
-                //warehouseTransfer = (strLine == "True") ? true : false;
+                strLine = sr.ReadLine();
+                preferShipPlaneTrain = (strLine == "True") ? true : false;
 
                 sr.Close();
                 fs.Close();
@@ -87,8 +87,9 @@ namespace MoreEffectiveTransfer
             UIHelperBase group3 = helper.AddGroup(Localization.Get("ADVANCED_WAREHOUSE"));
             group3.AddCheckbox(Localization.Get("WAREHOUSE_FIRST"), warehouseFirst, (index) => warehouseFirstEnable(index));
             group3.AddCheckbox(Localization.Get("WAREHOUSE_SPAWN_UNSPAWN"), warehouseSpawnUnSpawnFix, (index) => warehouseSpawnUnSpawnFixEnable(index));
-            //group3.AddCheckbox(Localization.Get("WAREHOUSE_TRANSFER"), warehouseTransfer, (index) => warehouseTransferEnable(index));
             group3.AddCheckbox(Localization.Get("WAREHOUSE_RESEVER_FOR_CITY"), warehouseAdvancedBalance, (index) => warehouseAdvancedBalanceEnable(index));
+            UIHelperBase group4 = helper.AddGroup(Localization.Get("EXPERIMENTAL_FUNCTION"));
+            group4.AddCheckbox(Localization.Get("PREFER_SHIP_PLANE_TRAIN"), preferShipPlaneTrain, (index) => preferShipPlaneTrainEnable(index));
             SaveSetting();
         }
 
@@ -116,17 +117,16 @@ namespace MoreEffectiveTransfer
             SaveSetting();
         }
 
-        //public void warehouseTransferEnable(bool index)
-        //{
-        //    warehouseTransfer = index;
-        //    SaveSetting();
-        //}
-
         public void warehouseAdvancedBalanceEnable(bool index)
         {
             warehouseAdvancedBalance = index;
             SaveSetting();
         }
 
+        public void preferShipPlaneTrainEnable(bool index)
+        {
+            preferShipPlaneTrain = index;
+            SaveSetting();
+        }
     }
 }

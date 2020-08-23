@@ -8,3 +8,4 @@ WAREHOUSE_FIRST	Warehouse first!
 ADVANCED_WAREHOUSE	Advanced warehouse(See User Guide for detail)
 WAREHOUSE_SPAWN_UNSPAWN	Fix Warehouse Spawn and Unspawn position
 WAREHOUSE_RESEVER_FOR_CITY	Reserve warehouse cargo trucks for local transfer
+EXPERIMENTAL_FUNCTION	Experimental Function

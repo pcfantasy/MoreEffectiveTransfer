@@ -13,6 +13,7 @@ using MoreEffectiveTransfer.Util;
 using MoreEffectiveTransfer.UI;
 using MoreEffectiveTransfer.CustomManager;
 using CitiesHarmony.API;
+using MoreEffectiveTransfer.Patch;
 
 namespace MoreEffectiveTransfer
 {
@@ -55,7 +56,6 @@ namespace MoreEffectiveTransfer
                     HarmonyInitDetour();
                     SetupGui();
                     MoreEffectiveTransfer.LoadSetting();
-                    MoreEffectiveTransfer.debugMode = false;
                     if (mode == LoadMode.NewGame)
                     {
                         DebugLog.LogToFileOnly("New Game");
@@ -70,6 +70,8 @@ namespace MoreEffectiveTransfer
             {
                 MainDataStore.refreshCanNotConnectedBuildingIDCount[i] = 0;
                 MainDataStore.canNotConnectedBuildingIDCount[i] = 0;
+                CargoStationAISimulationStepPatch.stationBuildingID[i] = 0;
+                CargoStationAISimulationStepPatch.stationBuildingIDFinal[i] = 0;
                 for (int j = 0; j < 255; j++)
                 {
                     MainDataStore.canNotConnectedBuildingID[i, j] = 0;
