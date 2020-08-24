@@ -8,5 +8,5 @@ WAREHOUSE_FIRST	Сначала на склад!
 ADVANCED_WAREHOUSE	Улучшенные функции склада(Подробности в User Guide)
 WAREHOUSE_SPAWN_UNSPAWN	Изменение Spawn и Unspawn точек склада
 WAREHOUSE_RESEVER_FOR_CITY	Зарезервируйте часть складских грузов для внутригородских перевозок
-EXPERIMENTAL_FUNCTION	Experimental Function
-PREFER_SHIP_PLANE_TRAIN	Im/Export prefer to use nearest ship/plane/train station instead of highway.
+EXPERIMENTAL_FUNCTION	Экспериментальная функция
+PREFER_SHIP_PLANE_TRAIN	Экспорт предпочитает ближайший корабль/самолёт/вокзал вместо шоссе.

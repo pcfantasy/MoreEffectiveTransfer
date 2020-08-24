@@ -44,9 +44,9 @@ namespace MoreEffectiveTransfer.Patch
                     DebugLog.LogToFileOnly($"Find station Num = {stationBuildingNumFinal}");
                 }
 
-                shipStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.00005f;
-                trainStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.00005f;
-                planeStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.00005f;
+                shipStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.0001f;
+                trainStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.0001f;
+                planeStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.0001f;
             }
 
             if (Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].m_flags.IsFlagSet(Building.Flags.Active))
