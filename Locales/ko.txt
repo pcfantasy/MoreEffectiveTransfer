@@ -8,3 +8,5 @@ WAREHOUSE_FIRST	창고를 최우선으로!
 ADVANCED_WAREHOUSE	발전된 창고(유저 가이드 참조)
 WAREHOUSE_SPAWN_UNSPAWN	창고 소환/미소환 장소 수정
 WAREHOUSE_RESEVER_FOR_CITY	Reserve warehouse cargo trucks for local transfer
+EXPERIMENTAL_FUNCTION	Experimental Function
+PREFER_SHIP_PLANE_TRAIN	Import/Export will prefer to use nearest ship/plane/train station rather than highway.
