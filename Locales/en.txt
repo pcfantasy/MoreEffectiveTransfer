@@ -9,4 +9,4 @@ ADVANCED_WAREHOUSE	Advanced warehouse(See User Guide for detail)
 WAREHOUSE_SPAWN_UNSPAWN	Fix Warehouse Spawn and Unspawn position
 WAREHOUSE_RESEVER_FOR_CITY	Reserve warehouse cargo trucks for local transfer
 EXPERIMENTAL_FUNCTION	Experimental Function
-PREFER_SHIP_PLANE_TRAIN	Import/Export will prefer to use nearest ship/plane/train station rather than highway.
+PREFER_SHIP_PLANE_TRAIN	Im/Export prefer to use nearest ship/plane/train station instead of highway.
