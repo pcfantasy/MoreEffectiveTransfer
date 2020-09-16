@@ -70,8 +70,6 @@ namespace MoreEffectiveTransfer
             {
                 MainDataStore.refreshCanNotConnectedBuildingIDCount[i] = 0;
                 MainDataStore.canNotConnectedBuildingIDCount[i] = 0;
-                CargoStationAISimulationStepPatch.stationBuildingID[i] = 0;
-                CargoStationAISimulationStepPatch.stationBuildingIDFinal[i] = 0;
                 for (int j = 0; j < 255; j++)
                 {
                     MainDataStore.canNotConnectedBuildingID[i, j] = 0;

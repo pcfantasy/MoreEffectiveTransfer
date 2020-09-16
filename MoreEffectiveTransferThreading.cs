@@ -11,7 +11,10 @@ namespace MoreEffectiveTransfer
     public class MoreEffectiveTransferThreading : ThreadingExtensionBase
     {
         public static bool isFirstTime = true;
-        public const int HarmonyPatchNum = 8;
+        public const int HarmonyPatchNum = 7;
+        public static float shipStationDistanceRandom = 1f;
+        public static float trainStationDistanceRandom = 1f;
+        public static float planeStationDistanceRandom = 1f;
         public override void OnBeforeSimulationFrame()
         {
             base.OnBeforeSimulationFrame();
@@ -29,6 +32,9 @@ namespace MoreEffectiveTransfer
                         WareHouseUI.refeshOnce = true;
                         HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepotFinal = HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot;
                         HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot = false;
+                        shipStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.003f;
+                        trainStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.003f;
+                        planeStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.003f;
                     }
                     CheckDetour();
                 }
