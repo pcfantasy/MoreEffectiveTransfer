@@ -225,11 +225,53 @@ namespace MoreEffectiveTransfer.CustomManager
             BuildingManager bM = Singleton<BuildingManager>.instance;
             if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
             {
-                return 100f;
+                if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling))
+                {
+                    return 100f;
+                }
+                else
+                {
+                    if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
+                    {
+                        if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling))
+                        {
+                            return 100f;
+                        }
+                        else
+                        {
+                            return 1f;
+                        }
+                    }
+                    else
+                    {
+                        return 100f;
+                    }
+                }
             }
             else if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
             {
-                return 100f;
+                if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling))
+                {
+                    return 100f;
+                }
+                else
+                {
+                    if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
+                    {
+                        if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling))
+                        {
+                            return 100f;
+                        }
+                        else
+                        {
+                            return 1f;
+                        }
+                    }
+                    else
+                    {
+                        return 100f;
+                    }
+                }
             }
 
             return 1f;
