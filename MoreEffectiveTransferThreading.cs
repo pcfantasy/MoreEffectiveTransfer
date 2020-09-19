@@ -32,9 +32,9 @@ namespace MoreEffectiveTransfer
                         WareHouseUI.refeshOnce = true;
                         HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepotFinal = HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot;
                         HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot = false;
-                        shipStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.003f;
-                        trainStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.003f;
-                        planeStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 300) * 0.003f;
+                        shipStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
+                        trainStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
+                        planeStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
                     }
                     CheckDetour();
                 }
