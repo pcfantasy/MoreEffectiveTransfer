@@ -317,7 +317,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 }
             }
 
-            float distance = 0xdeadbeaf;
             if (offerInOutside && offerOutOutside)
             {
                 DebugLog.LogToFileOnly("Error: offerInOutside && offerOutOutside, no such case");
@@ -326,30 +325,30 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 if (offerOutOutsidePlane)
                 {
-                    return distance * MoreEffectiveTransferThreading.planeStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransferThreading.planeStationDistanceRandom;
                 } 
                 else if (offerOutOutsideShip)
                 {
-                    return distance * MoreEffectiveTransferThreading.shipStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransferThreading.shipStationDistanceRandom;
                 }
                 else if (offerOutOutsideTrain)
                 {
-                    return distance * MoreEffectiveTransferThreading.trainStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransferThreading.trainStationDistanceRandom;
                 }
             } 
             else if (offerInOutside)
             {
                 if (offerInOutsidePlane)
                 {
-                    return distance * MoreEffectiveTransferThreading.planeStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransferThreading.planeStationDistanceRandom;
                 }
                 else if (offerInOutsideShip)
                 {
-                    return distance * MoreEffectiveTransferThreading.shipStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransferThreading.shipStationDistanceRandom;
                 }
                 else if (offerInOutsideTrain)
                 {
-                    return distance * MoreEffectiveTransferThreading.trainStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransferThreading.trainStationDistanceRandom;
                 }
             }
             
