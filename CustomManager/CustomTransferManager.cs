@@ -191,11 +191,6 @@ namespace MoreEffectiveTransfer.CustomManager
 
         public static float WareHouseFirst(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
-            if (!MoreEffectiveTransfer.warehouseFirst)
-            {
-                return 1f;
-            }
-
             switch (material)
             {
                 case TransferReason.Oil:
@@ -227,7 +222,8 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling))
                 {
-                    return 100f;
+                    if (MoreEffectiveTransfer.warehouseFirst)
+                        return 100f;
                 }
                 else
                 {
@@ -235,16 +231,18 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling))
                         {
-                            return 100f;
+                            if (MoreEffectiveTransfer.warehouseFirst)
+                                return 100f;
                         }
                         else
                         {
-                            return 1f;
+                            return 0.01f;
                         }
                     }
                     else
                     {
-                        return 100f;
+                        if (MoreEffectiveTransfer.warehouseFirst)
+                            return 100f;
                     }
                 }
             }
@@ -252,7 +250,8 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling))
                 {
-                    return 100f;
+                    if (MoreEffectiveTransfer.warehouseFirst)
+                        return 100f;
                 }
                 else
                 {
@@ -260,16 +259,18 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling))
                         {
-                            return 100f;
+                            if (MoreEffectiveTransfer.warehouseFirst)
+                                return 100f;
                         }
                         else
                         {
-                            return 1f;
+                            return 0.01f;
                         }
                     }
                     else
                     {
-                        return 100f;
+                        if (MoreEffectiveTransfer.warehouseFirst)
+                            return 100f;
                     }
                 }
             }
