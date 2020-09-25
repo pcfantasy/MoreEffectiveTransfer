@@ -9,4 +9,4 @@ ADVANCED_WAREHOUSE	Улучшенные функции склада(Подроб
 WAREHOUSE_SPAWN_UNSPAWN	Изменение Spawn и Unspawn точек склада
 WAREHOUSE_RESEVER_FOR_CITY	Зарезервируйте часть складских грузов для внутригородских перевозок
 EXPERIMENTAL_FUNCTION	Экспериментальная функция
-PREFER_SHIP_PLANE_TRAIN	Import/Export prefer to use ship/plane/train instead of highway.
+PREFER_SHIP_PLANE_TRAIN	Импорт/Экспорт предпочитает ближ. корабль/самолёт/вокз. вместо шоссе
