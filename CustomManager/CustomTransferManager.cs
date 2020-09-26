@@ -398,7 +398,7 @@ namespace MoreEffectiveTransfer.CustomManager
             return preDistance;
         }
 
-        public static void ForgetFailedBuilding(ushort targetBuilding, int idex)
+        public static void ForgetFailedBuilding(ushort targetBuilding)
         {
             if (MoreEffectiveTransfer.fixUnRouteTransfer)
             {
@@ -406,18 +406,25 @@ namespace MoreEffectiveTransfer.CustomManager
                 {
                     if (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] != 0)
                     {
-                        if (MainDataStore.refreshCanNotConnectedBuildingIDCount[targetBuilding] > 8)
+                        int maxForgetCount = (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] << 1);
+                        if (maxForgetCount > 250)
+                            maxForgetCount = 250;
+
+                        if (MainDataStore.refreshCanNotConnectedBuildingIDCount[targetBuilding] > maxForgetCount)
                         {
                             //After several times we can refresh fail building list.
-                            MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]--;
-                            MainDataStore.canNotConnectedBuildingID[targetBuilding, idex] = MainDataStore.canNotConnectedBuildingID[targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]];
-                            MainDataStore.canNotConnectedBuildingID[targetBuilding, MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]] = 0;
                             if (MoreEffectiveTransfer.debugMode)
                             {
                                 DebugLog.LogToFileOnly("ForgetFailedBuilding begin, count = " + MainDataStore.canNotConnectedBuildingIDCount[targetBuilding].ToString());
                                 DebugLog.LogToFileOnly("DebugInfo: m_targetBuilding id is " + targetBuilding.ToString());
                                 DebugLog.LogToFileOnly("ForgetFailedBuilding end");
                             }
+
+                            for (int i = 0; i < MainDataStore.canNotConnectedBuildingIDCount[targetBuilding]; i++)
+                            {
+                                MainDataStore.canNotConnectedBuildingID[targetBuilding, i] = 0;
+                            }
+                            MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] = 0;
                             MainDataStore.refreshCanNotConnectedBuildingIDCount[targetBuilding] = 0;
                         }
                         else
@@ -452,7 +459,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
-                            ForgetFailedBuilding(targetBuilding, j);
+                            ForgetFailedBuilding(targetBuilding);
                             return true;
                         }
                     }
@@ -472,7 +479,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
-                            ForgetFailedBuilding(targetBuilding, j);
+                            ForgetFailedBuilding(targetBuilding);
                             return true;
                         }
                     }
@@ -502,7 +509,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
-                            ForgetFailedBuilding(targetBuilding, j);
+                            ForgetFailedBuilding(targetBuilding);
                             return true;
                         }
                     }
@@ -522,7 +529,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (MainDataStore.canNotConnectedBuildingID[targetBuilding, j] == sourceBuilding)
                         {
-                            ForgetFailedBuilding(targetBuilding, j);
+                            ForgetFailedBuilding(targetBuilding);
                             return true;
                         }
                     }
