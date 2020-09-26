@@ -406,9 +406,9 @@ namespace MoreEffectiveTransfer.CustomManager
                 {
                     if (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] != 0)
                     {
-                        int maxForgetCount = (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] << 1);
-                        if (maxForgetCount > 250)
-                            maxForgetCount = 250;
+                        int maxForgetCount = (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] << 1) + 8;
+                        if (maxForgetCount > 600)
+                            maxForgetCount = 600;
 
                         if (MainDataStore.refreshCanNotConnectedBuildingIDCount[targetBuilding] > maxForgetCount)
                         {
