@@ -175,7 +175,7 @@ namespace MoreEffectiveTransfer.CustomManager
                             int num5 = 0;
                             CustomCommonBuildingAI.InitDelegate();
                             CustomCommonBuildingAI.CalculateOwnVehicles(AI, offerOut.Building, ref bM.m_buildings.m_buffer[offerOut.Building], actualTransferReason, ref num2, ref num3, ref num4, ref num5);
-                            if (num2 * 1.25f > (num - 1))
+                            if (num5 * 1.25f > (num - 1))
                                 return false;
                             else
                                 return true;
