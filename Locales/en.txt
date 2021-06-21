@@ -2,6 +2,7 @@
 FIX_UNROUTED_TRANSFER_MATCH_ENALBE	Fix UnRouted Transfer Match Enable
 DEBUG_MODE_DESCRIPTION	Show Debug Info in BuildingUI and Log(Will impact performace)
 DEBUG_MODE_DESCRIPTION_ENALBE	Debug Mode Enable
+LOCAL_USE_DESCRIPTION_ENALBE	Allow playerbuilding to only sevice local district
 FAILED_BUILDING_COUNT	UnRouted Transfer Match Building Count
 GENERATE_DETAIL_REPORT	Generate detailed report in MoreEffectiveTransfer.txt
 WAREHOUSE_FIRST	Warehouse first!
@@ -10,3 +11,4 @@ WAREHOUSE_SPAWN_UNSPAWN	Fix Warehouse Spawn and Unspawn position
 WAREHOUSE_RESEVER_FOR_CITY	Reserve warehouse cargo trucks for local transfer
 EXPERIMENTAL_FUNCTION	Experimental Function
 PREFER_SHIP_PLANE_TRAIN	Import/Export prefer to use ship/plane/train instead of highway.
+LOCAL_USE	This building only sevice inside district

@@ -10,3 +10,5 @@ WAREHOUSE_SPAWN_UNSPAWN	Изменение Spawn и Unspawn точек скла�
 WAREHOUSE_RESEVER_FOR_CITY	Зарезервируйте часть складских грузов для внутригородских перевозок
 EXPERIMENTAL_FUNCTION	Экспериментальная функция
 PREFER_SHIP_PLANE_TRAIN	Импорт/Экспорт предпочитает ближ. корабль/самолёт/вокз. вместо шоссе
+LOCAL_USE_DESCRIPTION_ENALBE	Allow playerbuilding to only sevice local district
+LOCAL_USE	This building only sevice inside district

@@ -436,7 +436,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        public static bool IsUnRoutedMatch(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        public static bool IsUnRoutedMatch(TransferOffer offerIn, TransferOffer offerOut)
         {
             if (!MoreEffectiveTransfer.fixUnRouteTransfer)
             {
@@ -540,6 +540,204 @@ namespace MoreEffectiveTransfer.CustomManager
             return false;
         }
 
+        public static bool IsMaxUnRoutedCountReached(TransferOffer offerIn, TransferOffer offerOut, bool canUseNewMatchOffers)
+        {
+            if (!canUseNewMatchOffers)
+            {
+                return true;
+            }
+
+            if (!MoreEffectiveTransfer.fixUnRouteTransfer)
+            {
+                return false;
+            }
+
+            bool active = offerIn.Active;
+            bool active2 = offerOut.Active;
+            VehicleManager instance1 = Singleton<VehicleManager>.instance;
+            BuildingManager instance = Singleton<BuildingManager>.instance;
+            if (active && offerIn.Vehicle != 0)
+            {
+                ushort targetBuilding = 0;
+                ushort sourceBuilding = instance1.m_vehicles.m_buffer[offerIn.Vehicle].m_sourceBuilding;
+                targetBuilding = offerOut.Building;
+
+                if ((targetBuilding != 0) && (sourceBuilding != 0))
+                {
+                    if (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] == 255)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+                //info.m_vehicleAI.StartTransfer(vehicle, ref vehicles.m_buffer[(int)vehicle], material, offerOut);
+            }
+            else if (active2 && offerOut.Vehicle != 0)
+            {
+                ushort targetBuilding = 0;
+                ushort sourceBuilding = instance1.m_vehicles.m_buffer[offerOut.Vehicle].m_sourceBuilding;
+                targetBuilding = offerIn.Building;
+
+                if ((targetBuilding != 0) && (sourceBuilding != 0))
+                {
+                    if (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] == 255)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+                //info2.m_vehicleAI.StartTransfer(vehicle2, ref vehicles2.m_buffer[(int)vehicle2], material, offerIn);
+            }
+            else if (active && offerIn.Citizen != 0u)
+            {
+                DebugLog.LogToFileOnly("Error: No such case active && offerIn.Citizen != 0u");
+                return false;
+            }
+            else if (active2 && offerOut.Citizen != 0u)
+            {
+                DebugLog.LogToFileOnly("Error: No such case active && offerOut.Citizen != 0u");
+                return false;
+            }
+            else if (active2 && offerOut.Building != 0)
+            {
+                ushort targetBuilding = 0;
+                ushort sourceBuilding = offerOut.Building;
+                targetBuilding = offerIn.Building;
+
+                if ((targetBuilding != 0) && (sourceBuilding != 0))
+                {
+                    if (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] == 255)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+                //info3.m_buildingAI.StartTransfer(building, ref buildings.m_buffer[(int)building], material, offerIn);
+            }
+            else if (active && offerIn.Building != 0)
+            {
+                ushort targetBuilding = 0;
+                ushort sourceBuilding = offerIn.Building;
+                targetBuilding = offerOut.Building;
+
+                if ((targetBuilding != 0) && (sourceBuilding != 0))
+                {
+                    if (MainDataStore.canNotConnectedBuildingIDCount[targetBuilding] == 255)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+                //info4.m_buildingAI.StartTransfer(building2, ref buildings2.m_buffer[(int)building2], material, offerOut);
+            }
+            return false;
+        }
+
+        public static bool IsLocalUse(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        {
+            if (!MoreEffectiveTransfer.localUse)
+            {
+                return true;
+            }
+
+            switch (material)
+            {
+                case TransferReason.Snow:
+                case TransferReason.RoadMaintenance:
+                case TransferReason.ParkMaintenance:
+                case TransferReason.Garbage:
+                case TransferReason.Crime:
+                case TransferReason.Fire:
+                case TransferReason.Dead:
+                case TransferReason.GarbageMove:
+                case TransferReason.CriminalMove:
+                case TransferReason.DeadMove:
+                case TransferReason.SnowMove:
+                    break;
+                default:
+                    return true;
+            }
+
+            bool active = offerIn.Active;
+            bool active2 = offerOut.Active;
+            VehicleManager instance1 = Singleton<VehicleManager>.instance;
+            BuildingManager instance = Singleton<BuildingManager>.instance;
+            DistrictManager instance2 = Singleton<DistrictManager>.instance;
+            if (active && offerIn.Vehicle != 0)
+            {
+                ushort sourceBuilding = instance1.m_vehicles.m_buffer[offerIn.Vehicle].m_sourceBuilding;
+                ushort targetBuilding = offerOut.Building;
+
+                if (instance.m_buildings.m_buffer[sourceBuilding].m_childHealth == 1)
+                {
+                    byte sourceDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[sourceBuilding].m_position);
+                    byte targetDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[targetBuilding].m_position);
+                    if (targetDisctrict != sourceDisctrict)
+                    {
+                        return false;
+                    }
+                }
+                //info.m_vehicleAI.StartTransfer(vehicle, ref vehicles.m_buffer[(int)vehicle], material, offerOut);
+            }
+            else if (active2 && offerOut.Vehicle != 0)
+            {
+                ushort sourceBuilding = instance1.m_vehicles.m_buffer[offerOut.Vehicle].m_sourceBuilding;
+                ushort targetBuilding = offerIn.Building;
+
+                if (instance.m_buildings.m_buffer[sourceBuilding].m_childHealth == 1)
+                {
+                    byte sourceDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[sourceBuilding].m_position);
+                    byte targetDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[targetBuilding].m_position);
+                    if (targetDisctrict != sourceDisctrict)
+                    {
+                        return false;
+                    }
+                }
+                //info2.m_vehicleAI.StartTransfer(vehicle2, ref vehicles2.m_buffer[(int)vehicle2], material, offerIn);
+            }
+            else if (active && offerIn.Citizen != 0u)
+            {
+                DebugLog.LogToFileOnly("Error: No such case active && offerIn.Citizen != 0u");
+                return true;
+            }
+            else if (active2 && offerOut.Citizen != 0u)
+            {
+                DebugLog.LogToFileOnly("Error: No such case active && offerOut.Citizen != 0u");
+                return true;
+            }
+            else if (active2 && offerOut.Building != 0)
+            {
+                ushort sourceBuilding = offerOut.Building;
+                ushort targetBuilding = offerIn.Building;
+                if (instance.m_buildings.m_buffer[sourceBuilding].m_childHealth == 1)
+                {
+                    byte sourceDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[sourceBuilding].m_position);
+                    byte targetDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[targetBuilding].m_position);
+                    if (targetDisctrict != sourceDisctrict)
+                    {
+                        return false;
+                    }
+                }
+                //info3.m_buildingAI.StartTransfer(building, ref buildings.m_buffer[(int)building], material, offerIn);
+            }
+            else if (active && offerIn.Building != 0)
+            {
+                ushort sourceBuilding = offerIn.Building;
+                ushort targetBuilding = offerOut.Building;
+                if (instance.m_buildings.m_buffer[sourceBuilding].m_childHealth == 1)
+                {
+                    byte sourceDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[sourceBuilding].m_position);
+                    byte targetDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[targetBuilding].m_position);
+                    if (targetDisctrict != sourceDisctrict)
+                    {
+                        return false;
+                    }
+                }
+                //info4.m_buildingAI.StartTransfer(building2, ref buildings2.m_buffer[(int)building2], material, offerOut);
+            }
+            return true;
+        }
+
         public static void MatchOffers(TransferReason material)
         {
             if (!_init)
@@ -634,6 +832,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                         {
                                             float incomingOutgoingDistance = Vector3.SqrMagnitude(outgoingOfferPre.Position - incomingPosition);
                                             // NON-STOCK CODE START
+                                            var isLocalUse = IsLocalUse(incomingOffer, outgoingOfferPre, material);
                                             if (canUseNewMatchOffers)
                                             {
                                                 //WareHouse first
@@ -642,24 +841,30 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 incomingOutgoingDistance = ApplyPriority(incomingOffer, outgoingOfferPre, material, incomingOutgoingDistance);
                                                 if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                 {
-                                                    if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre, material) && CanWareHouseTransfer(incomingOffer, outgoingOfferPre, material))
+                                                    if (isLocalUse)
                                                     {
-                                                        validPriority = incomingPriorityInside;
-                                                        validOutgoingIdex = i;
-                                                        currentShortestDistance = incomingOutgoingDistance;
+                                                        if (!IsUnRoutedMatch(incomingOffer, outgoingOfferPre) && CanWareHouseTransfer(incomingOffer, outgoingOfferPre, material))
+                                                        {
+                                                            validPriority = incomingPriorityInside;
+                                                            validOutgoingIdex = i;
+                                                            currentShortestDistance = incomingOutgoingDistance;
+                                                        }
                                                     }
                                                 }
                                             }
-                                            // NON-STOCK CODE END
-                                            float distanceOffset = (!(distanceMultiplier < 0f)) ? (incomingPriorityInsideFloat / (1f + incomingOutgoingDistance * distanceMultiplier)) : (incomingPriorityInsideFloat - incomingPriorityInsideFloat / (1f - incomingOutgoingDistance * distanceMultiplier));
-                                            if ((distanceOffset > distanceOffsetPre) && !canUseNewMatchOffers)
+                                            if (isLocalUse)
                                             {
-                                                validPriority = incomingPriorityInside;
-                                                validOutgoingIdex = i;
-                                                distanceOffsetPre = distanceOffset;
-                                                if ((incomingOutgoingDistance < maxDistance))
+                                                // NON-STOCK CODE END
+                                                float distanceOffset = (!(distanceMultiplier < 0f)) ? (incomingPriorityInsideFloat / (1f + incomingOutgoingDistance * distanceMultiplier)) : (incomingPriorityInsideFloat - incomingPriorityInsideFloat / (1f - incomingOutgoingDistance * distanceMultiplier));
+                                                if ((distanceOffset > distanceOffsetPre) && ((!canUseNewMatchOffers) || (IsMaxUnRoutedCountReached(incomingOffer, outgoingOfferPre, canUseNewMatchOffers))))
                                                 {
-                                                    break;
+                                                    validPriority = incomingPriorityInside;
+                                                    validOutgoingIdex = i;
+                                                    distanceOffsetPre = distanceOffset;
+                                                    if ((incomingOutgoingDistance < maxDistance))
+                                                    {
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
@@ -776,6 +981,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                         {
                                             float incomingOutgoingDistance = Vector3.SqrMagnitude(incomingOfferPre.Position - outgoingPosition);
                                             // NON-STOCK CODE START
+                                            var isLocalUse = IsLocalUse(incomingOfferPre, outgoingOffer, material);
                                             if (canUseNewMatchOffers)
                                             {
                                                 //WareHouse first
@@ -794,24 +1000,31 @@ namespace MoreEffectiveTransfer.CustomManager
                                                 }
                                                 if ((incomingOutgoingDistance < currentShortestDistance) || currentShortestDistance == -1)
                                                 {
-                                                    if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer, material) && CanWareHouseTransfer(incomingOfferPre, outgoingOffer, material))
+                                                    if (isLocalUse)
                                                     {
-                                                        validPriority = outgoingPriorityInside;
-                                                        validIncomingIdex = j;
-                                                        currentShortestDistance = incomingOutgoingDistance;
+                                                        if (!IsUnRoutedMatch(incomingOfferPre, outgoingOffer) && CanWareHouseTransfer(incomingOfferPre, outgoingOffer, material))
+                                                        {
+                                                            validPriority = outgoingPriorityInside;
+                                                            validIncomingIdex = j;
+                                                            currentShortestDistance = incomingOutgoingDistance;
+                                                        }
                                                     }
                                                 }
                                             }
-                                            // NON-STOCK CODE END
-                                            float distanceOffset = (!(distanceMultiplier < 0f)) ? (outgoingPriorityInsideFloat / (1f + incomingOutgoingDistance * distanceMultiplier)) : (outgoingPriorityInsideFloat - outgoingPriorityInsideFloat / (1f - incomingOutgoingDistance * distanceMultiplier));
-                                            if ((distanceOffset > distanceOffsetPre) && !canUseNewMatchOffers)
+
+                                            if (isLocalUse)
                                             {
-                                                validPriority = outgoingPriorityInside;
-                                                validIncomingIdex = j;
-                                                distanceOffsetPre = distanceOffset;
-                                                if (incomingOutgoingDistance < maxDistance)
+                                                // NON-STOCK CODE END
+                                                float distanceOffset = (!(distanceMultiplier < 0f)) ? (outgoingPriorityInsideFloat / (1f + incomingOutgoingDistance * distanceMultiplier)) : (outgoingPriorityInsideFloat - outgoingPriorityInsideFloat / (1f - incomingOutgoingDistance * distanceMultiplier));
+                                                if ((distanceOffset > distanceOffsetPre) && ((!canUseNewMatchOffers) || (IsMaxUnRoutedCountReached(incomingOfferPre, outgoingOffer, canUseNewMatchOffers))))
                                                 {
-                                                    break;
+                                                    validPriority = outgoingPriorityInside;
+                                                    validIncomingIdex = j;
+                                                    distanceOffsetPre = distanceOffset;
+                                                    if (incomingOutgoingDistance < maxDistance)
+                                                    {
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }

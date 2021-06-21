@@ -10,3 +10,5 @@ WAREHOUSE_SPAWN_UNSPAWN	分开仓库车辆的消失点和出生点
 WAREHOUSE_RESEVER_FOR_CITY	预留部分仓库的车给城市内部使用
 EXPERIMENTAL_FUNCTION	实验性功能
 PREFER_SHIP_PLANE_TRAIN	进出口会更倾向港口/火车站/货运飞机,而不是通过高速
+LOCAL_USE_DESCRIPTION_ENALBE	允许政府建筑只服务本地
+LOCAL_USE	这个建筑只在区域内服务

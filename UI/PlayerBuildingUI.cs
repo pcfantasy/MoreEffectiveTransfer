@@ -16,6 +16,8 @@ namespace MoreEffectiveTransfer.UI
         private UILabel failedBuildingCount;
         public static UICheckBox generateDetail;
         private UILabel generateDetailText;
+        public static UICheckBox localUse;
+        private UILabel localUseText;
 
         public override void Update()
         {
@@ -84,6 +86,36 @@ namespace MoreEffectiveTransfer.UI
             {
                 GenerateDetail_OnCheckChanged(component, eventParam);
             };
+
+            localUse = base.AddUIComponent<UICheckBox>();
+            localUse.relativePosition = new Vector3(15f, generateDetail.relativePosition.y + 20f);
+            this.localUseText = base.AddUIComponent<UILabel>();
+            this.localUseText.relativePosition = new Vector3(localUse.relativePosition.x + localUse.width + 20f, localUse.relativePosition.y + 5f);
+            localUse.height = 16f;
+            localUse.width = 16f;
+            localUse.label = this.localUseText;
+            localUse.text = Localization.Get("LOCAL_USE");
+            UISprite uISprite2 = localUse.AddUIComponent<UISprite>();
+            uISprite2.height = 20f;
+            uISprite2.width = 20f;
+            uISprite2.relativePosition = new Vector3(0f, 0f);
+            uISprite2.spriteName = "check-unchecked";
+            uISprite2.isVisible = true;
+            UISprite uISprite3 = localUse.AddUIComponent<UISprite>();
+            uISprite3.height = 20f;
+            uISprite3.width = 20f;
+            uISprite3.relativePosition = new Vector3(0f, 0f);
+            uISprite3.spriteName = "check-checked";
+            localUse.checkedBoxObject = uISprite3;
+            localUse.isChecked = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[MainDataStore.lastBuildingID].m_childHealth != 0);
+            localUse.isEnabled = true;
+            localUse.isVisible = true;
+            localUse.canFocus = true;
+            localUse.isInteractive = true;
+            localUse.eventCheckChanged += delegate (UIComponent component, bool eventParam)
+            {
+                LocalUse_OnCheckChanged(component, eventParam);
+            };
         }
 
         public static void GenerateDetail_OnCheckChanged(UIComponent UIComp, bool bValue)
@@ -108,6 +140,19 @@ namespace MoreEffectiveTransfer.UI
                 generateDetail.isChecked = false;
             }
         }
+        public static void LocalUse_OnCheckChanged(UIComponent UIComp, bool bValue)
+        {
+            if (bValue)
+            {
+                localUse.isChecked = true;
+                Singleton<BuildingManager>.instance.m_buildings.m_buffer[MainDataStore.lastBuildingID].m_childHealth = 1;
+            }
+            else
+            {
+                localUse.isChecked = false;
+                Singleton<BuildingManager>.instance.m_buildings.m_buffer[MainDataStore.lastBuildingID].m_childHealth = 0;
+            }
+        }
 
         private void RefreshDisplayData()
         {
@@ -122,12 +167,13 @@ namespace MoreEffectiveTransfer.UI
                         generateDetail.isChecked = false;
                     }
                     this.BringToFront();
+                    localUse.isChecked = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[MainDataStore.lastBuildingID].m_childHealth != 0);
                 }
                 refeshOnce = false;
                 this.Show();
             }
             
-            if (!MoreEffectiveTransfer.debugMode)
+            if (!MoreEffectiveTransfer.debugMode && !MoreEffectiveTransfer.localUse)
             {
                 this.Hide();
             }
