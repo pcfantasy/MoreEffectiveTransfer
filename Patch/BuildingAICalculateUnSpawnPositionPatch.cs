@@ -8,11 +8,11 @@ using UnityEngine;
 namespace MoreEffectiveTransfer.Patch
 {
     [HarmonyPatch]
-    class WarehouseAICalculateSpawnPositionPatch
+    class BuildingAICalculateUnspawnPositionPatch
     {
         public static MethodBase TargetMethod()
         {
-            return typeof(WarehouseAI).GetMethod("CalculateSpawnPosition", BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(ushort), typeof(Building).MakeByRefType(), typeof(Randomizer).MakeByRefType(), typeof(VehicleInfo), typeof(Vector3).MakeByRefType(), typeof(Vector3).MakeByRefType()}, null);
+            return typeof(BuildingAI).GetMethod("CalculateUnspawnPosition", BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(ushort), typeof(Building).MakeByRefType(), typeof(Randomizer).MakeByRefType(), typeof(VehicleInfo), typeof(Vector3).MakeByRefType(), typeof(Vector3).MakeByRefType() }, null);
         }
         public static void Postfix(ref Building data, ref Vector3 position, ref Vector3 target)
         {
@@ -33,12 +33,14 @@ namespace MoreEffectiveTransfer.Patch
                     var moveDistance = data.Width * 8f / 3f;
                     vector = orgPosition - data.m_position;
                     vector = VectorUtils.NormalizeXZ(vector);
-                    vector = new Vector3(vector.z, 0, -vector.x);
+                    vector = new Vector3(-vector.z, 0, vector.x);
                     //left hand driver
                     if (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True)
                         vector = -vector;
                     position += moveDistance * vector;
                     target += moveDistance * vector;
+
+
                 }
             }
         }

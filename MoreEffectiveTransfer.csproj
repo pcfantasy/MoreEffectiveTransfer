@@ -74,8 +74,8 @@
     <Compile Include="Patch\CarAIPathfindFailurePatch.cs" />
     <Compile Include="Patch\CargoTruckAIArriveAtTargetPatch.cs" />
     <Compile Include="Patch\CommonBuildingAIReleaseBuildingPatch.cs" />
-    <Compile Include="Patch\WarehouseAICalculateUnSpawnPositionPatch.cs" />
-    <Compile Include="Patch\WarehouseAICalculateSpawnPositionPatch.cs" />
+    <Compile Include="Patch\BuildingAICalculateUnSpawnPositionPatch.cs" />
+    <Compile Include="Patch\BuildingAICalculateSpawnPositionPatch.cs" />
     <Compile Include="Patch\HelicopterDepotAISimulationStepPatch.cs" />
     <Compile Include="CustomManager\CustomTransferManager.cs" />
     <Compile Include="Patch\TransferManagerMatchOfferPatch.cs" />
