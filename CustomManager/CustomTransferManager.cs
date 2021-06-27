@@ -642,9 +642,6 @@ namespace MoreEffectiveTransfer.CustomManager
 
             switch (material)
             {
-                case TransferReason.Snow:
-                case TransferReason.RoadMaintenance:
-                case TransferReason.ParkMaintenance:
                 case TransferReason.Garbage:
                 case TransferReason.Crime:
                 case TransferReason.Fire:
@@ -652,7 +649,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.GarbageMove:
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
-                case TransferReason.SnowMove:
                     break;
                 default:
                     return true;

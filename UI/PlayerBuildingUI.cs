@@ -172,8 +172,11 @@ namespace MoreEffectiveTransfer.UI
                 refeshOnce = false;
                 this.Show();
             }
-            
-            if (!MoreEffectiveTransfer.debugMode && !MoreEffectiveTransfer.localUse)
+
+            var buildingAI = Singleton<BuildingManager>.instance.m_buildings.m_buffer[MainDataStore.lastBuildingID].Info.m_buildingAI;
+            bool isLocalUseAvailable = MoreEffectiveTransfer.localUse && ((buildingAI is LandfillSiteAI) || (buildingAI is PoliceStationAI) || (buildingAI is FireStationAI));
+
+            if (!MoreEffectiveTransfer.debugMode && !isLocalUseAvailable)
             {
                 this.Hide();
             }
