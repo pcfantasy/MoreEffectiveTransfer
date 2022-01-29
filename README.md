@@ -10,6 +10,7 @@ This whole situation cannot be easily prevented, and would rather require a comp
 TLDR: you notice in your city that garbage trucks go from A to B, and from B to A, and you think this mod is not doing its' job. C'est la vie - this mod usually reduces these situations a lot, but cannot fully prevent them.
 
 
+
 # See original user guide / wiki by pcfantasy:
 ## MoreEffectiveTransfer User Guide [![Steam Downloads](https://img.shields.io/steam/downloads/1680840913.svg?label=Steam%20downloads&logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=1680840913)
 [English version](https://github.com/pcfantasy/MoreEffectiveTransfer/wiki/English-UG) <br>
