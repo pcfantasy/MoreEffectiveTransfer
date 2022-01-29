@@ -3,7 +3,7 @@
 ## Settings and their effect
 
 ### Prefer local district services (recommended to enable)
-<b>Affects: Garbage, Crime, Dead, Fire</b>
+<b>Affects: Garbage, Crime, Dead, Fire</b><br />
 This setting further narrows down the matchmaking:<br />
 All low priority (priority 0..4) outgoing transfer requests will only match with services from the same district. If no matching services from the same district are available, the request is unfulfilled.
 As the problem (garbage, crime, ...) accumulates, the request will gain urgency and increase priority. Once reaching priority classes 5..7 it will be matched to fulfill, regardless of district restrictions.
