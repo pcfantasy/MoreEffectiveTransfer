@@ -11,7 +11,7 @@ TLDR: you notice in your city that garbage trucks go from A to B, and from B to 
 
 
 
-# See original user guide / wiki by pcfantasy:
+# For reference also see original user guide / wiki by pcfantasy:
 ## MoreEffectiveTransfer User Guide [![Steam Downloads](https://img.shields.io/steam/downloads/1680840913.svg?label=Steam%20downloads&logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=1680840913)
 [English version](https://github.com/pcfantasy/MoreEffectiveTransfer/wiki/English-UG) <br>
 ## MoreEffectiveTransfer 说明书
