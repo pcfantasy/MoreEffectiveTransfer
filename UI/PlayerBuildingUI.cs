@@ -4,6 +4,7 @@ using UnityEngine;
 using ColossalFramework;
 using MoreEffectiveTransfer.Util;
 
+/*
 namespace MoreEffectiveTransfer.UI
 {
     public class PlayerBuildingUI : UIPanel
@@ -183,3 +184,4 @@ namespace MoreEffectiveTransfer.UI
         }
     }
 }
+*/

@@ -4,6 +4,7 @@ using UnityEngine;
 using ColossalFramework;
 using MoreEffectiveTransfer.Util;
 
+/*
 namespace MoreEffectiveTransfer.UI
 {
     public class WareHouseUI : UIPanel
@@ -134,3 +135,4 @@ namespace MoreEffectiveTransfer.UI
         }
     }
 }
+*/

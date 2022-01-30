@@ -24,6 +24,8 @@ namespace MoreEffectiveTransfer
         public static bool HarmonyDetourInited = false;
         public static bool HarmonyDetourFailed = true;
         public static bool isGuiRunning = false;
+
+        /*
         public static UIPanel buildingInfo;
         public static UIPanel playerBuildingInfo;
         public static UIPanel uniqueFactoryInfo;
@@ -36,6 +38,7 @@ namespace MoreEffectiveTransfer
         public static GameObject PlayerBuildingWindowGameObject;
         public static GameObject UniqueFactoryWindowGameObject;
         public static GameObject WareHouseWindowGameObject;
+        */
 
         public override void OnCreated(ILoading loading)
         {
@@ -54,7 +57,8 @@ namespace MoreEffectiveTransfer
                     DataInit();
                     InitDetour();
                     HarmonyInitDetour();
-                    SetupGui();
+                    //SetupGui();
+
                     MoreEffectiveTransfer.LoadSetting();
                     if (mode == LoadMode.NewGame)
                     {
@@ -86,7 +90,7 @@ namespace MoreEffectiveTransfer
                 {
                     RevertDetour();
                     HarmonyRevertDetour();
-                    RemoveGui();
+                    //RemoveGui();
                 }
             }
         }
@@ -96,6 +100,7 @@ namespace MoreEffectiveTransfer
             base.OnReleased();
         }
 
+        /*
         public static void SetupGui()
         {
             SetupBuidingGui();
@@ -104,7 +109,7 @@ namespace MoreEffectiveTransfer
             SetupUniqueFactoryGui();
             Loader.isGuiRunning = true;
         }
-
+ 
         public static void RemoveGui()
         {
             Loader.isGuiRunning = false;
@@ -290,6 +295,7 @@ namespace MoreEffectiveTransfer
                 wareHousePanel.Hide();
             }
         }
+        */
 
         public void HarmonyInitDetour()
         {

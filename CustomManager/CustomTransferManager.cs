@@ -22,6 +22,7 @@ namespace MoreEffectiveTransfer.CustomManager
         private static BuildingManager _BuildingManager = null;
         private static VehicleManager _VehicleManager = null;
         private static InstanceManager _InstanceManager = null;
+        private static DistrictManager _DistrictManager = null;
 
         // TransferManager internal fields and arrays
         public static TransferManager.TransferOffer[] m_outgoingOffers;
@@ -77,6 +78,7 @@ namespace MoreEffectiveTransfer.CustomManager
             CustomTransferManager._BuildingManager = Singleton<BuildingManager>.instance;
             CustomTransferManager._InstanceManager = Singleton<InstanceManager>.instance;
             CustomTransferManager._VehicleManager  = Singleton<VehicleManager>.instance;
+            CustomTransferManager._DistrictManager = Singleton<DistrictManager>.instance;
 
             _init = true;
         }
@@ -170,21 +172,23 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.ParkMaintenance:
                 case TransferReason.Fish:
                     return OFFER_MATCHMODE.BALANCED;
-                case TransferReason.Garbage:    //Garbage: outgoing offer (passive) from buldings with garbage to be collected, incoming (active) from landfills
-                case TransferReason.Crime:      //Crime: like garbage
+
+                case TransferReason.Garbage:            //Garbage: outgoing offer (passive) from buldings with garbage to be collected, incoming (active) from landfills
+                case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
+                case TransferReason.Crime:              //Crime: like garbage
                 case TransferReason.Fire2:
-                case TransferReason.Fire:       //Fire: like garbage
-                case TransferReason.Dead:       //Dead: like garbage
+                case TransferReason.Fire:               //Fire: like garbage
+                case TransferReason.Dead:               //Dead: like garbage
                 case TransferReason.Sick:
                 case TransferReason.Sick2:
                 case TransferReason.Taxi:
                     return OFFER_MATCHMODE.OUTGOING_FIRST;
-                case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from empting landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
-                case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
+
+                case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
                 case TransferReason.SnowMove:
-                    return OFFER_MATCHMODE.OUTGOING_FIRST;
+                    return OFFER_MATCHMODE.INCOMING_FIRST;
 
                 default: 
                     return OFFER_MATCHMODE.BALANCED;
@@ -695,109 +699,64 @@ namespace MoreEffectiveTransfer.CustomManager
             return false;
         }
 
-        public static bool IsLocalUse(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        public static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority)
         {
+            const int PRIORITY_THRESHOLD_LOCAL = 4; //upper prios 4..7 also get non-local fulfillment
+
+            // guard: current option setting?
             if (!MoreEffectiveTransfer.optionPreferLocalService)
-            {
                 return true;
-            }
+
+            // guard: priority above threshold -> any service is OK!
+            if (priority >= PRIORITY_THRESHOLD_LOCAL)
+                return true;
 
             switch (material)
             {
+                // Services subject to prefer local services:
                 case TransferReason.Garbage:
                 case TransferReason.Crime:
                 case TransferReason.Fire:
+                case TransferReason.Fire2:
                 case TransferReason.Dead:
-                case TransferReason.GarbageMove:
+                case TransferReason.Sick:
+                case TransferReason.Sick2:
+
+                // Material Transfers for service subject to policy:
+                case TransferReason.GarbageMove:        
+                case TransferReason.GarbageTransfer:    
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
+                case TransferReason.SnowMove:
                     break;
+
                 default:
                     return true;
             }
 
-            bool active = offerIn.Active;
-            bool active2 = offerOut.Active;
-            VehicleManager instance1 = Singleton<VehicleManager>.instance;
-            BuildingManager instance = Singleton<BuildingManager>.instance;
-            DistrictManager instance2 = Singleton<DistrictManager>.instance;
-            if (active && offerIn.Vehicle != 0)
-            {
-                ushort sourceBuilding = instance1.m_vehicles.m_buffer[offerIn.Vehicle].m_sourceBuilding;
-                ushort targetBuilding = offerOut.Building;
+            // determine buildings or vehicle parent buildings
+            ushort buildingIncoming = 0, buildingOutgoing = 0;
+            if (offerIn.Building != 0) buildingIncoming = offerIn.Building;
+            if (offerIn.Vehicle != 0) buildingIncoming = _VehicleManager.m_vehicles.m_buffer[offerIn.Vehicle].m_sourceBuilding;
+            if (offerOut.Building != 0) buildingOutgoing = offerOut.Building;
+            if (offerOut.Vehicle != 0) buildingOutgoing = _VehicleManager.m_vehicles.m_buffer[offerOut.Vehicle].m_sourceBuilding;
 
-                if (instance.m_buildings.m_buffer[sourceBuilding].m_childHealth == 1)
-                {
-                    byte sourceDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[sourceBuilding].m_position);
-                    byte targetDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[targetBuilding].m_position);
-                    if (targetDisctrict != sourceDisctrict)
-                    {
-                        return false;
-                    }
-                }
-                //info.m_vehicleAI.StartTransfer(vehicle, ref vehicles.m_buffer[(int)vehicle], material, offerOut);
-            }
-            else if (active2 && offerOut.Vehicle != 0)
-            {
-                ushort sourceBuilding = instance1.m_vehicles.m_buffer[offerOut.Vehicle].m_sourceBuilding;
-                ushort targetBuilding = offerIn.Building;
+            // get respective districts
+            byte districtIncoming = _DistrictManager.GetDistrict(_BuildingManager.m_buildings.m_buffer[buildingIncoming].m_position);
+            byte districtOutgoing = _DistrictManager.GetDistrict(_BuildingManager.m_buildings.m_buffer[buildingOutgoing].m_position);
 
-                if (instance.m_buildings.m_buffer[sourceBuilding].m_childHealth == 1)
-                {
-                    byte sourceDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[sourceBuilding].m_position);
-                    byte targetDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[targetBuilding].m_position);
-                    if (targetDisctrict != sourceDisctrict)
-                    {
-                        return false;
-                    }
-                }
-                //info2.m_vehicleAI.StartTransfer(vehicle2, ref vehicles2.m_buffer[(int)vehicle2], material, offerIn);
-            }
-            else if (active && offerIn.Citizen != 0u)
-            {
-                DebugLog.LogToFileOnly("Error: No such case active && offerIn.Citizen != 0u");
-                return true;
-            }
-            else if (active2 && offerOut.Citizen != 0u)
-            {
-                DebugLog.LogToFileOnly("Error: No such case active && offerOut.Citizen != 0u");
-                return true;
-            }
-            else if (active2 && offerOut.Building != 0)
-            {
-                ushort sourceBuilding = offerOut.Building;
-                ushort targetBuilding = offerIn.Building;
-                if (instance.m_buildings.m_buffer[sourceBuilding].m_childHealth == 1)
-                {
-                    byte sourceDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[sourceBuilding].m_position);
-                    byte targetDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[targetBuilding].m_position);
-                    if (targetDisctrict != sourceDisctrict)
-                    {
-                        return false;
-                    }
-                }
-                //info3.m_buildingAI.StartTransfer(building, ref buildings.m_buffer[(int)building], material, offerIn);
-            }
-            else if (active && offerIn.Building != 0)
-            {
-                ushort sourceBuilding = offerIn.Building;
-                ushort targetBuilding = offerOut.Building;
-                if (instance.m_buildings.m_buffer[sourceBuilding].m_childHealth == 1)
-                {
-                    byte sourceDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[sourceBuilding].m_position);
-                    byte targetDisctrict = instance2.GetDistrict(instance.m_buildings.m_buffer[targetBuilding].m_position);
-                    if (targetDisctrict != sourceDisctrict)
-                    {
-                        return false;
-                    }
-                }
-                //info4.m_buildingAI.StartTransfer(building2, ref buildings2.m_buffer[(int)building2], material, offerOut);
-            }
-            return true;
+            // return true if: both within same district, or active offer is outside district ("in global area"
+            if (  (districtIncoming == districtOutgoing) 
+                  || (offerIn.Active && districtIncoming == 0)
+                  || (offerOut.Active && districtOutgoing == 0) 
+               )
+               return true;
+
+            return false;
         }
 
 
-        public static String DebugInspectOffer(TransferOffer offer)
+        public static String DebugInspectOffer(ref TransferOffer offer)
         {
             var instB = default(InstanceID);
             instB.Building = offer.Building;
@@ -812,14 +771,14 @@ namespace MoreEffectiveTransfer.CustomManager
             for (int i=0; i< offerCountIncoming; i++)
             {
                 TransferOffer incomingOffer = m_incomingOffers[offset * 256 + i];
-                String bname = DebugInspectOffer(incomingOffer);
+                String bname = DebugInspectOffer(ref incomingOffer);
                 DebugLog.DebugMsg($"   in #{i}: act {incomingOffer.Active}, excl {incomingOffer.Exclude}, amt {incomingOffer.Amount}, bvc {incomingOffer.Building}/{incomingOffer.Vehicle}/{incomingOffer.Citizen} name={bname}");
             }
 
             for (int i = 0; i < offerCountOutgoing; i++)
             {
                 TransferOffer outgoingOffer = m_outgoingOffers[offset * 256 + i];
-                String bname = DebugInspectOffer(outgoingOffer);
+                String bname = DebugInspectOffer(ref outgoingOffer);
                 DebugLog.DebugMsg($"   out #{i}: act {outgoingOffer.Active}, excl {outgoingOffer.Exclude}, amt {outgoingOffer.Amount}, bvc {outgoingOffer.Building}/{outgoingOffer.Vehicle}/{outgoingOffer.Citizen} name={bname}");
             }
         }
@@ -869,73 +828,162 @@ namespace MoreEffectiveTransfer.CustomManager
             OFFER_MATCHMODE match_mode = GetMatchOffersMode(material);
 
 
-            // OUTGOING FIRST mode - try to fulfill all outgoing requests
+            // OUTGOING FIRST mode - try to fulfill all outgoing requests by finding incomings by distance
+            // -------------------------------------------------------------------------------------------
             if (match_mode == OFFER_MATCHMODE.OUTGOING_FIRST)
             {
                 DebugLog.DebugMsg($"   ###MatchMode OUTGOING FIRST###");
 
-                // outgoing offers by descending priority
+                // loop outgoing offers by descending priority
                 for (int priority = 7; priority >= 0; priority--)
                 {
                     offer_offset = (int)material * 8 + priority;
                     offerCountIncoming = m_incomingCount[offer_offset];
                     offerCountOutgoing = m_outgoingCount[offer_offset];
 
-                    // all offers within this priority
+                    // loop all offers within this priority
                     for (int offerIndex = 0; offerIndex < offerCountOutgoing; offerIndex++)
                     {
-                        TransferOffer outgoingOffer = m_outgoingOffers[offer_offset * 256 + offerIndex];    //FIXME: copy by value!
-                        if (outgoingOffer.Exclude) break;
-                        DebugLog.DebugMsg($"   ###Matching OUTGOING offer: {DebugInspectOffer(outgoingOffer)}");
+                        ref TransferOffer outgoingOffer = ref m_outgoingOffers[offer_offset * 256 + offerIndex];
+                        if (outgoingOffer.Exclude) continue;
+                        DebugLog.DebugMsg($"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}");
 
-                        int bestmatch_position = 0;
+                        int bestmatch_position = -1;
                         float bestmatch_distance = float.MaxValue;
 
-                        // go through all matching counterpart offers and find closest one
+                        // loop through all matching counterpart offers and find closest one
                         for (int counterpart_prio = 7; counterpart_prio >= 0; counterpart_prio--)
                         {
                             int counterpart_offset = (int)material * 8 + counterpart_prio;
                             int counterpart_offercount = m_incomingCount[counterpart_offset];
-                            for (int counterpart_index = 0; counterpart_index<counterpart_offercount; counterpart_index++)
+                            for (int counterpart_index = 0; counterpart_index < counterpart_offercount; counterpart_index++)
                             {
-                                TransferOffer incomingOffer = m_incomingOffers[counterpart_offset * 256 + counterpart_index];   //FIXME: copy by value!
+                                ref TransferOffer incomingOffer = ref m_incomingOffers[counterpart_offset * 256 + counterpart_index];
 
-                                // guard: out=in same?
-                                if (outgoingOffer.m_object == incomingOffer.m_object) continue;
+                                // guards: out=in same? exclude offer (already used?)
+                                if ((incomingOffer.Exclude) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
 
-                                //TODO: check MoreEffectiveTransfer.optionPreferLocalService
+                                // CHECK OPTION: preferlocalservice
+                                bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
+                                
+                                //TODO: CHECK OPTION: MoreEffectiveTransfer.optionWarehouseFirst
 
                                 float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position);
-                                if (distance < bestmatch_distance)
+                                if ((isLocalAllowed) && (distance < bestmatch_distance))
                                 {
                                     bestmatch_position = counterpart_offset * 256 + counterpart_index;
                                     bestmatch_distance = distance;
                                 }
 
-                                DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(incomingOffer)}, distance: {distance}, bestmatch: {bestmatch_distance}");                                
+                                DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, local: {isLocalAllowed}, distance: {distance}, bestmatch: {bestmatch_distance}");                                
                             }
                         }
 
                         // Select bestmatch
-                        DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(m_incomingOffers[bestmatch_position])}");
-                        
-                        // Start the transfer
-                        int deltaamount = Math.Min(m_outgoingOffers[offer_offset * 256 + offerIndex].Amount, m_incomingOffers[bestmatch_position].Amount);
-                        TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, m_outgoingOffers[offer_offset * 256 + offerIndex], m_incomingOffers[bestmatch_position], deltaamount);
-                        
-                        // mark offer pair as to be excluded for further matches
-                        m_incomingOffers[bestmatch_position].Exclude = true;
-                        m_outgoingOffers[offer_offset * 256 + offerIndex].Exclude = true;
+                        if (bestmatch_position != -1)
+                        {
+                            DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(ref m_incomingOffers[bestmatch_position])}");
+
+                            // Start the transfer
+                            int deltaamount = Math.Min(m_outgoingOffers[offer_offset * 256 + offerIndex].Amount, m_incomingOffers[bestmatch_position].Amount);
+                            TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, m_outgoingOffers[offer_offset * 256 + offerIndex], m_incomingOffers[bestmatch_position], deltaamount);
+
+                            // mark offer pair as to be excluded for further matches
+                            m_incomingOffers[bestmatch_position].Exclude = true;
+                            outgoingOffer.Exclude = true;
+                            offerCountIncomingTotal--;
+                            offerCountOutgoingTotal--;
+                        }
 
                     } //end loop priority
 
+                    // guard: no more incoming offers left? ->break processing
+                    if (offerCountIncomingTotal == 0 || offerCountOutgoingTotal == 0) break;
+
                 } //end loop outgoing offer
 
-            }
+            } //end OFFER_MATCHMODE.OUTGOING_FIRST
+
+
+            // INCOMING FIRST mode - try to fulfill all incoming offers by finding outgoings by distance
+            // -------------------------------------------------------------------------------------------
+            if (match_mode == OFFER_MATCHMODE.INCOMING_FIRST)
+            {
+                DebugLog.DebugMsg($"   ###MatchMode INCOMING FIRST###");
+
+                // loop incoming offers by descending priority
+                for (int priority = 7; priority >= 0; priority--)
+                {
+                    offer_offset = (int)material * 8 + priority;
+                    offerCountIncoming = m_incomingCount[offer_offset];
+                    offerCountOutgoing = m_outgoingCount[offer_offset];
+
+                    // loop all offers within this priority
+                    for (int offerIndex = 0; offerIndex < offerCountIncoming; offerIndex++)
+                    {
+                        ref TransferOffer incomingOffer = ref m_incomingOffers[offer_offset * 256 + offerIndex];
+                        if (incomingOffer.Exclude) continue;
+                        DebugLog.DebugMsg($"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}");
+
+                        int bestmatch_position = -1;
+                        float bestmatch_distance = float.MaxValue;
+
+                        // loop through all matching counterpart offers and find closest one
+                        for (int counterpart_prio = 7; counterpart_prio >= 0; counterpart_prio--)
+                        {
+                            int counterpart_offset = (int)material * 8 + counterpart_prio;
+                            int counterpart_offercount = m_outgoingCount[counterpart_offset];
+                            for (int counterpart_index = 0; counterpart_index < counterpart_offercount; counterpart_index++)
+                            {
+                                ref TransferOffer outgoingOffer = ref m_outgoingOffers[counterpart_offset * 256 + counterpart_index];
+
+                                // guards: out=in same? exclude offer (already used?)
+                                if ((outgoingOffer.Exclude) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
+
+                                // CHECK OPTION: preferlocalservice
+                                bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
+
+                                //TODO: CHECK OPTION: MoreEffectiveTransfer.optionWarehouseFirst
+
+                                float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position);
+                                if ((isLocalAllowed) && (distance < bestmatch_distance))
+                                {
+                                    bestmatch_position = counterpart_offset * 256 + counterpart_index;
+                                    bestmatch_distance = distance;
+                                }
+
+                                DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, local: {isLocalAllowed}, distance: {distance}, bestmatch: {bestmatch_distance}");
+                            }
+                        }
+
+                        // Select bestmatch
+                        if (bestmatch_position != -1)
+                        {
+                            DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(ref m_outgoingOffers[bestmatch_position])}");
+
+                            // Start the transfer
+                            int deltaamount = Math.Min(m_incomingOffers[offer_offset * 256 + offerIndex].Amount, m_outgoingOffers[bestmatch_position].Amount);
+                            TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, m_outgoingOffers[bestmatch_position], m_incomingOffers[offer_offset * 256 + offerIndex], deltaamount);
+
+                            // mark offer pair as to be excluded for further matches
+                            m_outgoingOffers[bestmatch_position].Exclude = true;
+                            incomingOffer.Exclude = true;
+                            offerCountIncomingTotal--;
+                            offerCountOutgoingTotal--;
+                        }
+
+                    } //end loop priority
+
+                    // guard: no more incoming offers left? ->break processing
+                    if (offerCountIncomingTotal == 0 || offerCountOutgoingTotal == 0) break;
+
+                } //end loop outgoing offer
+
+            } //end OFFER_MATCHMODE.INCOMING_FIRST
 
 
 
-            END_OFFERMATCHING:
+        END_OFFERMATCHING:
             // finally: clear everything, including unmatched offers!
             ClearAllTransferOffers(material);
 

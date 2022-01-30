@@ -7,6 +7,11 @@ using System;
 
 namespace MoreEffectiveTransfer.UI
 {
+}
+
+/*
+namespace MoreEffectiveTransfer.UI
+{
     public class BuildingUI : UIPanel
     {
         public static readonly string cacheName = "BuildingUI";
@@ -136,3 +141,4 @@ namespace MoreEffectiveTransfer.UI
         }
     }
 }
+*/

@@ -26,10 +26,12 @@ namespace MoreEffectiveTransfer
                     int num4 = (int)(currentFrameIndex & 255u);
                     if (num4 == 255)
                     {
+                        /*
                         BuildingUI.refeshOnce = true;
                         PlayerBuildingUI.refeshOnce = true;
                         UniqueFactoryUI.refeshOnce = true;
                         WareHouseUI.refeshOnce = true;
+                        */
 
                         //HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepotFinal = HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot;
                         //HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot = false;

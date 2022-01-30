@@ -4,6 +4,7 @@ using UnityEngine;
 using ColossalFramework;
 using MoreEffectiveTransfer.Util;
 
+/*
 namespace MoreEffectiveTransfer.UI
 {
     public class UniqueFactoryUI : UIPanel
@@ -138,3 +139,4 @@ namespace MoreEffectiveTransfer.UI
         }
     }
 }
+*/
