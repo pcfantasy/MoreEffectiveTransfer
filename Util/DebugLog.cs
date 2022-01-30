@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace MoreEffectiveTransfer.Util
 {
@@ -19,9 +20,13 @@ namespace MoreEffectiveTransfer.Util
             }
         }
 
-        public static void LogWarning(string msg)
+
+        [Conditional("DEBUG")]
+        public static void DebugMsg(string msg)
         {
-            DebugOutputPanel.AddMessage(PluginManager.MessageType.Warning, msg);
+            //DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, "[METM] "+msg);
+            LogToFileOnly(msg);
         }
+
     }
 }

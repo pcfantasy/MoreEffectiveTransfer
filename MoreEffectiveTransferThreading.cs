@@ -11,13 +11,13 @@ namespace MoreEffectiveTransfer
     public class MoreEffectiveTransferThreading : ThreadingExtensionBase
     {
         public static bool isFirstTime = true;
-        public const int HarmonyPatchNum = 8;
-        public static float shipStationDistanceRandom = 1f;
-        public static float trainStationDistanceRandom = 1f;
-        public static float planeStationDistanceRandom = 1f;
+        public const int HarmonyPatchNumExpected = 1; //was: 8
+
+
         public override void OnBeforeSimulationFrame()
         {
             base.OnBeforeSimulationFrame();
+
             if (Loader.CurrentLoadMode == LoadMode.LoadGame || Loader.CurrentLoadMode == LoadMode.NewGame)
             {
                 if (MoreEffectiveTransfer.IsEnabled)
@@ -30,12 +30,15 @@ namespace MoreEffectiveTransfer
                         PlayerBuildingUI.refeshOnce = true;
                         UniqueFactoryUI.refeshOnce = true;
                         WareHouseUI.refeshOnce = true;
-                        HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepotFinal = HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot;
-                        HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot = false;
-                        shipStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
-                        trainStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
-                        planeStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
+
+                        //HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepotFinal = HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot;
+                        //HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot = false;
+
+                        MoreEffectiveTransfer.shipStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
+                        MoreEffectiveTransfer.trainStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
+                        MoreEffectiveTransfer.planeStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
                     }
+
                     CheckDetour();
                 }
             }
@@ -78,9 +81,9 @@ namespace MoreEffectiveTransfer
                             }
                         }
 
-                        if (i != HarmonyPatchNum)
+                        if (i != HarmonyPatchNumExpected)
                         {
-                            string error = $"MoreEffectiveTransfer HarmonyDetour Patch Num is {i}, Right Num is {HarmonyPatchNum} Send MoreEffectiveTransfer.txt to Author.";
+                            string error = $"MoreEffectiveTransfer HarmonyDetour Patch Num is {i}, expected: {HarmonyPatchNumExpected}. Send MoreEffectiveTransfer.txt to Author.";
                             DebugLog.LogToFileOnly(error);
                             UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", error, true);
                         }

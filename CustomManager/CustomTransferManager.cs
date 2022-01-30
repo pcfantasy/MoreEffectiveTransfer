@@ -1,8 +1,9 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Plugins;
 using MoreEffectiveTransfer.CustomAI;
-using MoreEffectiveTransfer.Patch;
 using MoreEffectiveTransfer.Util;
+using System;
+using System.Diagnostics;
 using System.Reflection;
 using UnityEngine;
 
@@ -12,31 +13,17 @@ namespace MoreEffectiveTransfer.CustomManager
     {
         public static bool _init = false;
 
-        public static void Init()
-        {
-            var inst = Singleton<TransferManager>.instance;
-            var incomingCount = typeof(TransferManager).GetField("m_incomingCount", BindingFlags.NonPublic | BindingFlags.Instance);
-            var incomingOffers = typeof(TransferManager).GetField("m_incomingOffers", BindingFlags.NonPublic | BindingFlags.Instance);
-            var incomingAmount = typeof(TransferManager).GetField("m_incomingAmount", BindingFlags.NonPublic | BindingFlags.Instance);
-            var outgoingCount = typeof(TransferManager).GetField("m_outgoingCount", BindingFlags.NonPublic | BindingFlags.Instance);
-            var outgoingOffers = typeof(TransferManager).GetField("m_outgoingOffers", BindingFlags.NonPublic | BindingFlags.Instance);
-            var outgoingAmount = typeof(TransferManager).GetField("m_outgoingAmount", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (inst == null)
-            {
-                CODebugBase<LogChannel>.Error(LogChannel.Core, "No instance of TransferManager found!");
-                DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, "No instance of TransferManager found!");
-                return;
-            }
-            m_incomingCount = incomingCount.GetValue(inst) as ushort[];
-            m_incomingOffers = incomingOffers.GetValue(inst) as TransferManager.TransferOffer[];
-            m_incomingAmount = incomingAmount.GetValue(inst) as int[];
-            m_outgoingCount = outgoingCount.GetValue(inst) as ushort[];
-            m_outgoingOffers = outgoingOffers.GetValue(inst) as TransferManager.TransferOffer[];
-            m_outgoingAmount = outgoingAmount.GetValue(inst) as int[];
+        // Matching logic
+        private enum OFFER_MATCHMODE : int { INCOMING_FIRST = 1, OUTGOING_FIRST = 2, BALANCED = 3 };
 
-            InitDelegate();
-        }
 
+        // References to game functionalities:
+        private static TransferManager _TransferManager = null;
+        private static BuildingManager _BuildingManager = null;
+        private static VehicleManager _VehicleManager = null;
+        private static InstanceManager _InstanceManager = null;
+
+        // TransferManager internal fields and arrays
         public static TransferManager.TransferOffer[] m_outgoingOffers;
         public static TransferManager.TransferOffer[] m_incomingOffers;
         public static ushort[] m_outgoingCount;
@@ -44,51 +31,120 @@ namespace MoreEffectiveTransfer.CustomManager
         public static int[] m_outgoingAmount;
         public static int[] m_incomingAmount;
 
+
+        #region DELEGATES
+        public static void InitDelegate()
+        {
+            TransferManagerStartTransferDG = FastDelegateFactory.Create<TransferManagerStartTransfer>(typeof(TransferManager), "StartTransfer", instanceMethod: true);
+            TransferManagerGetDistanceMultiplierDG = FastDelegateFactory.Create<TransferManagerGetDistanceMultiplier>(typeof(TransferManager), "GetDistanceMultiplier", instanceMethod: false);
+        }
+
+        public delegate void TransferManagerStartTransfer(TransferManager TransferManager, TransferReason material, TransferOffer offerOut, TransferOffer offerIn, int delta);
+        public static TransferManagerStartTransfer TransferManagerStartTransferDG;
+
+        public delegate float TransferManagerGetDistanceMultiplier(TransferManager.TransferReason material);
+        public static TransferManagerGetDistanceMultiplier TransferManagerGetDistanceMultiplierDG;
+        #endregion
+
+
+        public static void Init()
+        {
+            _TransferManager = Singleton<TransferManager>.instance;
+            if (_TransferManager == null)
+            {
+                CODebugBase<LogChannel>.Error(LogChannel.Core, "No instance of TransferManager found!");
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, "No instance of TransferManager found!");
+                return;
+            }
+
+            var incomingCount = typeof(TransferManager).GetField("m_incomingCount", BindingFlags.NonPublic | BindingFlags.Instance);
+            var incomingOffers = typeof(TransferManager).GetField("m_incomingOffers", BindingFlags.NonPublic | BindingFlags.Instance);
+            var incomingAmount = typeof(TransferManager).GetField("m_incomingAmount", BindingFlags.NonPublic | BindingFlags.Instance);
+            var outgoingCount = typeof(TransferManager).GetField("m_outgoingCount", BindingFlags.NonPublic | BindingFlags.Instance);
+            var outgoingOffers = typeof(TransferManager).GetField("m_outgoingOffers", BindingFlags.NonPublic | BindingFlags.Instance);
+            var outgoingAmount = typeof(TransferManager).GetField("m_outgoingAmount", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            m_incomingCount = incomingCount.GetValue(_TransferManager) as ushort[];
+            m_incomingOffers = incomingOffers.GetValue(_TransferManager) as TransferManager.TransferOffer[];
+            m_incomingAmount = incomingAmount.GetValue(_TransferManager) as int[];
+            m_outgoingCount = outgoingCount.GetValue(_TransferManager) as ushort[];
+            m_outgoingOffers = outgoingOffers.GetValue(_TransferManager) as TransferManager.TransferOffer[];
+            m_outgoingAmount = outgoingAmount.GetValue(_TransferManager) as int[];
+
+            InitDelegate();
+
+            // get references to other managers:
+            CustomTransferManager._BuildingManager = Singleton<BuildingManager>.instance;
+            CustomTransferManager._InstanceManager = Singleton<InstanceManager>.instance;
+            CustomTransferManager._VehicleManager  = Singleton<VehicleManager>.instance;
+
+            _init = true;
+        }
+
+
         public static bool CanUseNewMatchOffers(TransferReason material)
         {
             switch (material)
             {
+                // Goods & Service for new transfer manager:
+                case TransferReason.Garbage:
+                case TransferReason.GarbageMove:
+                case TransferReason.GarbageTransfer:
+                    /*
+                case TransferReason.Crime:
+                case TransferReason.Sick:
+                case TransferReason.Dead:
+                case TransferReason.Fire:
                 case TransferReason.Oil:
                 case TransferReason.Ore:
+                case TransferReason.Logs:
+                case TransferReason.Grain:
+                case TransferReason.Goods:
                 case TransferReason.Coal:
                 case TransferReason.Petrol:
                 case TransferReason.Food:
-                case TransferReason.Grain:
                 case TransferReason.Lumber:
-                case TransferReason.Logs:
-                case TransferReason.Goods:
-                case TransferReason.LuxuryProducts:
-                case TransferReason.AnimalProducts:
-                case TransferReason.Flours:
-                case TransferReason.Petroleum:
-                case TransferReason.Plastics:
-                case TransferReason.Metals:
-                case TransferReason.Glass:
-                case TransferReason.PlanedTimber:
-                case TransferReason.Paper:
-                case TransferReason.Fire:
-                case TransferReason.Garbage:
-                case TransferReason.GarbageMove:
-                case TransferReason.Crime:
-                case TransferReason.CriminalMove:
-                case TransferReason.Dead:
                 case TransferReason.DeadMove:
+                case TransferReason.Taxi:
+                case TransferReason.CriminalMove:
                 case TransferReason.Snow:
                 case TransferReason.SnowMove:
                 case TransferReason.RoadMaintenance:
+                case TransferReason.SickMove:
+                case TransferReason.ForestFire:
+                case TransferReason.Collapsed:
+                case TransferReason.Collapsed2:
+                case TransferReason.Fire2:
+                case TransferReason.Sick2:
                 case TransferReason.ParkMaintenance:
-                case TransferReason.Taxi:
+                case TransferReason.Mail:
+                case TransferReason.UnsortedMail:
+                case TransferReason.SortedMail:
+                case TransferReason.OutgoingMail:
+                case TransferReason.IncomingMail:
+                case TransferReason.AnimalProducts:
+                case TransferReason.Flours:
+                case TransferReason.Paper:
+                case TransferReason.PlanedTimber:
+                case TransferReason.Petroleum:
+                case TransferReason.Plastics:
+                case TransferReason.Glass:
+                case TransferReason.Metals:
+                case TransferReason.LuxuryProducts:
+                case TransferReason.Fish:
+                    */
                     return true;
-                default: return false;
+                
+                // Default: use vanilla transfermanager (esp. citizens)
+                default: 
+                    return false;
             }
         }
 
-        public static byte MatchOffersMode(TransferReason material)
+        private static OFFER_MATCHMODE GetMatchOffersMode(TransferReason material)
         {
-            //incoming only mode 0
-            //outgoing only mode 1
-            //balanced mode 2
-            //incoming first mode 3
+            //incoming first: pick highest priority outgoing offers by distance
+            //outgoing first: try to fulfill all outgoing offers by descending priority. incoming offer mapped by distance only (priority not relevant).
             switch (material)
             {
                 case TransferReason.Oil:
@@ -113,19 +169,25 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.RoadMaintenance:
                 case TransferReason.ParkMaintenance:
                 case TransferReason.Fish:
-                    return 2;
-                case TransferReason.Garbage:
-                case TransferReason.Crime:
-                case TransferReason.Fire:
-                case TransferReason.Dead:
+                    return OFFER_MATCHMODE.BALANCED;
+                case TransferReason.Garbage:    //Garbage: outgoing offer (passive) from buldings with garbage to be collected, incoming (active) from landfills
+                case TransferReason.Crime:      //Crime: like garbage
+                case TransferReason.Fire2:
+                case TransferReason.Fire:       //Fire: like garbage
+                case TransferReason.Dead:       //Dead: like garbage
+                case TransferReason.Sick:
+                case TransferReason.Sick2:
                 case TransferReason.Taxi:
-                    return 3;
-                case TransferReason.GarbageMove:
+                    return OFFER_MATCHMODE.OUTGOING_FIRST;
+                case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from empting landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
+                case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
                 case TransferReason.SnowMove:
-                    return 1;
-                default: return 2;
+                    return OFFER_MATCHMODE.OUTGOING_FIRST;
+
+                default: 
+                    return OFFER_MATCHMODE.BALANCED;
             }
         }
 
@@ -160,7 +222,7 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is OutsideConnectionAI)
                 {
-                    if (MoreEffectiveTransfer.warehouseAdvancedBalance)
+                    if (MoreEffectiveTransfer.optionWarehouseReserveTrucks)
                     {
                         var AI = bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI as WarehouseAI;
                         TransferManager.TransferReason actualTransferReason = AI.GetActualTransferReason(offerOut.Building, ref bM.m_buildings.m_buffer[offerOut.Building]);
@@ -222,7 +284,7 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling))
                 {
-                    if (MoreEffectiveTransfer.warehouseFirst)
+                    if (MoreEffectiveTransfer.optionWarehouseFirst)
                         return 100f;
                 }
                 else
@@ -231,7 +293,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling))
                         {
-                            if (MoreEffectiveTransfer.warehouseFirst)
+                            if (MoreEffectiveTransfer.optionWarehouseFirst)
                                 return 100f;
                         }
                         else
@@ -241,7 +303,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     }
                     else
                     {
-                        if (MoreEffectiveTransfer.warehouseFirst)
+                        if (MoreEffectiveTransfer.optionWarehouseFirst)
                             return 100f;
                     }
                 }
@@ -250,7 +312,7 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling))
                 {
-                    if (MoreEffectiveTransfer.warehouseFirst)
+                    if (MoreEffectiveTransfer.optionWarehouseFirst)
                         return 100f;
                 }
                 else
@@ -259,7 +321,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     {
                         if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling))
                         {
-                            if (MoreEffectiveTransfer.warehouseFirst)
+                            if (MoreEffectiveTransfer.optionWarehouseFirst)
                                 return 100f;
                         }
                         else
@@ -269,7 +331,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     }
                     else
                     {
-                        if (MoreEffectiveTransfer.warehouseFirst)
+                        if (MoreEffectiveTransfer.optionWarehouseFirst)
                             return 100f;
                     }
                 }
@@ -280,7 +342,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
         public static float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material, float preDistance)
         {
-            if (!MoreEffectiveTransfer.preferShipPlaneTrain)
+            if (!MoreEffectiveTransfer.optionPreferExportShipPlaneTrain)
             {
                 return preDistance;
             }
@@ -368,30 +430,30 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 if (offerOutOutsidePlane)
                 {
-                    return preDistance * MoreEffectiveTransferThreading.planeStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransfer.planeStationDistanceRandom;
                 } 
                 else if (offerOutOutsideShip)
                 {
-                    return preDistance * MoreEffectiveTransferThreading.shipStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransfer.shipStationDistanceRandom;
                 }
                 else if (offerOutOutsideTrain)
                 {
-                    return preDistance * MoreEffectiveTransferThreading.trainStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransfer.trainStationDistanceRandom;
                 }
             } 
             else if (offerInOutside)
             {
                 if (offerInOutsidePlane)
                 {
-                    return preDistance * MoreEffectiveTransferThreading.planeStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransfer.planeStationDistanceRandom;
                 }
                 else if (offerInOutsideShip)
                 {
-                    return preDistance * MoreEffectiveTransferThreading.shipStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransfer.shipStationDistanceRandom;
                 }
                 else if (offerInOutsideTrain)
                 {
-                    return preDistance * MoreEffectiveTransferThreading.trainStationDistanceRandom;
+                    return preDistance * MoreEffectiveTransfer.trainStationDistanceRandom;
                 }
             }
             
@@ -400,7 +462,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
         public static void ForgetFailedBuilding(ushort targetBuilding)
         {
-            if (MoreEffectiveTransfer.fixUnRouteTransfer)
+            if (MoreEffectiveTransfer.optionFixUnRouteTransfer)
             {
                 if (targetBuilding != 0)
                 {
@@ -438,7 +500,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
         public static bool IsUnRoutedMatch(TransferOffer offerIn, TransferOffer offerOut)
         {
-            if (!MoreEffectiveTransfer.fixUnRouteTransfer)
+            if (!MoreEffectiveTransfer.optionFixUnRouteTransfer)
             {
                 return false;
             }
@@ -547,7 +609,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 return true;
             }
 
-            if (!MoreEffectiveTransfer.fixUnRouteTransfer)
+            if (!MoreEffectiveTransfer.optionFixUnRouteTransfer)
             {
                 return false;
             }
@@ -635,7 +697,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
         public static bool IsLocalUse(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
-            if (!MoreEffectiveTransfer.localUse)
+            if (!MoreEffectiveTransfer.optionPreferLocalService)
             {
                 return true;
             }
@@ -734,13 +796,151 @@ namespace MoreEffectiveTransfer.CustomManager
             return true;
         }
 
+
+        public static String DebugInspectOffer(TransferOffer offer)
+        {
+            var instB = default(InstanceID);
+            instB.Building = offer.Building;
+            return (offer.Building > 0 && offer.Building < _BuildingManager.m_buildings.m_size) ? _BuildingManager.m_buildings.m_buffer[offer.Building].Info?.name + "(" + _InstanceManager.GetName(instB) + ")"
+                    : (offer.Vehicle > 0 && offer.Vehicle < _VehicleManager.m_vehicles.m_size)  ? _VehicleManager.m_vehicles.m_buffer[offer.Vehicle].Info?.name : "";
+        }
+
+
+        [Conditional("DEBUG")]
+        public static void DebugPrintAllOffers(TransferReason material, int offset, int offerCountIncoming, int offerCountOutgoing)
+        {
+            for (int i=0; i< offerCountIncoming; i++)
+            {
+                TransferOffer incomingOffer = m_incomingOffers[offset * 256 + i];
+                String bname = DebugInspectOffer(incomingOffer);
+                DebugLog.DebugMsg($"   in #{i}: act {incomingOffer.Active}, excl {incomingOffer.Exclude}, amt {incomingOffer.Amount}, bvc {incomingOffer.Building}/{incomingOffer.Vehicle}/{incomingOffer.Citizen} name={bname}");
+            }
+
+            for (int i = 0; i < offerCountOutgoing; i++)
+            {
+                TransferOffer outgoingOffer = m_outgoingOffers[offset * 256 + i];
+                String bname = DebugInspectOffer(outgoingOffer);
+                DebugLog.DebugMsg($"   out #{i}: act {outgoingOffer.Active}, excl {outgoingOffer.Exclude}, amt {outgoingOffer.Amount}, bvc {outgoingOffer.Building}/{outgoingOffer.Vehicle}/{outgoingOffer.Citizen} name={bname}");
+            }
+        }
+
+
         public static void MatchOffers(TransferReason material)
         {
+            //init on first call
             if (!_init)
             {
                 Init();
-                _init = true;
             }
+
+            // guard: ignore transferreason.none
+            if (material == TransferReason.None)
+                return;
+
+            // function scope variables
+            int offer_offset;
+            int offerCountIncoming, offerCountIncomingTotal = 0;
+            int offerCountOutgoing, offerCountOutgoingTotal = 0;
+            int offerAmountIncoming = 0;
+            int offerAmountOutgoing = 0;
+
+            // DEBUG LOGGING
+            DebugLog.DebugMsg($"-- TRANSFER REASON: {material.ToString()}");
+            for (int priority = 7; priority >= 0; priority--)
+            {
+                offer_offset = (int)material * 8 + priority;
+                offerCountIncoming = m_incomingCount[offer_offset];
+                offerCountOutgoing = m_outgoingCount[offer_offset];
+                offerCountIncomingTotal += offerCountIncoming;
+                offerCountOutgoingTotal += offerCountOutgoing;
+                offerAmountIncoming = m_incomingAmount[(int)material];
+                offerAmountOutgoing = m_outgoingAmount[(int)material];
+
+                DebugLog.DebugMsg($"   #Offers@priority {priority}: {offerCountIncoming} in (amt {offerAmountIncoming}), {offerCountOutgoing} out (amt {offerAmountOutgoing})");
+                DebugPrintAllOffers(material, offer_offset, offerCountIncoming, offerCountOutgoing);
+            }
+
+            // guard: nothing to match?
+            if (offerCountIncomingTotal == 0 || offerCountOutgoingTotal == 0)
+                goto END_OFFERMATCHING;
+
+
+            // Select offer matching algorithm
+            OFFER_MATCHMODE match_mode = GetMatchOffersMode(material);
+
+
+            // OUTGOING FIRST mode - try to fulfill all outgoing requests
+            if (match_mode == OFFER_MATCHMODE.OUTGOING_FIRST)
+            {
+                DebugLog.DebugMsg($"   ###MatchMode OUTGOING FIRST###");
+
+                // outgoing offers by descending priority
+                for (int priority = 7; priority >= 0; priority--)
+                {
+                    offer_offset = (int)material * 8 + priority;
+                    offerCountIncoming = m_incomingCount[offer_offset];
+                    offerCountOutgoing = m_outgoingCount[offer_offset];
+
+                    // all offers within this priority
+                    for (int offerIndex = 0; offerIndex < offerCountOutgoing; offerIndex++)
+                    {
+                        TransferOffer outgoingOffer = m_outgoingOffers[offer_offset * 256 + offerIndex];    //FIXME: copy by value!
+                        if (outgoingOffer.Exclude) break;
+                        DebugLog.DebugMsg($"   ###Matching OUTGOING offer: {DebugInspectOffer(outgoingOffer)}");
+
+                        int bestmatch_position = 0;
+                        float bestmatch_distance = float.MaxValue;
+
+                        // go through all matching counterpart offers and find closest one
+                        for (int counterpart_prio = 7; counterpart_prio >= 0; counterpart_prio--)
+                        {
+                            int counterpart_offset = (int)material * 8 + counterpart_prio;
+                            int counterpart_offercount = m_incomingCount[counterpart_offset];
+                            for (int counterpart_index = 0; counterpart_index<counterpart_offercount; counterpart_index++)
+                            {
+                                TransferOffer incomingOffer = m_incomingOffers[counterpart_offset * 256 + counterpart_index];   //FIXME: copy by value!
+
+                                // guard: out=in same?
+                                if (outgoingOffer.m_object == incomingOffer.m_object) continue;
+
+                                //TODO: check MoreEffectiveTransfer.optionPreferLocalService
+
+                                float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position);
+                                if (distance < bestmatch_distance)
+                                {
+                                    bestmatch_position = counterpart_offset * 256 + counterpart_index;
+                                    bestmatch_distance = distance;
+                                }
+
+                                DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(incomingOffer)}, distance: {distance}, bestmatch: {bestmatch_distance}");                                
+                            }
+                        }
+
+                        // Select bestmatch
+                        DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(m_incomingOffers[bestmatch_position])}");
+                        
+                        // Start the transfer
+                        int deltaamount = Math.Min(m_outgoingOffers[offer_offset * 256 + offerIndex].Amount, m_incomingOffers[bestmatch_position].Amount);
+                        TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, m_outgoingOffers[offer_offset * 256 + offerIndex], m_incomingOffers[bestmatch_position], deltaamount);
+                        
+                        // mark offer pair as to be excluded for further matches
+                        m_incomingOffers[bestmatch_position].Exclude = true;
+                        m_outgoingOffers[offer_offset * 256 + offerIndex].Exclude = true;
+
+                    } //end loop priority
+
+                } //end loop outgoing offer
+
+            }
+
+
+
+            END_OFFERMATCHING:
+            // finally: clear everything, including unmatched offers!
+            ClearAllTransferOffers(material);
+
+
+            /*
             if (material != TransferReason.None)
             {
                 float distanceMultiplier = TransferManagerGetDistanceMultiplierDG(material);
@@ -1107,18 +1307,23 @@ namespace MoreEffectiveTransfer.CustomManager
                 m_incomingAmount[(int)material] = 0;
                 m_outgoingAmount[(int)material] = 0;
             }
+            */
+
         }
 
-        public static void InitDelegate()
+
+        private static void ClearAllTransferOffers(TransferReason material)
         {
-            TransferManagerStartTransferDG = FastDelegateFactory.Create<TransferManagerStartTransfer>(typeof(TransferManager), "StartTransfer", instanceMethod: true);
-            TransferManagerGetDistanceMultiplierDG = FastDelegateFactory.Create<TransferManagerGetDistanceMultiplier>(typeof(TransferManager), "GetDistanceMultiplier", instanceMethod: false);
+            for (int k = 0; k < 8; k++)
+            {
+                int material_offset = (int)material * 8 + k;
+                m_incomingCount[material_offset] = 0;
+                m_outgoingCount[material_offset] = 0;
+            }
+            m_incomingAmount[(int)material] = 0;
+            m_outgoingAmount[(int)material] = 0;
         }
 
-        public delegate void TransferManagerStartTransfer(TransferManager TransferManager, TransferReason material, TransferOffer offerOut, TransferOffer offerIn, int delta);
-        public static TransferManagerStartTransfer TransferManagerStartTransferDG;
 
-        public delegate float TransferManagerGetDistanceMultiplier(TransferManager.TransferReason material);
-        public static TransferManagerGetDistanceMultiplier TransferManagerGetDistanceMultiplierDG;
     }
 }

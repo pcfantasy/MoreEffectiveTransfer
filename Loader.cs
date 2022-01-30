@@ -302,6 +302,10 @@ namespace MoreEffectiveTransfer
                     HarmonyDetourInited = true;
                 }
             }
+            else
+            {
+                DebugLog.LogToFileOnly("ERROR: Harmony not found!");
+            }
         }
 
         public void HarmonyRevertDetour()
@@ -315,6 +319,10 @@ namespace MoreEffectiveTransfer
                     HarmonyDetourInited = false;
                     HarmonyDetourFailed = true;
                 }
+            }
+            else
+            {
+                DebugLog.LogToFileOnly("ERROR: Harmony not found!");
             }
         }
 

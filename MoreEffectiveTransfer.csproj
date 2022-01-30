@@ -22,22 +22,28 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Steam install path - currently unused -->
     <SteamInstallPath>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\Valve\Steam', 'SteamPath', null, RegistryView.Registry64, RegistryView.Registry32))\</SteamInstallPath>
     <CitiesSkylinesInstallPath>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 255710', 'InstallLocation', null, RegistryView.Registry64, RegistryView.Registry32))\</CitiesSkylinesInstallPath>
     <!-- <CitiesSkylinesModsPath>$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\</CitiesSkylinesModsPath>-->
-    <CitiesSkylinesModsPath>$(CitiesSkylinesInstallPath)..\..\workshop\content\255710\1680840913\</CitiesSkylinesModsPath>
+    <!-- WORKSHOP BUILD: <CitiesSkylinesModsPath>$(CitiesSkylinesInstallPath)..\..\workshop\content\255710\1680840913\</CitiesSkylinesModsPath> -->
+    <!-- LOCAL BUILD: -->
+    <CitiesSkylinesModsPath>C:\Users\Henne\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\1680840913\</CitiesSkylinesModsPath>
+    <!-- END LOCAL BUILD -->
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
@@ -81,6 +87,7 @@
     <Compile Include="Patch\TransferManagerMatchOfferPatch.cs" />
     <Compile Include="Patch\TransferManagerAddOutgoingOfferPatch.cs" />
     <Compile Include="UI\BuildingUI.cs" />
+    <Compile Include="Util\FastList.cs" />
     <Compile Include="Util\FastDelegateFactory.cs" />
     <Compile Include="Util\DebugLog.cs" />
     <Compile Include="Util\HarmonyDetours.cs" />

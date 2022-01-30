@@ -174,7 +174,7 @@ namespace MoreEffectiveTransfer.UI
             }
 
             var buildingAI = Singleton<BuildingManager>.instance.m_buildings.m_buffer[MainDataStore.lastBuildingID].Info.m_buildingAI;
-            bool isLocalUseAvailable = MoreEffectiveTransfer.localUse && ((buildingAI is LandfillSiteAI) || (buildingAI is PoliceStationAI) || (buildingAI is FireStationAI));
+            bool isLocalUseAvailable = MoreEffectiveTransfer.optionPreferLocalService && ((buildingAI is LandfillSiteAI) || (buildingAI is PoliceStationAI) || (buildingAI is FireStationAI));
 
             if (!MoreEffectiveTransfer.debugMode && !isLocalUseAvailable)
             {
