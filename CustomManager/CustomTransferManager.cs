@@ -89,52 +89,59 @@ namespace MoreEffectiveTransfer.CustomManager
             switch (material)
             {
                 // Goods & Service for new transfer manager:
-                case TransferReason.Garbage:
-                case TransferReason.GarbageMove:
-                case TransferReason.GarbageTransfer:
-                    /*
-                case TransferReason.Crime:
-                case TransferReason.Sick:
-                case TransferReason.Dead:
-                case TransferReason.Fire:
-                case TransferReason.Oil:
-                case TransferReason.Ore:
-                case TransferReason.Logs:
-                case TransferReason.Grain:
-                case TransferReason.Goods:
-                case TransferReason.Coal:
-                case TransferReason.Petrol:
-                case TransferReason.Food:
-                case TransferReason.Lumber:
-                case TransferReason.DeadMove:
-                case TransferReason.Taxi:
-                case TransferReason.CriminalMove:
-                case TransferReason.Snow:
-                case TransferReason.SnowMove:
-                case TransferReason.RoadMaintenance:
-                case TransferReason.SickMove:
-                case TransferReason.ForestFire:
-                case TransferReason.Collapsed:
-                case TransferReason.Collapsed2:
-                case TransferReason.Fire2:
-                case TransferReason.Sick2:
-                case TransferReason.ParkMaintenance:
-                case TransferReason.Mail:
-                case TransferReason.UnsortedMail:
-                case TransferReason.SortedMail:
-                case TransferReason.OutgoingMail:
-                case TransferReason.IncomingMail:
-                case TransferReason.AnimalProducts:
-                case TransferReason.Flours:
-                case TransferReason.Paper:
-                case TransferReason.PlanedTimber:
-                case TransferReason.Petroleum:
-                case TransferReason.Plastics:
-                case TransferReason.Glass:
-                case TransferReason.Metals:
-                case TransferReason.LuxuryProducts:
-                case TransferReason.Fish:
-                    */
+                /*
+              case TransferReason.Garbage:
+              case TransferReason.GarbageMove:
+              case TransferReason.GarbageTransfer:
+              case TransferReason.Crime:
+              case TransferReason.CriminalMove:
+              case TransferReason.Fire:
+              case TransferReason.Fire2:
+              case TransferReason.ForestFire:
+                */
+              case TransferReason.Sick:
+              case TransferReason.Sick2:
+              case TransferReason.SickMove:
+              case TransferReason.Dead:
+              case TransferReason.DeadMove:
+
+            //case TransferReason.Collapsed:
+            //case TransferReason.Collapsed2:
+
+            //case TransferReason.Snow:
+            //case TransferReason.SnowMove:
+            //case TransferReason.RoadMaintenance:            
+            //case TransferReason.ParkMaintenance:
+
+            //case TransferReason.Mail:
+            //case TransferReason.UnsortedMail:
+            //case TransferReason.SortedMail:
+            //case TransferReason.OutgoingMail:
+            //case TransferReason.IncomingMail:
+
+            //case TransferReason.Oil:
+            //case TransferReason.Ore:
+            //case TransferReason.Logs:
+            //case TransferReason.Grain:
+            //case TransferReason.Goods:
+            //case TransferReason.Coal:
+            //case TransferReason.Petrol:
+            //case TransferReason.Food:
+            //case TransferReason.Lumber:
+            
+            //case TransferReason.Taxi:
+
+            //case TransferReason.AnimalProducts:
+            //case TransferReason.Flours:
+            //case TransferReason.Paper:
+            //case TransferReason.PlanedTimber:
+            //case TransferReason.Petroleum:
+            //case TransferReason.Plastics:
+            //case TransferReason.Glass:
+            //case TransferReason.Metals:
+            //case TransferReason.LuxuryProducts:
+            //case TransferReason.Fish:
+                
                     return true;
                 
                 // Default: use vanilla transfermanager (esp. citizens)
@@ -175,18 +182,20 @@ namespace MoreEffectiveTransfer.CustomManager
 
                 case TransferReason.Garbage:            //Garbage: outgoing offer (passive) from buldings with garbage to be collected, incoming (active) from landfills
                 case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
-                case TransferReason.Crime:              //Crime: like garbage
-                case TransferReason.Fire2:
-                case TransferReason.Fire:               //Fire: like garbage
-                case TransferReason.Dead:               //Dead: like garbage
-                case TransferReason.Sick:
-                case TransferReason.Sick2:
+                case TransferReason.Crime:              //Crime: outgoing offer (passive) 
+                case TransferReason.ForestFire:         //like Fire2
+                case TransferReason.Fire2:              //Fire2: helicopter
+                case TransferReason.Fire:               //Fire: outgoing offer (passive) - always prio7
+                case TransferReason.Dead:               //Dead: outgoing offer (passive) 
+                case TransferReason.Sick:               //Sick: outgoing offer (passive) [special case: citizen with outgoing and active]
+                case TransferReason.Sick2:              //Sick2: helicopter
                 case TransferReason.Taxi:
                     return OFFER_MATCHMODE.OUTGOING_FIRST;
 
                 case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
                 case TransferReason.CriminalMove:
-                case TransferReason.DeadMove:
+                case TransferReason.SickMove:
+                case TransferReason.DeadMove:           //outgoing (active) from emptying, incoming (passive) from receiving
                 case TransferReason.SnowMove:
                     return OFFER_MATCHMODE.INCOMING_FIRST;
 
@@ -702,6 +711,7 @@ namespace MoreEffectiveTransfer.CustomManager
         public static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority)
         {
             const int PRIORITY_THRESHOLD_LOCAL = 4; //upper prios 4..7 also get non-local fulfillment
+            bool isMoveTransfer = false;
 
             // guard: current option setting?
             if (!MoreEffectiveTransfer.optionPreferLocalService)
@@ -718,16 +728,18 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Crime:
                 case TransferReason.Fire:
                 case TransferReason.Fire2:
+                case TransferReason.ForestFire:
                 case TransferReason.Dead:
                 case TransferReason.Sick:
                 case TransferReason.Sick2:
 
-                // Material Transfers for service subject to policy:
+                // Material Transfers for services subject to policy:
                 case TransferReason.GarbageMove:        
                 case TransferReason.GarbageTransfer:    
                 case TransferReason.CriminalMove:
                 case TransferReason.DeadMove:
                 case TransferReason.SnowMove:
+                    isMoveTransfer = true;      //Move Transfers: incoming offer is passive, allow move/emptying to global district buildings
                     break;
 
                 default:
@@ -745,10 +757,11 @@ namespace MoreEffectiveTransfer.CustomManager
             byte districtIncoming = _DistrictManager.GetDistrict(_BuildingManager.m_buildings.m_buffer[buildingIncoming].m_position);
             byte districtOutgoing = _DistrictManager.GetDistrict(_BuildingManager.m_buildings.m_buffer[buildingOutgoing].m_position);
 
-            // return true if: both within same district, or active offer is outside district ("in global area"
+            // return true if: both within same district, or active offer is outside district ("in global area")
             if (  (districtIncoming == districtOutgoing) 
                   || (offerIn.Active && districtIncoming == 0)
                   || (offerOut.Active && districtOutgoing == 0) 
+                  || (isMoveTransfer && districtIncoming == 0)
                )
                return true;
 
@@ -845,7 +858,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     for (int offerIndex = 0; offerIndex < offerCountOutgoing; offerIndex++)
                     {
                         ref TransferOffer outgoingOffer = ref m_outgoingOffers[offer_offset * 256 + offerIndex];
-                        if (outgoingOffer.Exclude) continue;
+                        if (outgoingOffer.Exclude || outgoingOffer.Amount==0) continue;
                         DebugLog.DebugMsg($"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}");
 
                         int bestmatch_position = -1;
@@ -861,7 +874,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                 ref TransferOffer incomingOffer = ref m_incomingOffers[counterpart_offset * 256 + counterpart_index];
 
                                 // guards: out=in same? exclude offer (already used?)
-                                if ((incomingOffer.Exclude) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
+                                if ((incomingOffer.Exclude || incomingOffer.Amount==0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
 
                                 // CHECK OPTION: preferlocalservice
                                 bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
@@ -875,7 +888,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                     bestmatch_distance = distance;
                                 }
 
-                                DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, local: {isLocalAllowed}, distance: {distance}, bestmatch: {bestmatch_distance}");                                
+                                DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}, bestmatch: {bestmatch_distance}");                                
                             }
                         }
 
@@ -883,16 +896,17 @@ namespace MoreEffectiveTransfer.CustomManager
                         if (bestmatch_position != -1)
                         {
                             DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(ref m_incomingOffers[bestmatch_position])}");
+                            // ATTENTION: last incomingOffer is NOT necessarily bvestmatch!
 
                             // Start the transfer
-                            int deltaamount = Math.Min(m_outgoingOffers[offer_offset * 256 + offerIndex].Amount, m_incomingOffers[bestmatch_position].Amount);
-                            TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, m_outgoingOffers[offer_offset * 256 + offerIndex], m_incomingOffers[bestmatch_position], deltaamount);
+                            int deltaamount = Math.Min(outgoingOffer.Amount, m_incomingOffers[bestmatch_position].Amount);
+                            TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, outgoingOffer, m_incomingOffers[bestmatch_position], deltaamount);
 
                             // mark offer pair as to be excluded for further matches
-                            m_incomingOffers[bestmatch_position].Exclude = true;
-                            outgoingOffer.Exclude = true;
-                            offerCountIncomingTotal--;
-                            offerCountOutgoingTotal--;
+                            outgoingOffer.Amount -= deltaamount;
+                            m_incomingOffers[bestmatch_position].Amount -= deltaamount;
+                            
+
                         }
 
                     } //end loop priority
@@ -922,7 +936,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     for (int offerIndex = 0; offerIndex < offerCountIncoming; offerIndex++)
                     {
                         ref TransferOffer incomingOffer = ref m_incomingOffers[offer_offset * 256 + offerIndex];
-                        if (incomingOffer.Exclude) continue;
+                        if (incomingOffer.Exclude || incomingOffer.Amount==0) continue;
                         DebugLog.DebugMsg($"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}");
 
                         int bestmatch_position = -1;
@@ -938,7 +952,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                 ref TransferOffer outgoingOffer = ref m_outgoingOffers[counterpart_offset * 256 + counterpart_index];
 
                                 // guards: out=in same? exclude offer (already used?)
-                                if ((outgoingOffer.Exclude) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
+                                if ((outgoingOffer.Exclude || outgoingOffer.Amount==0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
 
                                 // CHECK OPTION: preferlocalservice
                                 bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
@@ -952,7 +966,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                     bestmatch_distance = distance;
                                 }
 
-                                DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, local: {isLocalAllowed}, distance: {distance}, bestmatch: {bestmatch_distance}");
+                                DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}, bestmatch: {bestmatch_distance}");
                             }
                         }
 
@@ -960,16 +974,16 @@ namespace MoreEffectiveTransfer.CustomManager
                         if (bestmatch_position != -1)
                         {
                             DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(ref m_outgoingOffers[bestmatch_position])}");
+                            // ATTENTION: last outgoingOffer is NOT necessarily the bestmatch!
 
                             // Start the transfer
-                            int deltaamount = Math.Min(m_incomingOffers[offer_offset * 256 + offerIndex].Amount, m_outgoingOffers[bestmatch_position].Amount);
-                            TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, m_outgoingOffers[bestmatch_position], m_incomingOffers[offer_offset * 256 + offerIndex], deltaamount);
+                            int deltaamount = Math.Min(incomingOffer.Amount, m_outgoingOffers[bestmatch_position].Amount);
+                            TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, m_outgoingOffers[bestmatch_position], incomingOffer, deltaamount);
 
                             // mark offer pair as to be excluded for further matches
-                            m_outgoingOffers[bestmatch_position].Exclude = true;
-                            incomingOffer.Exclude = true;
-                            offerCountIncomingTotal--;
-                            offerCountOutgoingTotal--;
+                            incomingOffer.Amount -= deltaamount;
+                            m_outgoingOffers[bestmatch_position].Amount -= deltaamount;
+                            
                         }
 
                     } //end loop priority
