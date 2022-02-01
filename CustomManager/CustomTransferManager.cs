@@ -23,6 +23,7 @@ namespace MoreEffectiveTransfer.CustomManager
         private static VehicleManager _VehicleManager = null;
         private static InstanceManager _InstanceManager = null;
         private static DistrictManager _DistrictManager = null;
+        private static CitizenManager _CitizenManager = null;
 
         // TransferManager internal fields and arrays
         public static TransferManager.TransferOffer[] m_outgoingOffers;
@@ -79,6 +80,7 @@ namespace MoreEffectiveTransfer.CustomManager
             CustomTransferManager._InstanceManager = Singleton<InstanceManager>.instance;
             CustomTransferManager._VehicleManager  = Singleton<VehicleManager>.instance;
             CustomTransferManager._DistrictManager = Singleton<DistrictManager>.instance;
+            CustomTransferManager._CitizenManager  = Singleton<CitizenManager>.instance;
 
             _init = true;
         }
@@ -748,10 +750,14 @@ namespace MoreEffectiveTransfer.CustomManager
 
             // determine buildings or vehicle parent buildings
             ushort buildingIncoming = 0, buildingOutgoing = 0;
+            
             if (offerIn.Building != 0) buildingIncoming = offerIn.Building;
-            if (offerIn.Vehicle != 0) buildingIncoming = _VehicleManager.m_vehicles.m_buffer[offerIn.Vehicle].m_sourceBuilding;
+            else if (offerIn.Vehicle != 0) buildingIncoming = _VehicleManager.m_vehicles.m_buffer[offerIn.Vehicle].m_sourceBuilding;
+            else if (offerIn.Citizen != 0) buildingIncoming = _CitizenManager.m_citizens.m_buffer[offerIn.Citizen].m_homeBuilding;
+            
             if (offerOut.Building != 0) buildingOutgoing = offerOut.Building;
-            if (offerOut.Vehicle != 0) buildingOutgoing = _VehicleManager.m_vehicles.m_buffer[offerOut.Vehicle].m_sourceBuilding;
+            else if (offerOut.Vehicle != 0) buildingOutgoing = _VehicleManager.m_vehicles.m_buffer[offerOut.Vehicle].m_sourceBuilding;
+            else if (offerOut.Citizen != 0) buildingOutgoing = _CitizenManager.m_citizens.m_buffer[offerIn.Citizen].m_homeBuilding;
 
             // get respective districts
             byte districtIncoming = _DistrictManager.GetDistrict(_BuildingManager.m_buildings.m_buffer[buildingIncoming].m_position);
