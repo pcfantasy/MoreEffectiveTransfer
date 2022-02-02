@@ -115,8 +115,9 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Mail:
                 case TransferReason.UnsortedMail:
                 case TransferReason.SortedMail:
-                case TransferReason.OutgoingMail:
                 case TransferReason.IncomingMail:
+                case TransferReason.OutgoingMail:
+
 
                 //case TransferReason.Taxi:
             
@@ -187,6 +188,8 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Collapsed:          //Collapsed: outgoing (passive)
                 case TransferReason.Collapsed2:         //Collapsed2: helicopter
                 case TransferReason.Snow:               //outgoing (passive) from netsegements, incoming (active) from snowdumps
+                case TransferReason.Mail:               //outgoing (passive) from buidings, incoming(active) from postoffice
+                case TransferReason.OutgoingMail:       //outside connections incoming(passive)
                     return OFFER_MATCHMODE.OUTGOING_FIRST;
 
                 case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
@@ -196,6 +199,9 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.SnowMove:           //outgoing (active) from emptying snowdumps, incoming (passive) from receiving
                 case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
                 case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
+                case TransferReason.IncomingMail:       //outside connections outgoing(active), incoming(passive) from postsortingfacilities
+                case TransferReason.SortedMail:         //outside connections outgoing(active), incoming(passive) from postoffice
+                case TransferReason.UnsortedMail:       //outgoing(active) from ???, incoming(passive) from postsortingfacilities
                     return OFFER_MATCHMODE.INCOMING_FIRST;
 
                 default: 
@@ -721,6 +727,8 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Collapsed:
                 case TransferReason.Collapsed2:
                 case TransferReason.ParkMaintenance:
+                case TransferReason.Mail:
+                case TransferReason.SortedMail:
                     break;
 
                 // Material Transfers for services subject to policy:
