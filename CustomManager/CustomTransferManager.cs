@@ -111,21 +111,19 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.SnowMove:
                 case TransferReason.RoadMaintenance:            
                 case TransferReason.ParkMaintenance:
-*/
                 case TransferReason.Mail:
                 case TransferReason.UnsortedMail:
                 case TransferReason.SortedMail:
                 case TransferReason.IncomingMail:
                 case TransferReason.OutgoingMail:
-
-
-                //case TransferReason.Taxi:
+*/
             
+                case TransferReason.Goods:
+
                 //case TransferReason.Oil:
                 //case TransferReason.Ore:
                 //case TransferReason.Logs:
                 //case TransferReason.Grain:
-                //case TransferReason.Goods:
                 //case TransferReason.Coal:
                 //case TransferReason.Petrol:
                 //case TransferReason.Food:
@@ -153,6 +151,7 @@ namespace MoreEffectiveTransfer.CustomManager
         {
             //incoming first: pick highest priority outgoing offers by distance
             //outgoing first: try to fulfill all outgoing offers by descending priority. incoming offer mapped by distance only (priority not relevant).
+            //balanced: outgoing/incoming together by priorty descending
             switch (material)
             {
                 case TransferReason.Oil:
@@ -209,6 +208,76 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
+        public static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority)
+        {
+            const int PRIORITY_THRESHOLD_LOCAL = 4; //upper prios 4..7 also get non-local fulfillment
+            bool isMoveTransfer = false;
+
+            // guard: current option setting?
+            if (!MoreEffectiveTransfer.optionPreferLocalService)
+                return true;
+
+            // guard: priority above threshold -> any service is OK!
+            if (priority >= PRIORITY_THRESHOLD_LOCAL)
+                return true;
+
+            switch (material)
+            {
+                // Services subject to prefer local services:
+                case TransferReason.Garbage:
+                case TransferReason.Crime:
+                case TransferReason.Fire:
+                case TransferReason.Fire2:
+                case TransferReason.ForestFire:
+                case TransferReason.Dead:
+                case TransferReason.Sick:
+                case TransferReason.Sick2:
+                case TransferReason.Collapsed:
+                case TransferReason.Collapsed2:
+                case TransferReason.ParkMaintenance:
+                case TransferReason.Mail:
+                case TransferReason.SortedMail:
+                    break;
+
+                // Material Transfers for services subject to policy:
+                case TransferReason.GarbageMove:
+                case TransferReason.GarbageTransfer:
+                case TransferReason.CriminalMove:
+                case TransferReason.SickMove:
+                case TransferReason.DeadMove:
+                case TransferReason.SnowMove:
+                    isMoveTransfer = true;      //Move Transfers: incoming offer is passive, allow move/emptying to global district buildings
+                    break;
+
+                default:
+                    return true;
+            }
+
+            // determine buildings or vehicle parent buildings
+            ushort buildingIncoming = 0, buildingOutgoing = 0;
+
+            if (offerIn.Building != 0) buildingIncoming = offerIn.Building;
+            else if (offerIn.Vehicle != 0) buildingIncoming = _VehicleManager.m_vehicles.m_buffer[offerIn.Vehicle].m_sourceBuilding;
+            else if (offerIn.Citizen != 0) buildingIncoming = _CitizenManager.m_citizens.m_buffer[offerIn.Citizen].m_homeBuilding;
+
+            if (offerOut.Building != 0) buildingOutgoing = offerOut.Building;
+            else if (offerOut.Vehicle != 0) buildingOutgoing = _VehicleManager.m_vehicles.m_buffer[offerOut.Vehicle].m_sourceBuilding;
+            else if (offerOut.Citizen != 0) buildingOutgoing = _CitizenManager.m_citizens.m_buffer[offerIn.Citizen].m_homeBuilding;
+
+            // get respective districts
+            byte districtIncoming = _DistrictManager.GetDistrict(_BuildingManager.m_buildings.m_buffer[buildingIncoming].m_position);
+            byte districtOutgoing = _DistrictManager.GetDistrict(_BuildingManager.m_buildings.m_buffer[buildingOutgoing].m_position);
+
+            // return true if: both within same district, or active offer is outside district ("in global area")
+            if ((districtIncoming == districtOutgoing)
+                  || (offerIn.Active && districtIncoming == 0)
+                  || (offerOut.Active && districtOutgoing == 0)
+                  || (isMoveTransfer && districtIncoming == 0)
+               )
+                return true;
+
+            return false;
+        }
 
         public static bool CanWareHouseTransfer(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
@@ -697,77 +766,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 return false;
                 //info4.m_buildingAI.StartTransfer(building2, ref buildings2.m_buffer[(int)building2], material, offerOut);
             }
-            return false;
-        }
-
-        public static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority)
-        {
-            const int PRIORITY_THRESHOLD_LOCAL = 4; //upper prios 4..7 also get non-local fulfillment
-            bool isMoveTransfer = false;
-
-            // guard: current option setting?
-            if (!MoreEffectiveTransfer.optionPreferLocalService)
-                return true;
-
-            // guard: priority above threshold -> any service is OK!
-            if (priority >= PRIORITY_THRESHOLD_LOCAL)
-                return true;
-
-            switch (material)
-            {
-                // Services subject to prefer local services:
-                case TransferReason.Garbage:
-                case TransferReason.Crime:
-                case TransferReason.Fire:
-                case TransferReason.Fire2:
-                case TransferReason.ForestFire:
-                case TransferReason.Dead:
-                case TransferReason.Sick:
-                case TransferReason.Sick2:
-                case TransferReason.Collapsed:
-                case TransferReason.Collapsed2:
-                case TransferReason.ParkMaintenance:
-                case TransferReason.Mail:
-                case TransferReason.SortedMail:
-                    break;
-
-                // Material Transfers for services subject to policy:
-                case TransferReason.GarbageMove:        
-                case TransferReason.GarbageTransfer:    
-                case TransferReason.CriminalMove:
-                case TransferReason.SickMove:
-                case TransferReason.DeadMove:
-                case TransferReason.SnowMove:
-                    isMoveTransfer = true;      //Move Transfers: incoming offer is passive, allow move/emptying to global district buildings
-                    break;
-
-                default:
-                    return true;
-            }
-
-            // determine buildings or vehicle parent buildings
-            ushort buildingIncoming = 0, buildingOutgoing = 0;
-            
-            if (offerIn.Building != 0) buildingIncoming = offerIn.Building;
-            else if (offerIn.Vehicle != 0) buildingIncoming = _VehicleManager.m_vehicles.m_buffer[offerIn.Vehicle].m_sourceBuilding;
-            else if (offerIn.Citizen != 0) buildingIncoming = _CitizenManager.m_citizens.m_buffer[offerIn.Citizen].m_homeBuilding;
-            
-            if (offerOut.Building != 0) buildingOutgoing = offerOut.Building;
-            else if (offerOut.Vehicle != 0) buildingOutgoing = _VehicleManager.m_vehicles.m_buffer[offerOut.Vehicle].m_sourceBuilding;
-            else if (offerOut.Citizen != 0) buildingOutgoing = _CitizenManager.m_citizens.m_buffer[offerIn.Citizen].m_homeBuilding;
-
-            // get respective districts
-            byte districtIncoming = _DistrictManager.GetDistrict(_BuildingManager.m_buildings.m_buffer[buildingIncoming].m_position);
-            byte districtOutgoing = _DistrictManager.GetDistrict(_BuildingManager.m_buildings.m_buffer[buildingOutgoing].m_position);
-
-            // return true if: both within same district, or active offer is outside district ("in global area")
-            if (  (districtIncoming == districtOutgoing) 
-                  || (offerIn.Active && districtIncoming == 0)
-                  || (offerOut.Active && districtOutgoing == 0) 
-                  || (isMoveTransfer && districtIncoming == 0)
-               )
-               return true;
-
             return false;
         }
 

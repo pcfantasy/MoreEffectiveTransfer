@@ -11,19 +11,22 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool debugMode = false;
 
+        // MAIN switch, mainly for debugging/profiling
+        public static bool optionEnableNewTransferManager = true;
+
         // UNUSED options
         public static bool optionFixUnRouteTransfer = true;
 
         // SERVICE options
-        public static bool optionPreferLocalService = false;
+        public static bool optionPreferLocalService = true;
         
         // WAREHOUSE options
-        public static bool optionWarehouseFirst = false;
-        public static bool optionWarehouseReserveTrucks = false;
-        public static bool optionWarehouseSpawnUnSpawnFix = false;
+        public static bool optionWarehouseFirst = true;
+        public static bool optionWarehouseReserveTrucks = true;
+        public static bool optionWarehouseSpawnUnSpawnFix = true;
         
         // EXPORT options
-        public static bool optionPreferExportShipPlaneTrain = false;
+        public static bool optionPreferExportShipPlaneTrain = true;
 
         // RUNTIME settings:
         public static float shipStationDistanceRandom = 1f;
@@ -60,7 +63,6 @@ namespace MoreEffectiveTransfer
             StreamWriter streamWriter = new StreamWriter(fs);
 
             streamWriter.WriteLine(optionFixUnRouteTransfer);
-            streamWriter.WriteLine(false); //debugMode default false
             streamWriter.WriteLine(optionWarehouseReserveTrucks);
             streamWriter.WriteLine(optionWarehouseFirst);
             streamWriter.WriteLine(optionWarehouseSpawnUnSpawnFix);
@@ -79,10 +81,7 @@ namespace MoreEffectiveTransfer
                 StreamReader sr = new StreamReader(fs);
 
                 string strLine = sr.ReadLine();
-                optionFixUnRouteTransfer = (strLine == "True") ? true : false;
-                
-                strLine = sr.ReadLine();
-                debugMode = false; //debugMode default false
+                optionFixUnRouteTransfer = (strLine == "True") ? true : false;               
                 
                 strLine = sr.ReadLine();
                 optionWarehouseReserveTrucks = (strLine == "True") ? true : false;
@@ -107,6 +106,12 @@ namespace MoreEffectiveTransfer
         public void OnSettingsUI(UIHelperBase helper)
         {
             LoadSetting();
+
+            #if (DEBUG || PROFILE)
+            UIHelperBase group0 = helper.AddGroup(Localization.Get("optionEnableNewTransferManager"));
+            group0.AddCheckbox(Localization.Get("optionEnableNewTransferManager"), optionEnableNewTransferManager, (index) => setOptionEnableNewTransferManager(index));
+            #endif
+
             UIHelperBase group1 = helper.AddGroup(Localization.Get("FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION"));
             group1.AddCheckbox(Localization.Get("FIX_UNROUTED_TRANSFER_MATCH_ENALBE"), optionFixUnRouteTransfer, (index) => setOptionFixUnRouteTransfer(index));
             UIHelperBase group2 = helper.AddGroup(Localization.Get("DEBUG_MODE_DESCRIPTION"));
@@ -126,6 +131,13 @@ namespace MoreEffectiveTransfer
         {
             debugMode = index;
             SaveSetting();
+        }
+
+        public void setOptionEnableNewTransferManager(bool index)
+        {
+            optionEnableNewTransferManager = index;
+            SaveSetting();
+            DebugLog.DebugMsg($"** OPTION ENABLE/DISABLE: {optionEnableNewTransferManager} **");
         }
 
         public void setOptionFixUnRouteTransfer(bool index)

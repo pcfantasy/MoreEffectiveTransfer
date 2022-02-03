@@ -12,3 +12,4 @@ WAREHOUSE_RESEVER_FOR_CITY	Reserve warehouse cargo trucks for local transfer
 EXPERIMENTAL_FUNCTION	Experimental Function
 PREFER_SHIP_PLANE_TRAIN	Import/Export prefer to use ship/plane/train instead of highway.
 LOCAL_USE	This building only sevice inside district
+optionEnableNewTransferManager	ENABLE/DISABLE TRANSFER MANAGER

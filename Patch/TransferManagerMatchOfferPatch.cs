@@ -14,6 +14,12 @@ namespace MoreEffectiveTransfer.Patch
 
         public static bool Prefix(TransferManager.TransferReason material)
         {
+            #if (DEBUG || PROFILE)
+            // disabled in settings? ->use stock transfer manager
+            if (!MoreEffectiveTransfer.optionEnableNewTransferManager)
+                return true;
+            #endif
+
             if (CustomTransferManager.CanUseNewMatchOffers(material))
             {
                 CustomTransferManager.MatchOffers(material);
