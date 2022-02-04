@@ -931,11 +931,9 @@ namespace MoreEffectiveTransfer.CustomManager
             } //end OFFER_MATCHMODE.BALANCED
 
 
-
         END_OFFERMATCHING:
             // finally: clear everything, including unmatched offers!
             ClearAllTransferOffers(material);
-
         }
 
         private static void MatchIncomingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
@@ -944,7 +942,7 @@ namespace MoreEffectiveTransfer.CustomManager
             ref TransferOffer incomingOffer = ref m_incomingOffers[offer_offset * 256 + offerIndex];
 
             // guard: offer valid?
-            if (incomingOffer.Exclude || incomingOffer.Amount == 0) return;
+            if (incomingOffer.Amount == 0) return;
 
             DebugLog.DebugMsg($"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}");
 
@@ -961,7 +959,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     ref TransferOffer outgoingOffer = ref m_outgoingOffers[counterpart_offset * 256 + counterpart_index];
 
                     // guards: out=in same? exclude offer (already used?)
-                    if ((outgoingOffer.Exclude || outgoingOffer.Amount == 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
+                    if ((outgoingOffer.Amount == 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
 
                     // CHECK OPTION: preferlocalservice
                     bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
@@ -989,7 +987,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 int deltaamount = Math.Min(incomingOffer.Amount, m_outgoingOffers[bestmatch_position].Amount);
                 TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, m_outgoingOffers[bestmatch_position], incomingOffer, deltaamount);
 
-                // mark offer pair as to be excluded for further matches
+                // reduce offer amount
                 incomingOffer.Amount -= deltaamount;
                 m_outgoingOffers[bestmatch_position].Amount -= deltaamount;
             }
@@ -1001,7 +999,7 @@ namespace MoreEffectiveTransfer.CustomManager
             ref TransferOffer outgoingOffer = ref m_outgoingOffers[offer_offset * 256 + offerIndex];
 
             // guard: offer valid?
-            if (outgoingOffer.Exclude || outgoingOffer.Amount == 0) return;
+            if (outgoingOffer.Amount == 0) return;
 
             DebugLog.DebugMsg($"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}");
 
@@ -1018,7 +1016,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     ref TransferOffer incomingOffer = ref m_incomingOffers[counterpart_offset * 256 + counterpart_index];
 
                     // guards: out=in same? exclude offer (already used?)
-                    if ((incomingOffer.Exclude || incomingOffer.Amount == 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
+                    if ((incomingOffer.Amount == 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
 
                     // CHECK OPTION: preferlocalservice
                     bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
@@ -1046,7 +1044,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 int deltaamount = Math.Min(outgoingOffer.Amount, m_incomingOffers[bestmatch_position].Amount);
                 TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, outgoingOffer, m_incomingOffers[bestmatch_position], deltaamount);
 
-                // mark offer pair as to be excluded for further matches
+                // reduce offer amount
                 outgoingOffer.Amount -= deltaamount;
                 m_incomingOffers[bestmatch_position].Amount -= deltaamount;
             }
