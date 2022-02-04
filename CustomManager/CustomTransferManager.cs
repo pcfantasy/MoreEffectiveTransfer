@@ -178,8 +178,8 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.PlanedTimber:
                 case TransferReason.Paper:
                 case TransferReason.Fish:
-                //warehouse incoming behaviour: empty=incoming offer prio 0; balanced=incoming offer prio2; fill=incoming prio2;
-                //warehouse outgoing behaviour: 
+                //warehouse incoming behaviour: empty=prio 0; balanced=prio 0-2; fill=prio 2;
+                //warehouse outgoing behaviour: empty=prio 2 ; balanced=prio 0-2; fill=prio 0;
                     return OFFER_MATCHMODE.BALANCED;
 
                 case TransferReason.Garbage:            //Garbage: outgoing offer (passive) from buldings with garbage to be collected, incoming (active) from landfills
@@ -338,8 +338,11 @@ namespace MoreEffectiveTransfer.CustomManager
             return true;
         }
 
-        public static float WareHouseFirst(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        public static float WareHouseFirst(ref TransferOffer offer, TransferReason material)
         {
+            if (!MoreEffectiveTransfer.optionWarehouseFirst)
+                return 1f;
+
             switch (material)
             {
                 case TransferReason.Oil:
@@ -360,71 +363,17 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Glass:
                 case TransferReason.PlanedTimber:
                 case TransferReason.Paper:
+                case TransferReason.Fish:
                     break;
+
                 default:
                     return 1f;
             }
 
-
-            BuildingManager bM = Singleton<BuildingManager>.instance;
-            if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
-            {
-                if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling))
-                {
-                    if (MoreEffectiveTransfer.optionWarehouseFirst)
-                        return 100f;
-                }
-                else
-                {
-                    if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
-                    {
-                        if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling))
-                        {
-                            if (MoreEffectiveTransfer.optionWarehouseFirst)
-                                return 100f;
-                        }
-                        else
-                        {
-                            return 0.01f;
-                        }
-                    }
-                    else
-                    {
-                        if (MoreEffectiveTransfer.optionWarehouseFirst)
-                            return 100f;
-                    }
-                }
-            }
-            else if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
-            {
-                if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Filling))
-                {
-                    if (MoreEffectiveTransfer.optionWarehouseFirst)
-                        return 100f;
-                }
-                else
-                {
-                    if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is WarehouseAI)
-                    {
-                        if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Downgrading) || bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Filling))
-                        {
-                            if (MoreEffectiveTransfer.optionWarehouseFirst)
-                                return 100f;
-                        }
-                        else
-                        {
-                            return 0.01f;
-                        }
-                    }
-                    else
-                    {
-                        if (MoreEffectiveTransfer.optionWarehouseFirst)
-                            return 100f;
-                    }
-                }
-            }
-
-            return 1f;
+            if (offer.Exclude)  //TransferOffer.Exclude is only ever set by WarehouseAI!
+                return 0.01f;   //WarehouseDIstanceFactorSqr = 1 / 10^2
+            else
+                return 1f;
         }
 
         public static float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material, float preDistance)
@@ -811,7 +760,7 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
-        public static void MatchOffers(TransferReason material)
+        unsafe public static void MatchOffers(TransferReason material)
         {
             //init on first call
             if (!_init)
@@ -936,7 +885,7 @@ namespace MoreEffectiveTransfer.CustomManager
             ClearAllTransferOffers(material);
         }
 
-        private static void MatchIncomingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
+        unsafe private static void MatchIncomingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
         {
             // Get incoming offer reference:
             ref TransferOffer incomingOffer = ref m_incomingOffers[offer_offset * 256 + offerIndex];
@@ -961,12 +910,16 @@ namespace MoreEffectiveTransfer.CustomManager
                     // guards: out=in same? exclude offer (already used?)
                     if ((outgoingOffer.Amount == 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
 
+                    //guard: if both are warehouse, prevent low prio inter-warehouse transfers
+                    if ((incomingOffer.Exclude) && (outgoingOffer.Exclude) && (counterpart_prio >= prio_lower_limit+1)) continue;
+
                     // CHECK OPTION: preferlocalservice
                     bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
 
-                    //TODO: CHECK OPTION: MoreEffectiveTransfer.optionWarehouseFirst
+                    // CHECK OPTION: WarehouseFirst
+                    float distanceFactor = WareHouseFirst(ref outgoingOffer, material);
 
-                    float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position);
+                    float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor;
                     if ((isLocalAllowed) && (distance < bestmatch_distance))
                     {
                         bestmatch_position = counterpart_offset * 256 + counterpart_index;
@@ -993,7 +946,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        private static void MatchOutgoingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
+        unsafe private static void MatchOutgoingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
         {
             // Get Outgoing offer reference:
             ref TransferOffer outgoingOffer = ref m_outgoingOffers[offer_offset * 256 + offerIndex];
@@ -1018,12 +971,16 @@ namespace MoreEffectiveTransfer.CustomManager
                     // guards: out=in same? exclude offer (already used?)
                     if ((incomingOffer.Amount == 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
 
+                    //guard: if both are warehouse, prevent low prio inter-warehouse transfers
+                    if ((outgoingOffer.Exclude) && (incomingOffer.Exclude) && (counterpart_prio >= prio_lower_limit + 1)) continue;
+
                     // CHECK OPTION: preferlocalservice
                     bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
 
-                    //TODO: CHECK OPTION: MoreEffectiveTransfer.optionWarehouseFirst
+                    // CHECK OPTION: WarehouseFirst
+                    float distanceFactor = WareHouseFirst(ref incomingOffer, material);
 
-                    float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position);
+                    float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor;
                     if ((isLocalAllowed) && (distance < bestmatch_distance))
                     {
                         bestmatch_position = counterpart_offset * 256 + counterpart_index;
