@@ -791,7 +791,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 offerAmountIncoming = m_incomingAmount[(int)material];
                 offerAmountOutgoing = m_outgoingAmount[(int)material];
 
-                DebugLog.DebugMsg($"   #Offers@priority {priority}: {offerCountIncoming} in (amt {offerAmountIncoming}), {offerCountOutgoing} out (amt {offerAmountOutgoing})");
+                DebugLog.DebugMsg($"   #Offers@priority {priority} : {offerCountIncoming} in, {offerCountOutgoing} out");
                 DebugPrintAllOffers(material, offer_offset, offerCountIncoming, offerCountOutgoing);
             }
 
@@ -911,7 +911,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     if ((outgoingOffer.Amount == 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
 
                     //guard: if both are warehouse, prevent low prio inter-warehouse transfers
-                    if ((incomingOffer.Exclude) && (outgoingOffer.Exclude) && (counterpart_prio >= prio_lower_limit+1)) continue;
+                    if ((incomingOffer.Exclude) && (outgoingOffer.Exclude) && (counterpart_prio < (prio_lower_limit + 1))) continue;
 
                     // CHECK OPTION: preferlocalservice
                     bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
@@ -972,7 +972,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     if ((incomingOffer.Amount == 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
 
                     //guard: if both are warehouse, prevent low prio inter-warehouse transfers
-                    if ((outgoingOffer.Exclude) && (incomingOffer.Exclude) && (counterpart_prio >= prio_lower_limit + 1)) continue;
+                    if ((outgoingOffer.Exclude) && (incomingOffer.Exclude) && (counterpart_prio < (prio_lower_limit + 1))) continue;
 
                     // CHECK OPTION: preferlocalservice
                     bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
