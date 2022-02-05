@@ -381,12 +381,15 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 int count = 0, cargo = 0, capacity = 0, outside = 0;
                 int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_truckCount;
+                Building.Flags isEmptying = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & Building.Flags.Downgrading);
+
+                float maxExport = (isEmptying!=Building.Flags.None) ? (total * 0.75f) : (total * 0.5f);
 
                 CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI,
                                        outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
 
-                DebugLog.DebugMsg($"          -> checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {(count + 1) > (total * 0.75)}");
-                if ((count + 1) > (total * 0.75))
+                DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
+                if ((float) (outside + 1f) > maxExport)
                     return false;
             }
 
