@@ -96,7 +96,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 // Goods & Service for new transfer manager:
 
                 // Block 1: Services:
-                /*
                 case TransferReason.Garbage:
                 case TransferReason.GarbageMove:
                 case TransferReason.GarbageTransfer:
@@ -121,32 +120,30 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.SortedMail:
                 case TransferReason.IncomingMail:
                 case TransferReason.OutgoingMail:
-                case TransferReason.Taxi:
-                */                            
+                case TransferReason.Taxi:                      
                 
                 // Block 2: Goods
                     
                 case TransferReason.Goods:
+                case TransferReason.Oil:
+                case TransferReason.Ore:
+                case TransferReason.Logs:
+                case TransferReason.Grain:
+                case TransferReason.Coal:
+                case TransferReason.Petrol:
+                case TransferReason.Food:
+                case TransferReason.Lumber:
+                case TransferReason.AnimalProducts:
+                case TransferReason.Flours:
+                case TransferReason.Paper:
+                case TransferReason.PlanedTimber:
+                case TransferReason.Petroleum:
+                case TransferReason.Plastics:
+                case TransferReason.Glass:
+                case TransferReason.Metals:
+                case TransferReason.LuxuryProducts:
+                case TransferReason.Fish:
 
-                //case TransferReason.Oil:
-                //case TransferReason.Ore:
-                //case TransferReason.Logs:
-                //case TransferReason.Grain:
-                //case TransferReason.Coal:
-                //case TransferReason.Petrol:
-                //case TransferReason.Food:
-                //case TransferReason.Lumber:
-                //case TransferReason.AnimalProducts:
-                //case TransferReason.Flours:
-                //case TransferReason.Paper:
-                //case TransferReason.PlanedTimber:
-                //case TransferReason.Petroleum:
-                //case TransferReason.Plastics:
-                //case TransferReason.Glass:
-                //case TransferReason.Metals:
-                //case TransferReason.LuxuryProducts:
-                //case TransferReason.Fish:
-                
                     return true;
                 
               // Default: use vanilla transfermanager (esp. citizens)

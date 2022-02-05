@@ -17,6 +17,14 @@ namespace MoreEffectiveTransfer
         // MAIN switch, mainly for debugging/profiling
         public static bool optionEnableNewTransferManager = true;
 
+#if (PROFILE)
+        public static System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
+        public static long timerCounterVanilla = 0;
+        public static long timerCounterMETM = 0;
+        public static float timerMillisecondsVanilla = 0;
+        public static float timerMillisecondsMETM = 0;
+#endif
+
         // SERVICE options
         public static bool optionPreferLocalService = true;
         
@@ -109,10 +117,10 @@ namespace MoreEffectiveTransfer
         {
             LoadSetting();
 
-            #if (DEBUG || PROFILE)
+#if (DEBUG || PROFILE)
             UIHelperBase group0 = helper.AddGroup(Localization.Get("DEBUGPROFILE"));
             group0.AddCheckbox(Localization.Get("optionEnableNewTransferManager"), optionEnableNewTransferManager, (index) => setOptionEnableNewTransferManager(index));
-            #endif
+#endif
 
             UIHelperBase group1 = helper.AddGroup(Localization.Get("GROUP_SERVICE_OPTIONS"));
             group1.AddCheckbox(Localization.Get("optionPreferLocalService"), optionPreferLocalService, (index) => setOptionPreferLocalService(index));

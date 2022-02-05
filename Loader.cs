@@ -50,7 +50,14 @@ namespace MoreEffectiveTransfer
                 {
                     RevertDetour();
                     HarmonyRevertDetour();
-                    //RemoveGui();
+
+#if (PROFILE)
+                    DebugLog.LogToFileOnly("--- PROFILING STATISTICS ---");
+                    DebugLog.LogToFileOnly($"- VANILLA TRANSFER MANAGER: NUM INVOCATIONS: {MoreEffectiveTransfer.timerCounterVanilla}, TOTAL MS: {MoreEffectiveTransfer.timerMillisecondsVanilla}, AVG TIME/INVOCATION: {(float)(MoreEffectiveTransfer.timerMillisecondsVanilla / MoreEffectiveTransfer.timerCounterVanilla)}ms");
+                    DebugLog.LogToFileOnly($"-     NEW TRANSFER MANAGER: NUM INVOCATIONS: {MoreEffectiveTransfer.timerCounterMETM}, TOTAL MS: {MoreEffectiveTransfer.timerMillisecondsMETM}, AVG TIME/INVOCATION: {(float)(MoreEffectiveTransfer.timerMillisecondsMETM / MoreEffectiveTransfer.timerCounterMETM)}ms");
+                    DebugLog.LogToFileOnly("--- END PROFILING STATISTICS ---");
+#endif
+
                 }
             }
         }

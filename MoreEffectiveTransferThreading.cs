@@ -78,6 +78,11 @@ namespace MoreEffectiveTransfer
                             UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", error, true);
                         }
                     }
+
+#if (PROFILE)
+                    DebugLog.LogToFileOnly("PROFILING MODE - statistics will be output at end!");
+#endif
+
                 }
             }
         }
