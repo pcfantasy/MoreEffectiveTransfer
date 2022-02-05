@@ -45,6 +45,15 @@
     <CitiesSkylinesModsPath>C:\Users\Henne\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\1680840913\</CitiesSkylinesModsPath>
     <!-- END LOCAL BUILD -->
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Profile|AnyCPU'">
+    <OutputPath>bin\Profile\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <DefineConstants>PROFILE</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(CitiesSkylinesInstallPath)Cities_Data\Managed\Assembly-CSharp.dll</HintPath>

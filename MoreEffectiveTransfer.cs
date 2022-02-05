@@ -18,11 +18,10 @@ namespace MoreEffectiveTransfer
         public static bool optionEnableNewTransferManager = true;
 
 #if (PROFILE)
-        public static System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
+        public static System.Diagnostics.Stopwatch timerVanilla = new System.Diagnostics.Stopwatch();
+        public static System.Diagnostics.Stopwatch timerMETM = new System.Diagnostics.Stopwatch();
         public static long timerCounterVanilla = 0;
         public static long timerCounterMETM = 0;
-        public static float timerMillisecondsVanilla = 0;
-        public static float timerMillisecondsMETM = 0;
 #endif
 
         // SERVICE options

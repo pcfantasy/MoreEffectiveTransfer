@@ -16,16 +16,17 @@ namespace MoreEffectiveTransfer.Patch
         public static bool Prefix(TransferManager.TransferReason material)
         {
 #if (PROFILE)
-            // Profiling
-            MoreEffectiveTransfer.timer.Start();
-
             // disabled in settings? ->use stock transfer manager
             if (!MoreEffectiveTransfer.optionEnableNewTransferManager)
             {
+                // begin Profiling
                 MoreEffectiveTransfer.timerCounterVanilla++;
+                MoreEffectiveTransfer.timerVanilla.Start();
                 return true;
             }
+
             MoreEffectiveTransfer.timerCounterMETM++;
+            MoreEffectiveTransfer.timerMETM.Start();
 #endif
 
             if (CustomTransferManager.CanUseNewMatchOffers(material))
@@ -40,16 +41,11 @@ namespace MoreEffectiveTransfer.Patch
         }
 
 #if (PROFILE)
-        public static void Postfix(TransferManager.TransferReason material)
+        public static void Postfix()
         {
             // end profiling
-            MoreEffectiveTransfer.timer.Stop();
-            if (!MoreEffectiveTransfer.optionEnableNewTransferManager)
-                MoreEffectiveTransfer.timerMillisecondsVanilla += MoreEffectiveTransfer.timer.ElapsedMilliseconds;
-            else
-                MoreEffectiveTransfer.timerMillisecondsMETM += MoreEffectiveTransfer.timer.ElapsedMilliseconds;
-            
-            MoreEffectiveTransfer.timer.Reset();
+            MoreEffectiveTransfer.timerMETM.Stop();
+            MoreEffectiveTransfer.timerVanilla.Stop();
         }
 #endif
 
