@@ -22,7 +22,7 @@ Note that this can make things worse if you do not have strategically well-place
 
 
 ### Reserve Warehouse Trucks for local transfer (recommended to enable if Warehouse First is used)
-<b>Affects: warehouse goods exports/b><br />
+<b>Affects: warehouse goods exports</b><br />
 This setting will prevent all warehouses from using all their trucks to export goods out of the city.
 A contigent of trucks will be held in reserve and will only be used to fulfill requests from consumers within the city.<br />
 The setting's effect is: <br />
