@@ -40,6 +40,8 @@ namespace MoreEffectiveTransfer.CustomManager
         {
             TransferManagerStartTransferDG = FastDelegateFactory.Create<TransferManagerStartTransfer>(typeof(TransferManager), "StartTransfer", instanceMethod: true);
             TransferManagerGetDistanceMultiplierDG = FastDelegateFactory.Create<TransferManagerGetDistanceMultiplier>(typeof(TransferManager), "GetDistanceMultiplier", instanceMethod: false);
+
+            CustomCommonBuildingAI.InitDelegate();
         }
 
         public delegate void TransferManagerStartTransfer(TransferManager TransferManager, TransferReason material, TransferOffer offerOut, TransferOffer offerIn, int delta);
@@ -293,53 +295,7 @@ namespace MoreEffectiveTransfer.CustomManager
             return false;
         }
 
-        private static bool CanWareHouseTransfer(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
-        {
-            BuildingManager bM = Singleton<BuildingManager>.instance;
-            if (offerIn.Building == 0 || offerIn.Building > Singleton<BuildingManager>.instance.m_buildings.m_size)
-            {
-                return true;
-            }
-
-            if (offerOut.Building == 0 || offerOut.Building > Singleton<BuildingManager>.instance.m_buildings.m_size)
-            {
-                return true;
-            }
-
-            if (bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI is WarehouseAI)
-            {
-                if (bM.m_buildings.m_buffer[offerIn.Building].Info.m_buildingAI is OutsideConnectionAI)
-                {
-                    if (MoreEffectiveTransfer.optionWarehouseReserveTrucks)
-                    {
-                        var AI = bM.m_buildings.m_buffer[offerOut.Building].Info.m_buildingAI as WarehouseAI;
-                        TransferManager.TransferReason actualTransferReason = AI.GetActualTransferReason(offerOut.Building, ref bM.m_buildings.m_buffer[offerOut.Building]);
-                        if (actualTransferReason != TransferManager.TransferReason.None)
-                        {
-                            int budget = Singleton<EconomyManager>.instance.GetBudget(AI.m_info.m_class);
-                            int productionRate = PlayerBuildingAI.GetProductionRate(100, budget);
-                            int num = (productionRate * AI.m_truckCount + 99) / 100;
-                            int num2 = 0;
-                            int num3 = 0;
-                            int num4 = 0;
-                            int num5 = 0;
-                            CustomCommonBuildingAI.InitDelegate();
-                            CustomCommonBuildingAI.CalculateOwnVehicles(AI, offerOut.Building, ref bM.m_buildings.m_buffer[offerOut.Building], actualTransferReason, ref num2, ref num3, ref num4, ref num5);
-                            if (num5 * 1.25f > (num - 1))
-                                return false;
-                            else
-                                return true;
-                        }
-                    }
-                    else
-                        return true;
-                }
-            }
-
-            return true;
-        }
-
-        private static float WareHouseFirst(ref TransferOffer offer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
+        private static float WarehouseFirst(ref TransferOffer offer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
         {
             if (!MoreEffectiveTransfer.optionWarehouseFirst)
                 return 1f;
@@ -386,6 +342,55 @@ namespace MoreEffectiveTransfer.CustomManager
             }
             else
                 return 1f;
+        }
+
+        private static bool WarehouseCanTransfer(ref TransferOffer incomingOffer, ref TransferOffer outgoingOffer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
+        {
+            if (!MoreEffectiveTransfer.optionWarehouseReserveTrucks)
+                return true;
+
+            switch (material)
+            {
+                case TransferReason.Oil:
+                case TransferReason.Ore:
+                case TransferReason.Coal:
+                case TransferReason.Petrol:
+                case TransferReason.Food:
+                case TransferReason.Grain:
+                case TransferReason.Lumber:
+                case TransferReason.Logs:
+                case TransferReason.Goods:
+                case TransferReason.LuxuryProducts:
+                case TransferReason.AnimalProducts:
+                case TransferReason.Flours:
+                case TransferReason.Petroleum:
+                case TransferReason.Plastics:
+                case TransferReason.Metals:
+                case TransferReason.Glass:
+                case TransferReason.PlanedTimber:
+                case TransferReason.Paper:
+                case TransferReason.Fish:
+                    break;
+
+                default:
+                    return true;
+            }
+
+            // is outgoing a warehouse with active delivery, and is couterpart incoming an outside connection?
+            if ((outgoingOffer.Exclude) && (outgoingOffer.Active) && (incomingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI is OutsideConnectionAI))
+            {
+                int count = 0, cargo = 0, capacity = 0, outside = 0;
+                int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_truckCount;
+
+                CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI,
+                                       outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
+
+                DebugLog.DebugMsg($"          -> checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {(count + 1) > (total * 0.75)}");
+                if ((count + 1) > (total * 0.75))
+                    return false;
+            }
+
+            return true;
         }
 
 
@@ -574,10 +579,13 @@ namespace MoreEffectiveTransfer.CustomManager
                     bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
 
                     // CHECK OPTION: WarehouseFirst
-                    float distanceFactor = WareHouseFirst(ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
+                    float distanceFactor = WarehouseFirst(ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
+
+                    // CHECK OPTION: WarehouseReserveTrucks
+                    bool canTransfer = WarehouseCanTransfer(ref incomingOffer, ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
 
                     float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor;
-                    if ((isLocalAllowed) && (distance < bestmatch_distance))
+                    if ((isLocalAllowed && canTransfer) && (distance < bestmatch_distance))
                     {
                         bestmatch_position = counterpart_offset * 256 + counterpart_index;
                         bestmatch_distance = distance;
@@ -635,10 +643,13 @@ namespace MoreEffectiveTransfer.CustomManager
                     bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
 
                     // CHECK OPTION: WarehouseFirst
-                    float distanceFactor = WareHouseFirst(ref incomingOffer, material, WAREHOUSE_OFFERTYPE.INCOMING);
+                    float distanceFactor = WarehouseFirst(ref incomingOffer, material, WAREHOUSE_OFFERTYPE.INCOMING);
+
+                    // CHECK OPTION: WarehouseReserveTrucks
+                    bool canTransfer = WarehouseCanTransfer(ref incomingOffer, ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
 
                     float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor;
-                    if ((isLocalAllowed) && (distance < bestmatch_distance))
+                    if ((isLocalAllowed && canTransfer) && (distance < bestmatch_distance))
                     {
                         bestmatch_position = counterpart_offset * 256 + counterpart_index;
                         bestmatch_distance = distance;
