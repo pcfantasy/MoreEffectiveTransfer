@@ -15,6 +15,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
         // Matching logic
         private enum OFFER_MATCHMODE : int { INCOMING_FIRST = 1, OUTGOING_FIRST = 2, BALANCED = 3 };
+        private enum WAREHOUSE_OFFERTYPE : int {  INCOMING = 1, OUTGOING = 2 };
 
 
         // References to game functionalities:
@@ -216,7 +217,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        public static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority)
+        private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority)
         {
             const int PRIORITY_THRESHOLD_LOCAL = 4; //upper prios 4..7 also get non-local fulfillment
             bool isMoveTransfer = false;
@@ -248,7 +249,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Taxi:
                     break;
 
-                // Goods subject to perfer local:
+                // Goods subject to prefer local:
 
 
 
@@ -292,7 +293,7 @@ namespace MoreEffectiveTransfer.CustomManager
             return false;
         }
 
-        public static bool CanWareHouseTransfer(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
+        private static bool CanWareHouseTransfer(TransferOffer offerIn, TransferOffer offerOut, TransferReason material)
         {
             BuildingManager bM = Singleton<BuildingManager>.instance;
             if (offerIn.Building == 0 || offerIn.Building > Singleton<BuildingManager>.instance.m_buildings.m_size)
@@ -338,7 +339,7 @@ namespace MoreEffectiveTransfer.CustomManager
             return true;
         }
 
-        public static float WareHouseFirst(ref TransferOffer offer, TransferReason material)
+        private static float WareHouseFirst(ref TransferOffer offer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
         {
             if (!MoreEffectiveTransfer.optionWarehouseFirst)
                 return 1f;
@@ -371,130 +372,22 @@ namespace MoreEffectiveTransfer.CustomManager
             }
 
             if (offer.Exclude)  //TransferOffer.Exclude is only ever set by WarehouseAI!
-                return 0.01f;   //WarehouseDIstanceFactorSqr = 1 / 10^2
+            {
+                Building.Flags isFilling = (_BuildingManager.m_buildings.m_buffer[offer.Building].m_flags & Building.Flags.Filling);
+                Building.Flags isEmptying = (_BuildingManager.m_buildings.m_buffer[offer.Building].m_flags & Building.Flags.Downgrading);
+
+                // Filling Warehouses dont like to fulfill outgoing offers,
+                // emptying warehouses dont like to fulfill incoming offers
+                if ((whInOut == WAREHOUSE_OFFERTYPE.INCOMING && isEmptying != Building.Flags.None) ||
+                    (whInOut == WAREHOUSE_OFFERTYPE.OUTGOING && isFilling != Building.Flags.None))
+                    return 0.1f;   //distance factorSqrt x10 further away than otherwise
+
+                return 0.01f;       //WarehouseDIstanceFactorSqr = 1 / 10^2
+            }
             else
                 return 1f;
         }
 
-        public static float ApplyPriority(TransferOffer offerIn, TransferOffer offerOut, TransferReason material, float preDistance)
-        {
-            if (!MoreEffectiveTransfer.optionPreferExportShipPlaneTrain)
-            {
-                return preDistance;
-            }
-
-            switch (material)
-            {
-                case TransferReason.Oil:
-                case TransferReason.Ore:
-                case TransferReason.Coal:
-                case TransferReason.Petrol:
-                case TransferReason.Food:
-                case TransferReason.Grain:
-                case TransferReason.Lumber:
-                case TransferReason.Logs:
-                case TransferReason.Goods:
-                case TransferReason.LuxuryProducts:
-                case TransferReason.AnimalProducts:
-                case TransferReason.Flours:
-                case TransferReason.Petroleum:
-                case TransferReason.Plastics:
-                case TransferReason.Metals:
-                case TransferReason.Glass:
-                case TransferReason.PlanedTimber:
-                case TransferReason.Paper:
-                    break;
-                default:
-                    return preDistance;
-            }
-
-
-            BuildingManager bM = Singleton<BuildingManager>.instance;
-            bool offerInOutside = false;
-            bool offerInOutsidePlane = false;
-            bool offerInOutsideShip = false;
-            bool offerInOutsideTrain = false;
-            bool offerOutOutside = false;
-            bool offerOutOutsidePlane = false;
-            bool offerOutOutsideShip = false;
-            bool offerOutOutsideTrain = false;
-            if (bM.m_buildings.m_buffer[offerIn.Building].m_flags.IsFlagSet(Building.Flags.Untouchable))
-            {
-                switch (bM.m_buildings.m_buffer[offerIn.Building].Info.m_class.m_subService)
-                {
-                    case ItemClass.SubService.PublicTransportPlane:
-                        offerInOutside = true;
-                        offerInOutsidePlane = true;
-                        break;
-                    case ItemClass.SubService.PublicTransportShip:
-                        offerInOutside = true;
-                        offerInOutsideShip = true;
-                        break;
-                    case ItemClass.SubService.PublicTransportTrain:
-                        offerInOutside = true;
-                        offerInOutsideTrain = true;
-                        break;
-                    default: break;
-                }
-            }
-
-            if (bM.m_buildings.m_buffer[offerOut.Building].m_flags.IsFlagSet(Building.Flags.Untouchable))
-            {
-                switch (bM.m_buildings.m_buffer[offerOut.Building].Info.m_class.m_subService)
-                {
-                    case ItemClass.SubService.PublicTransportPlane:
-                        offerOutOutside = true;
-                        offerOutOutsidePlane = true;
-                        break;
-                    case ItemClass.SubService.PublicTransportShip:
-                        offerOutOutside = true;
-                        offerOutOutsideShip = true;
-                        break;
-                    case ItemClass.SubService.PublicTransportTrain:
-                        offerOutOutside = true;
-                        offerOutOutsideTrain = true;
-                        break;
-                    default: break;
-                }
-            }
-
-            if (offerInOutside && offerOutOutside)
-            {
-                DebugLog.LogToFileOnly("Error: offerInOutside && offerOutOutside, no such case");
-            }
-            else if (offerOutOutside)
-            {
-                if (offerOutOutsidePlane)
-                {
-                    return preDistance * MoreEffectiveTransfer.planeStationDistanceRandom;
-                } 
-                else if (offerOutOutsideShip)
-                {
-                    return preDistance * MoreEffectiveTransfer.shipStationDistanceRandom;
-                }
-                else if (offerOutOutsideTrain)
-                {
-                    return preDistance * MoreEffectiveTransfer.trainStationDistanceRandom;
-                }
-            } 
-            else if (offerInOutside)
-            {
-                if (offerInOutsidePlane)
-                {
-                    return preDistance * MoreEffectiveTransfer.planeStationDistanceRandom;
-                }
-                else if (offerInOutsideShip)
-                {
-                    return preDistance * MoreEffectiveTransfer.shipStationDistanceRandom;
-                }
-                else if (offerInOutsideTrain)
-                {
-                    return preDistance * MoreEffectiveTransfer.trainStationDistanceRandom;
-                }
-            }
-            
-            return preDistance;
-        }
 
         public static String DebugInspectOffer(ref TransferOffer offer)
         {
@@ -681,7 +574,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
 
                     // CHECK OPTION: WarehouseFirst
-                    float distanceFactor = WareHouseFirst(ref outgoingOffer, material);
+                    float distanceFactor = WareHouseFirst(ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
 
                     float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor;
                     if ((isLocalAllowed) && (distance < bestmatch_distance))
@@ -690,7 +583,7 @@ namespace MoreEffectiveTransfer.CustomManager
                         bestmatch_distance = distance;
                     }
 
-                    DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}, bestmatch: {bestmatch_distance}");
+                    DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}@{distanceFactor}, bestmatch: {bestmatch_distance}");
                 }
             }
 
@@ -742,7 +635,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
 
                     // CHECK OPTION: WarehouseFirst
-                    float distanceFactor = WareHouseFirst(ref incomingOffer, material);
+                    float distanceFactor = WareHouseFirst(ref incomingOffer, material, WAREHOUSE_OFFERTYPE.INCOMING);
 
                     float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor;
                     if ((isLocalAllowed) && (distance < bestmatch_distance))
@@ -751,7 +644,7 @@ namespace MoreEffectiveTransfer.CustomManager
                         bestmatch_distance = distance;
                     }
 
-                    DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}, bestmatch: {bestmatch_distance}");
+                    DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}@{distanceFactor}, bestmatch: {bestmatch_distance}");
                 }
             }
 
