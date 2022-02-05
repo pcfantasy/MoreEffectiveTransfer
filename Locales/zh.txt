@@ -1,14 +1,13 @@
-﻿FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION	修正无法连接的运输(详细请看说明书)
-FIX_UNROUTED_TRANSFER_MATCH_ENALBE	修正无法连接的运输
-DEBUG_MODE_DESCRIPTION	在BuildingUI和log里显示调试信息(会影响游戏帧数)
-DEBUG_MODE_DESCRIPTION_ENALBE	打开调试模式
-FAILED_BUILDING_COUNT	无法连接的建筑数量
-GENERATE_DETAIL_REPORT	把无法连接的建筑的详细信息打印到MoreEffectiveTransfer.txt
-WAREHOUSE_FIRST	仓库优先
-ADVANCED_WAREHOUSE	高级仓库策略(详细请看说明书)
-WAREHOUSE_SPAWN_UNSPAWN	分开仓库车辆的消失点和出生点
-WAREHOUSE_RESEVER_FOR_CITY	预留部分仓库的车给城市内部使用
-EXPERIMENTAL_FUNCTION	实验性功能
-PREFER_SHIP_PLANE_TRAIN	进出口会更倾向港口/火车站/货运飞机,而不是通过高速
-LOCAL_USE	这个建筑只在区域内服务
-LOCAL_USE_DESCRIPTION_ENALBE	允许政府建筑只服务本地
+﻿DEBUGPROFILE	DEBUGGING / PROFILING ONLY
+optionEnableNewTransferManager	ENABLE/DISABLE TRANSFER MANAGER
+GROUP_SERVICE_OPTIONS	Service Options
+optionPreferLocalService	Prefer local district services
+optionPreferLocalService_txt	Further improve locality of services by matching low priority requests only with service buildings within the same district (or outside any district). Once an unfulfilled requests becomes high priority, it will be served by any nearby service offer though. Affects: garbage, police, health care, maintenance, mail, taxi.
+GROUP_WAREHOUSE_OPTIONS	Goods Delivery Options
+optionWarehouseFirst	Warehouse First
+optionWarehouseFirst_txt	Prefer to conduct all goods delivery (inbound and outbound) through warehouses, if available. Will increase warehouse traffic, so your warehouses better be situated strategically well.
+optionWarehouseReserveTrucks	Reserve warehouse cargo trucks for local transfers
+optionWarehouseReserveTrucks_txt	Recommended to enable with Warehouse First: reserve 25% of warehouse truck capacity for satisfying city demand, prevents all trucks being used for export.
+GROUP_EXPORTIMPORT_OPTIONS	Export/Import Options
+optionPreferExportShipPlaneTrain	Import/Export prefer to use ship/plane/train instead of highway
+optionPreferExportShipPlaneTrain_txt	Experimental function!

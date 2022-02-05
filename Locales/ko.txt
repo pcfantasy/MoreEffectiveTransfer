@@ -1,14 +1,13 @@
-FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION	경로가 미 지정된 수송 매치 수정(유저 가이드 참조)
-FIX_UNROUTED_TRANSFER_MATCH_ENALBE	경로가 미 지정된 수송 매치 수정 활성화
-DEBUG_MODE_DESCRIPTION	건물UI에 활성화된 수송 매치 수와 로그 여부를 표시함(렉을 유발 할 수 있음)
-DEBUG_MODE_DESCRIPTION_ENALBE	디버그 모드 활성화
-FAILED_BUILDING_COUNT	해당 건물에 경로가 미 지정된 수송 매치 수
-GENERATE_DETAIL_REPORT	MoreEffectiveTransfer.txt 파일을 생성합니다
-WAREHOUSE_FIRST	창고를 최우선으로!
-ADVANCED_WAREHOUSE	발전된 창고(유저 가이드 참조)
-WAREHOUSE_SPAWN_UNSPAWN	창고 소환/미소환 장소 수정
-WAREHOUSE_RESEVER_FOR_CITY	Reserve warehouse cargo trucks for local transfer
-EXPERIMENTAL_FUNCTION	Experimental Function
-PREFER_SHIP_PLANE_TRAIN	Import/Export prefer to use ship/plane/train instead of highway.
-LOCAL_USE_DESCRIPTION_ENALBE	Allow playerbuilding to only sevice local district
-LOCAL_USE	This building only sevice inside district
+DEBUGPROFILE	DEBUGGING / PROFILING ONLY
+optionEnableNewTransferManager	ENABLE/DISABLE TRANSFER MANAGER
+GROUP_SERVICE_OPTIONS	Service Options
+optionPreferLocalService	Prefer local district services
+optionPreferLocalService_txt	Further improve locality of services by matching low priority requests only with service buildings within the same district (or outside any district). Once an unfulfilled requests becomes high priority, it will be served by any nearby service offer though. Affects: garbage, police, health care, maintenance, mail, taxi.
+GROUP_WAREHOUSE_OPTIONS	Goods Delivery Options
+optionWarehouseFirst	Warehouse First
+optionWarehouseFirst_txt	Prefer to conduct all goods delivery (inbound and outbound) through warehouses, if available. Will increase warehouse traffic, so your warehouses better be situated strategically well.
+optionWarehouseReserveTrucks	Reserve warehouse cargo trucks for local transfers
+optionWarehouseReserveTrucks_txt	Recommended to enable with Warehouse First: reserve 25% of warehouse truck capacity for satisfying city demand, prevents all trucks being used for export.
+GROUP_EXPORTIMPORT_OPTIONS	Export/Import Options
+optionPreferExportShipPlaneTrain	Import/Export prefer to use ship/plane/train instead of highway
+optionPreferExportShipPlaneTrain_txt	Experimental function!

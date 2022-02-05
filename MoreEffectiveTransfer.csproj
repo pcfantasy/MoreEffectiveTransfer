@@ -77,17 +77,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomAI\CustomCommonBuildingAI.cs" />
-    <Compile Include="Patch\CarAIPathfindFailurePatch.cs" />
-    <Compile Include="Patch\CargoTruckAIArriveAtTargetPatch.cs" />
-    <Compile Include="Patch\CommonBuildingAIReleaseBuildingPatch.cs" />
-    <Compile Include="Patch\BuildingAICalculateUnSpawnPositionPatch.cs" />
-    <Compile Include="Patch\BuildingAICalculateSpawnPositionPatch.cs" />
-    <Compile Include="Patch\GarbageTruckAIPatch.cs" />
-    <Compile Include="Patch\HelicopterDepotAISimulationStepPatch.cs" />
     <Compile Include="CustomManager\CustomTransferManager.cs" />
     <Compile Include="Patch\TransferManagerMatchOfferPatch.cs" />
-    <Compile Include="Patch\TransferManagerAddOutgoingOfferPatch.cs" />
-    <Compile Include="UI\BuildingUI.cs" />
     <Compile Include="Util\FastList.cs" />
     <Compile Include="Util\FastDelegateFactory.cs" />
     <Compile Include="Util\DebugLog.cs" />
@@ -95,12 +86,8 @@
     <Compile Include="Loader.cs" />
     <Compile Include="Util\Localization.cs" />
     <Compile Include="MoreEffectiveTransfer.cs" />
-    <Compile Include="UI\PlayerBuildingUI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Util\MainDataStore.cs" />
     <Compile Include="MoreEffectiveTransferThreading.cs" />
-    <Compile Include="UI\UniqueFactoryUI.cs" />
-    <Compile Include="UI\WareHouseUI.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Locales\**\*.txt">
@@ -112,6 +99,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="UI\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- Copy all build outputs to mods folder using standard MSBuild Copy task. -->

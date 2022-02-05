@@ -1,8 +1,9 @@
 ﻿using CitiesHarmony.API;
+using ColossalFramework.UI;
 using ICities;
 using MoreEffectiveTransfer.Util;
 using System.IO;
-
+using UnityEngine;
 
 namespace MoreEffectiveTransfer
 {
@@ -11,11 +12,10 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool debugMode = false;
 
+        public const string SETTINGS_VERSION = "2.0.0";
+
         // MAIN switch, mainly for debugging/profiling
         public static bool optionEnableNewTransferManager = true;
-
-        // UNUSED options
-        public static bool optionFixUnRouteTransfer = true;
 
         // SERVICE options
         public static bool optionPreferLocalService = true;
@@ -23,7 +23,6 @@ namespace MoreEffectiveTransfer
         // WAREHOUSE options
         public static bool optionWarehouseFirst = true;
         public static bool optionWarehouseReserveTrucks = true;
-        public static bool optionWarehouseSpawnUnSpawnFix = true;
         
         // EXPORT options
         public static bool optionPreferExportShipPlaneTrain = true;
@@ -41,7 +40,7 @@ namespace MoreEffectiveTransfer
 
         public string Description
         {
-            get { return "Optimize transfer manager in vanilla game. Match the shortest transfer bettween offers."; }
+            get { return "Optimize transfer manager in vanilla game. Match the shortest transfer between offers."; }
         }
 
         public void OnEnabled()
@@ -62,12 +61,12 @@ namespace MoreEffectiveTransfer
             FileStream fs = File.Create("MoreEffectiveTransfer_setting.txt");
             StreamWriter streamWriter = new StreamWriter(fs);
 
-            streamWriter.WriteLine(optionFixUnRouteTransfer);
-            streamWriter.WriteLine(optionWarehouseReserveTrucks);
-            streamWriter.WriteLine(optionWarehouseFirst);
-            streamWriter.WriteLine(optionWarehouseSpawnUnSpawnFix);
-            streamWriter.WriteLine(optionPreferExportShipPlaneTrain);
+            streamWriter.WriteLine(SETTINGS_VERSION);
+
             streamWriter.WriteLine(optionPreferLocalService);
+            streamWriter.WriteLine(optionWarehouseFirst);
+            streamWriter.WriteLine(optionWarehouseReserveTrucks);
+            streamWriter.WriteLine(optionPreferExportShipPlaneTrain);
             
             streamWriter.Flush();
             fs.Close();
@@ -81,22 +80,25 @@ namespace MoreEffectiveTransfer
                 StreamReader sr = new StreamReader(fs);
 
                 string strLine = sr.ReadLine();
-                optionFixUnRouteTransfer = (strLine == "True") ? true : false;               
+                if (strLine != SETTINGS_VERSION)
+                {
+                    DebugLog.LogToFileOnly($"Loading Settings - version mismatch detected. Found version: {strLine}, expected version: {SETTINGS_VERSION}. A new settings file will be generated.");
+                    sr.Close();
+                    fs.Close();
+                    return;
+                }
+
+                strLine = sr.ReadLine();
+                optionPreferLocalService = (strLine == "True") ? true : false;
                 
+                strLine = sr.ReadLine();
+                optionWarehouseFirst = (strLine == "True") ? true : false;
+
                 strLine = sr.ReadLine();
                 optionWarehouseReserveTrucks = (strLine == "True") ? true : false;
                 
                 strLine = sr.ReadLine();
-                optionWarehouseFirst = (strLine == "True") ? true : false;
-                
-                strLine = sr.ReadLine();
-                optionWarehouseSpawnUnSpawnFix = (strLine == "True") ? true : false;
-                
-                strLine = sr.ReadLine();
-                optionPreferExportShipPlaneTrain = (strLine == "True") ? true : false;
-                
-                strLine = sr.ReadLine();
-                optionPreferLocalService = (strLine == "True") ? true : false;
+                optionPreferExportShipPlaneTrain = (strLine == "True") ? true : false;               
 
                 sr.Close();
                 fs.Close();
@@ -108,30 +110,51 @@ namespace MoreEffectiveTransfer
             LoadSetting();
 
             #if (DEBUG || PROFILE)
-            UIHelperBase group0 = helper.AddGroup(Localization.Get("optionEnableNewTransferManager"));
+            UIHelperBase group0 = helper.AddGroup(Localization.Get("DEBUGPROFILE"));
             group0.AddCheckbox(Localization.Get("optionEnableNewTransferManager"), optionEnableNewTransferManager, (index) => setOptionEnableNewTransferManager(index));
             #endif
 
-            UIHelperBase group1 = helper.AddGroup(Localization.Get("FIX_UNROUTED_TRANSFER_MATCH_DESCRIPTION"));
-            group1.AddCheckbox(Localization.Get("FIX_UNROUTED_TRANSFER_MATCH_ENALBE"), optionFixUnRouteTransfer, (index) => setOptionFixUnRouteTransfer(index));
-            UIHelperBase group2 = helper.AddGroup(Localization.Get("DEBUG_MODE_DESCRIPTION"));
-            group2.AddCheckbox(Localization.Get("DEBUG_MODE_DESCRIPTION_ENALBE"), debugMode, (index) => debugModeEnable(index));
-            group2.AddCheckbox(Localization.Get("LOCAL_USE_DESCRIPTION_ENALBE"), optionPreferLocalService, (index) => setOptionPreferLocalService(index));
-            UIHelperBase group3 = helper.AddGroup(Localization.Get("ADVANCED_WAREHOUSE"));
-            group3.AddCheckbox(Localization.Get("WAREHOUSE_FIRST"), optionWarehouseFirst, (index) => setOptionWarehouseFirst(index));
-            group3.AddCheckbox(Localization.Get("WAREHOUSE_SPAWN_UNSPAWN"), optionWarehouseSpawnUnSpawnFix, (index) => setOptionWarehouseSpawnUnSpawnFix(index));
-            group3.AddCheckbox(Localization.Get("WAREHOUSE_RESEVER_FOR_CITY"), optionWarehouseReserveTrucks, (index) => setOptionWarehouseReserveTrucks(index));
-            UIHelperBase group4 = helper.AddGroup(Localization.Get("EXPERIMENTAL_FUNCTION"));
-            group4.AddCheckbox(Localization.Get("PREFER_SHIP_PLANE_TRAIN"), optionPreferExportShipPlaneTrain, (index) => setOptionPreferExportShipPlaneTrain(index));
+            UIHelperBase group1 = helper.AddGroup(Localization.Get("GROUP_SERVICE_OPTIONS"));
+            group1.AddCheckbox(Localization.Get("optionPreferLocalService"), optionPreferLocalService, (index) => setOptionPreferLocalService(index));
+            UIPanel txtPanel1 = (group1 as UIHelper).self as UIPanel;
+            UILabel txtLabel1 = AddDescription(txtPanel1, "optionPreferLocalService_txt", txtPanel1, 1.0f, Localization.Get("optionPreferLocalService_txt"));
+
+
+            UIHelperBase group2 = helper.AddGroup(Localization.Get("GROUP_WAREHOUSE_OPTIONS"));
+            group2.AddCheckbox(Localization.Get("optionWarehouseFirst"), optionWarehouseFirst, (index) => setOptionWarehouseFirst(index));
+            UIPanel txtPanel2 = (group2 as UIHelper).self as UIPanel;
+            UILabel txtLabel21 = AddDescription(txtPanel2, "optionWarehouseFirst_txt", txtPanel2, 1.0f, Localization.Get("optionWarehouseFirst_txt"));
+
+            group2.AddCheckbox(Localization.Get("optionWarehouseReserveTrucks"), optionWarehouseReserveTrucks, (index) => setOptionWarehouseReserveTrucks(index));
+            UILabel txtLabel22 = AddDescription(txtPanel2, "optionWarehouseReserveTrucks_txt", txtPanel2, 1.0f, Localization.Get("optionWarehouseReserveTrucks_txt"));
+
+            UIHelperBase group3 = helper.AddGroup(Localization.Get("GROUP_EXPORTIMPORT_OPTIONS"));
+            group3.AddCheckbox(Localization.Get("optionPreferExportShipPlaneTrain"), optionPreferExportShipPlaneTrain, (index) => setOptionPreferExportShipPlaneTrain(index));
+            UIPanel txtPanel3 = (group3 as UIHelper).self as UIPanel;
+            UILabel txtLabel3 = AddDescription(txtPanel3, "optionPreferExportShipPlaneTrain_txt", txtPanel3, 1.0f, Localization.Get("optionPreferExportShipPlaneTrain_txt"));
+
             SaveSetting();
         }
 
 
-        public void debugModeEnable(bool index)
+        /* 
+         * Code adapted from PropAnarchy under MIT license
+         */
+        private static readonly Color32 m_greyColor = new Color32(0xe6, 0xe6, 0xe6, 0xee);
+        private static UILabel AddDescription(UIPanel panel, string name, UIComponent alignTo, float fontScale, string text)
         {
-            debugMode = index;
-            SaveSetting();
+            UILabel desc = panel.AddUIComponent<UILabel>();
+            desc.name = name;
+            desc.width = panel.width - 80;
+            desc.wordWrap = true;
+            desc.autoHeight = true;
+            desc.textScale = fontScale;
+            desc.textColor = m_greyColor;
+            desc.text = text;
+            desc.relativePosition = new UnityEngine.Vector3(alignTo.relativePosition.x + 26f, alignTo.relativePosition.y + alignTo.height);
+            return desc;
         }
+
 
         public void setOptionEnableNewTransferManager(bool index)
         {
@@ -140,26 +163,15 @@ namespace MoreEffectiveTransfer
             DebugLog.DebugMsg($"** OPTION ENABLE/DISABLE: {optionEnableNewTransferManager} **");
         }
 
-        public void setOptionFixUnRouteTransfer(bool index)
-        {
-            optionFixUnRouteTransfer = index;
-            SaveSetting();
-        }
-
         public void setOptionPreferLocalService(bool index)
         {
             optionPreferLocalService = index;
             SaveSetting();
         }
+        
         public void setOptionWarehouseFirst(bool index)
         {
             optionWarehouseFirst = index;
-            SaveSetting();
-        }
-
-        public void setOptionWarehouseSpawnUnSpawnFix(bool index)
-        {
-            optionWarehouseSpawnUnSpawnFix = index;
             SaveSetting();
         }
 

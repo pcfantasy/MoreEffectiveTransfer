@@ -2,8 +2,6 @@
 using ColossalFramework.UI;
 using HarmonyLib;
 using ICities;
-using MoreEffectiveTransfer.Patch;
-using MoreEffectiveTransfer.UI;
 using MoreEffectiveTransfer.Util;
 
 namespace MoreEffectiveTransfer
@@ -26,16 +24,6 @@ namespace MoreEffectiveTransfer
                     int num4 = (int)(currentFrameIndex & 255u);
                     if (num4 == 255)
                     {
-                        /*
-                        BuildingUI.refeshOnce = true;
-                        PlayerBuildingUI.refeshOnce = true;
-                        UniqueFactoryUI.refeshOnce = true;
-                        WareHouseUI.refeshOnce = true;
-                        */
-
-                        //HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepotFinal = HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot;
-                        //HelicopterDepotAISimulationStepPatch.haveFireHelicopterDepot = false;
-
                         MoreEffectiveTransfer.shipStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
                         MoreEffectiveTransfer.trainStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
                         MoreEffectiveTransfer.planeStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;

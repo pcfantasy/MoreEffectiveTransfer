@@ -1,19 +1,6 @@
-﻿using ColossalFramework.UI;
-using ICities;
-using UnityEngine;
-using System.IO;
-using ColossalFramework;
-using System.Reflection;
-using System;
-using System.Linq;
-using ColossalFramework.Math;
-using System.Collections.Generic;
-using ColossalFramework.PlatformServices;
+﻿using ICities;
 using MoreEffectiveTransfer.Util;
-using MoreEffectiveTransfer.UI;
-using MoreEffectiveTransfer.CustomManager;
 using CitiesHarmony.API;
-using MoreEffectiveTransfer.Patch;
 
 namespace MoreEffectiveTransfer
 {
@@ -25,20 +12,6 @@ namespace MoreEffectiveTransfer
         public static bool HarmonyDetourFailed = true;
         public static bool isGuiRunning = false;
 
-        /*
-        public static UIPanel buildingInfo;
-        public static UIPanel playerBuildingInfo;
-        public static UIPanel uniqueFactoryInfo;
-        public static UIPanel wareHouseInfo;
-        public static UniqueFactoryUI uniqueFactoryPanel;
-        public static WareHouseUI wareHousePanel;
-        public static PlayerBuildingUI playerBuildingPanel;
-        public static BuildingUI buildingPanel;
-        public static GameObject BuildingWindowGameObject;
-        public static GameObject PlayerBuildingWindowGameObject;
-        public static GameObject UniqueFactoryWindowGameObject;
-        public static GameObject WareHouseWindowGameObject;
-        */
 
         public override void OnCreated(ILoading loading)
         {
@@ -54,7 +27,7 @@ namespace MoreEffectiveTransfer
                 if (mode == LoadMode.LoadGame || mode == LoadMode.NewGame)
                 {
                     DebugLog.LogToFileOnly("OnLevelLoaded");
-                    DataInit();
+
                     InitDetour();
                     HarmonyInitDetour();
                     //SetupGui();
@@ -64,19 +37,6 @@ namespace MoreEffectiveTransfer
                     {
                         DebugLog.LogToFileOnly("New Game");
                     }
-                }
-            }
-        }
-
-        public void DataInit()
-        {
-            for (int i = 0; i < 49152; i++)
-            {
-                MainDataStore.refreshCanNotConnectedBuildingIDCount[i] = 0;
-                MainDataStore.canNotConnectedBuildingIDCount[i] = 0;
-                for (int j = 0; j < 255; j++)
-                {
-                    MainDataStore.canNotConnectedBuildingID[i, j] = 0;
                 }
             }
         }
@@ -99,203 +59,6 @@ namespace MoreEffectiveTransfer
         {
             base.OnReleased();
         }
-
-        /*
-        public static void SetupGui()
-        {
-            SetupBuidingGui();
-            SetupPlayerBuidingGui();
-            SetupWareHouseGui();
-            SetupUniqueFactoryGui();
-            Loader.isGuiRunning = true;
-        }
- 
-        public static void RemoveGui()
-        {
-            Loader.isGuiRunning = false;
-
-            if (uniqueFactoryPanel != null)
-            {
-                if (uniqueFactoryPanel.parent != null)
-                {
-                    uniqueFactoryPanel.parent.eventVisibilityChanged -= uniqueFactoryInfo_eventVisibilityChanged;
-                }
-            }
-            if (wareHousePanel != null)
-            {
-                if (wareHousePanel.parent != null)
-                {
-                    wareHousePanel.parent.eventVisibilityChanged -= wareHouseInfo_eventVisibilityChanged;
-                }
-            }
-            if (playerBuildingPanel != null)
-            {
-                if (playerBuildingPanel.parent != null)
-                {
-                    playerBuildingPanel.parent.eventVisibilityChanged -= playerbuildingInfo_eventVisibilityChanged;
-                }
-            }
-            if (buildingPanel != null)
-            {
-                if (buildingPanel.parent != null)
-                {
-                    buildingPanel.parent.eventVisibilityChanged -= buildingInfo_eventVisibilityChanged;
-                }
-            }
-
-            if (PlayerBuildingWindowGameObject != null)
-            {
-                UnityEngine.Object.Destroy(PlayerBuildingWindowGameObject);
-            }
-
-            if (BuildingWindowGameObject != null)
-            {
-                UnityEngine.Object.Destroy(BuildingWindowGameObject);
-            }
-
-            if (WareHouseWindowGameObject != null)
-            {
-                UnityEngine.Object.Destroy(WareHouseWindowGameObject);
-            }
-
-            if (UniqueFactoryWindowGameObject != null)
-            {
-                UnityEngine.Object.Destroy(UniqueFactoryWindowGameObject);
-            }
-        }
-
-        public static void SetupBuidingGui()
-        {
-            BuildingWindowGameObject = new GameObject("buildingWindowObject");
-            buildingPanel = (BuildingUI)BuildingWindowGameObject.AddComponent(typeof(BuildingUI));
-            buildingInfo = UIView.Find<UIPanel>("(Library) ZonedBuildingWorldInfoPanel");
-            if (buildingInfo == null)
-            {
-                DebugLog.LogToFileOnly("UIPanel not found (update broke the mod!): (Library) ZonedBuildingWorldInfoPanel\nAvailable panels are:\n");
-            }
-            buildingPanel.transform.parent = buildingInfo.transform;
-            buildingPanel.size = new Vector3(buildingInfo.size.x, buildingInfo.size.y/2f);
-            buildingPanel.baseBuildingWindow = buildingInfo.gameObject.transform.GetComponentInChildren<ZonedBuildingWorldInfoPanel>();
-            buildingPanel.position = new Vector3(buildingInfo.size.x, 0);
-            buildingInfo.eventVisibilityChanged += buildingInfo_eventVisibilityChanged;
-        }
-
-        public static void SetupUniqueFactoryGui()
-        {
-            UniqueFactoryWindowGameObject = new GameObject("UniqueFactoryWindowGameObject");
-            uniqueFactoryPanel = (UniqueFactoryUI)UniqueFactoryWindowGameObject.AddComponent(typeof(UniqueFactoryUI));
-            uniqueFactoryInfo = UIView.Find<UIPanel>("(Library) UniqueFactoryWorldInfoPanel");
-            if (uniqueFactoryInfo == null)
-            {
-                DebugLog.LogToFileOnly("UIPanel not found (update broke the mod!): (Library) UniqueFactoryWorldInfoPanel\nAvailable panels are:\n");
-            }
-            uniqueFactoryPanel.transform.parent = uniqueFactoryInfo.transform;
-            uniqueFactoryPanel.size = new Vector3(uniqueFactoryInfo.size.x, uniqueFactoryInfo.size.y/2f);
-            uniqueFactoryPanel.baseBuildingWindow = uniqueFactoryInfo.gameObject.transform.GetComponentInChildren<UniqueFactoryWorldInfoPanel>();
-            uniqueFactoryPanel.position = new Vector3(uniqueFactoryInfo.size.x, 0);
-            uniqueFactoryInfo.eventVisibilityChanged += uniqueFactoryInfo_eventVisibilityChanged;
-        }
-
-        public static void SetupWareHouseGui()
-        {
-            WareHouseWindowGameObject = new GameObject("WareHouseWindowGameObject");
-            wareHousePanel = (WareHouseUI)WareHouseWindowGameObject.AddComponent(typeof(WareHouseUI));
-            wareHouseInfo = UIView.Find<UIPanel>("(Library) WarehouseWorldInfoPanel");
-            if (wareHouseInfo == null)
-            {
-                DebugLog.LogToFileOnly("UIPanel not found (update broke the mod!): (Library) WarehouseWorldInfoPanel\nAvailable panels are:\n");
-            }
-            wareHousePanel.transform.parent = wareHouseInfo.transform;
-            wareHousePanel.size = new Vector3(wareHouseInfo.size.x, wareHouseInfo.size.y/2f);
-            wareHousePanel.baseBuildingWindow = wareHouseInfo.gameObject.transform.GetComponentInChildren<WarehouseWorldInfoPanel>();
-            wareHousePanel.position = new Vector3(wareHouseInfo.size.x, 0);
-            wareHouseInfo.eventVisibilityChanged += wareHouseInfo_eventVisibilityChanged;
-        }
-
-        public static void SetupPlayerBuidingGui()
-        {
-            PlayerBuildingWindowGameObject = new GameObject("PlayerbuildingWindowGameObject");
-            playerBuildingPanel = (PlayerBuildingUI)PlayerBuildingWindowGameObject.AddComponent(typeof(PlayerBuildingUI));
-            playerBuildingInfo = UIView.Find<UIPanel>("(Library) CityServiceWorldInfoPanel");
-            if (playerBuildingInfo == null)
-            {
-                DebugLog.LogToFileOnly("UIPanel not found (update broke the mod!): (Library) CityServiceWorldInfoPanel\nAvailable panels are:\n");
-            }
-            playerBuildingPanel.transform.parent = playerBuildingInfo.transform;
-            playerBuildingPanel.size = new Vector3(playerBuildingInfo.size.x, playerBuildingInfo.size.y/2f);
-            playerBuildingPanel.baseBuildingWindow = playerBuildingInfo.gameObject.transform.GetComponentInChildren<CityServiceWorldInfoPanel>();
-            playerBuildingPanel.position = new Vector3(playerBuildingInfo.size.x, 0);
-            playerBuildingInfo.eventVisibilityChanged += playerbuildingInfo_eventVisibilityChanged;
-        }
-
-        public static void playerbuildingInfo_eventVisibilityChanged(UIComponent component, bool value)
-        {
-            playerBuildingPanel.isEnabled = value;
-            if (value)
-            {
-                Loader.playerBuildingPanel.transform.parent = Loader.playerBuildingInfo.transform;
-                Loader.playerBuildingPanel.size = new Vector3(Loader.playerBuildingInfo.size.x, Loader.playerBuildingInfo.size.y/2f);
-                Loader.playerBuildingPanel.baseBuildingWindow = Loader.playerBuildingInfo.gameObject.transform.GetComponentInChildren<CityServiceWorldInfoPanel>();
-                Loader.playerBuildingPanel.position = new Vector3(Loader.playerBuildingInfo.size.x, 0);
-                playerBuildingPanel.Show();
-            }
-            else
-            {
-                playerBuildingPanel.Hide();
-            }
-        }
-
-        public static void buildingInfo_eventVisibilityChanged(UIComponent component, bool value)
-        {
-            buildingPanel.isEnabled = value;
-            if (value)
-            {
-                buildingPanel.transform.parent = buildingInfo.transform;
-                buildingPanel.size = new Vector3(buildingInfo.size.x, buildingInfo.size.y / 2f);
-                buildingPanel.baseBuildingWindow = buildingInfo.gameObject.transform.GetComponentInChildren<ZonedBuildingWorldInfoPanel>();
-                buildingPanel.position = new Vector3(buildingInfo.size.x, 0);
-                buildingPanel.Show();
-            }
-            else
-            {
-                buildingPanel.Hide();
-            }
-        }
-
-        public static void uniqueFactoryInfo_eventVisibilityChanged(UIComponent component, bool value)
-        {
-            uniqueFactoryPanel.isEnabled = value;
-            if (value)
-            {
-                uniqueFactoryPanel.transform.parent = uniqueFactoryInfo.transform;
-                uniqueFactoryPanel.size = new Vector3(uniqueFactoryInfo.size.x, uniqueFactoryInfo.size.y / 2f);
-                uniqueFactoryPanel.baseBuildingWindow = uniqueFactoryInfo.gameObject.transform.GetComponentInChildren<UniqueFactoryWorldInfoPanel>();
-                uniqueFactoryPanel.position = new Vector3(uniqueFactoryInfo.size.x, 0);
-                uniqueFactoryPanel.Show();
-            }
-            else
-            {
-                uniqueFactoryPanel.Hide();
-            }
-        }
-
-        public static void wareHouseInfo_eventVisibilityChanged(UIComponent component, bool value)
-        {
-            wareHousePanel.isEnabled = value;
-            if (value)
-            {
-                wareHousePanel.transform.parent = wareHouseInfo.transform;
-                wareHousePanel.size = new Vector3(wareHouseInfo.size.x, wareHouseInfo.size.y / 2f);
-                wareHousePanel.baseBuildingWindow = wareHouseInfo.gameObject.transform.GetComponentInChildren<WarehouseWorldInfoPanel>();
-                wareHousePanel.position = new Vector3(wareHouseInfo.size.x, 0);
-                wareHousePanel.Show();
-            }
-            else
-            {
-                wareHousePanel.Hide();
-            }
-        }
-        */
 
         public void HarmonyInitDetour()
         {
