@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("MoreEffectiveTransfer")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Original Copyright ©  2019 pcfantasy. Licensed under MIT.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -19,18 +19,9 @@ using System.Runtime.InteropServices;
 //请将此类型的 ComVisible 特性设置为 true。
 [assembly: ComVisible(false)]
 
-// 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
-[assembly: Guid("c7a1e749-47ed-449c-9579-e94ed850b079")]
+// Original GUID replaced with new GUID
+[assembly: Guid("D51F2CEB-E3F9-498E-9199-C7208AE4F755")]
 
-// 程序集的版本信息由下列四个值组成: 
-//
-//      主版本
-//      次版本
-//      生成号
-//      修订号
-//
-//可以指定所有这些值，也可以使用“生成号”和“修订号”的默认值，
-// 方法是按如下所示使用“*”: :
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.1.06.20")]
-[assembly: AssemblyFileVersion("3.1.06.20")]
+// Original assembly version replaced
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
