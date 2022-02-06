@@ -218,8 +218,8 @@ namespace MoreEffectiveTransfer.CustomManager
 
         private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority, ref float distanceModifier)
         {
-            const int PRIORITY_THRESHOLD_LOCAL = 4;     //upper prios also get non-local fulfillment
-            const float LOCAL_DISTRICT_MODIFIER = 0.1f;   //modifier for distance within same district
+            const int PRIORITY_THRESHOLD_LOCAL = 3;     //upper prios also get non-local fulfillment
+            const float LOCAL_DISTRICT_MODIFIER = 0.05f;   //modifier for distance within same district
             bool isMoveTransfer = false;
             bool isLocal = false;
 
@@ -608,7 +608,7 @@ namespace MoreEffectiveTransfer.CustomManager
                         bestmatch_distance = distance;
                     }
 
-                    DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}@{distanceFactor}, bestmatch: {bestmatch_distance}");
+                    DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
                 }
             }
 
@@ -673,7 +673,7 @@ namespace MoreEffectiveTransfer.CustomManager
                         bestmatch_distance = distance;
                     }
 
-                    DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}@{distanceFactor}, bestmatch: {bestmatch_distance}");
+                    DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
                 }
             }
 
