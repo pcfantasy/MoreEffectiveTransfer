@@ -5,8 +5,8 @@
 ### Prefer local district services (recommended to enable)
 <b>Affects: garbage, police, health care, maintenance, mail, taxi</b><br />
 This setting further improves locality of services by further narrows down the matchmaking:<br />
-All low priority (priority 0..4) outgoing transfer requests will only match with services from the same district. If no matching services from the same district are available, the request is unfulfilled.
-As the problem (garbage, crime, ...) accumulates, the request will gain urgency and increase priority. Once reaching priority classes 5..7 it will be matched to fulfill, regardless of district restrictions.
+All low priority outgoing transfer requests will only match with services from the same district. If no matching services from the same district are available, the request is unfulfilled.
+As the problem (garbage, crime, ...) accumulates, the request will gain urgency and increase priority. Once reaching hiher priority it will be matched to fulfill, regardless of district restrictions (but still with a bias towards local district services).
 <br /><b>Effect:</b><br />
 While not quite duplicating mods such as DistrictServiceLimit or EnhancedDistrictServices, it ensures that most services stay local as much as possible, while at the same time ensuring that high priority requests will be serviced, even if that means a service has to "rush across the map".
 <br /><br />
@@ -26,8 +26,7 @@ Note that this can make things worse if you do not have strategically well-place
 This setting will prevent all warehouses from using all their trucks to export goods out of the city.
 A contigent of trucks will be held in reserve and will only be used to fulfill requests from consumers within the city.<br />
 The setting's effect is: <br />
-* 50% capacity reserved when warehouse is in FILLING or BALANCED mode.<br />
-* 25% capacity reserved when warehouse is in EMPTYING mode.<br />
+* 25% capacity reserved at all times.<br />
 <br /><br />
 
   
@@ -38,7 +37,7 @@ That is because a more suitable, closer service offer might have already been ma
 
 This whole situation cannot be easily prevented, and would rather require a complete redesign of the offer matchmaking system, with a "global optimization" approach (instead of the current "line-by-line, from high to low priority" approach).
 
-TLDR: you notice in your city that garbage trucks go from A to B, and from B to A, and you think this mod is not doing its' job. C'est la vie - this mod usually reduces these situations a lot, but cannot fully prevent them.
+TLDR: you notice in your city that garbage trucks go from A to B, and from B to A, and you think this mod is not doing its' job. This mod usually reduces these situations, but cannot fully prevent them.
 <br /><br />
 
 

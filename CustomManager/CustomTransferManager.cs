@@ -216,18 +216,23 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority)
+        private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority, ref float distanceModifier)
         {
-            const int PRIORITY_THRESHOLD_LOCAL = 4; //upper prios 4..7 also get non-local fulfillment
+            const int PRIORITY_THRESHOLD_LOCAL = 4;     //upper prios also get non-local fulfillment
+            const float LOCAL_DISTRICT_MODIFIER = 0.1f;   //modifier for distance within same district
             bool isMoveTransfer = false;
+            bool isLocal = false;
 
             // guard: current option setting?
             if (!MoreEffectiveTransfer.optionPreferLocalService)
                 return true;
 
-            // guard: priority above threshold -> any service is OK!
+            // priority above threshold -> any service is OK!
             if (priority >= PRIORITY_THRESHOLD_LOCAL)
-                return true;
+            { 
+                isLocal = true;
+                // continue logic to set distanceModifier for service within same district
+            }
 
             switch (material)
             {
@@ -249,8 +254,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     break;
 
                 // Goods subject to prefer local:
-
-
+                // -none-
 
                 // Material Transfers for services subject to policy:
                 case TransferReason.GarbageMove:
@@ -263,7 +267,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     break;
 
                 default:
-                    return true;
+                    return true;                //guard: dont apply district logic to other materials
             }
 
             // determine buildings or vehicle parent buildings
@@ -287,9 +291,15 @@ namespace MoreEffectiveTransfer.CustomManager
                   || (offerOut.Active && districtOutgoing == 0)
                   || (isMoveTransfer && districtIncoming == 0)
                )
-                return true;
+            {
+                isLocal = true;
 
-            return false;
+                // really same district? set modifier!
+                if ((districtIncoming == districtOutgoing) && (districtIncoming != 0))
+                    distanceModifier = LOCAL_DISTRICT_MODIFIER;
+            }
+
+            return isLocal;
         }
 
         private static float WarehouseFirst(ref TransferOffer offer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
@@ -340,8 +350,8 @@ namespace MoreEffectiveTransfer.CustomManager
 
                 return 0.01f;       //WarehouseDIstanceFactorSqr = 1 / 10^2
             }
-            else
-                return 1f;
+
+            return 1f;
         }
 
         private static bool WarehouseCanTransfer(ref TransferOffer incomingOffer, ref TransferOffer outgoingOffer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
@@ -582,7 +592,8 @@ namespace MoreEffectiveTransfer.CustomManager
                     if ((incomingOffer.Exclude) && (outgoingOffer.Exclude) && (counterpart_prio < (prio_lower_limit + 1))) continue;
 
                     // CHECK OPTION: preferlocalservice
-                    bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
+                    float districtFactor = 1f;
+                    bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority, ref districtFactor);
 
                     // CHECK OPTION: WarehouseFirst
                     float distanceFactor = WarehouseFirst(ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
@@ -590,7 +601,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     // CHECK OPTION: WarehouseReserveTrucks
                     bool canTransfer = WarehouseCanTransfer(ref incomingOffer, ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
 
-                    float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor;
+                    float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor * districtFactor;
                     if ((isLocalAllowed && canTransfer) && (distance < bestmatch_distance))
                     {
                         bestmatch_position = counterpart_offset * 256 + counterpart_index;
@@ -646,7 +657,8 @@ namespace MoreEffectiveTransfer.CustomManager
                     if ((outgoingOffer.Exclude) && (incomingOffer.Exclude) && (counterpart_prio < (prio_lower_limit + 1))) continue;
 
                     // CHECK OPTION: preferlocalservice
-                    bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority);
+                    float districtFactor = 1f;
+                    bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority, ref districtFactor);
 
                     // CHECK OPTION: WarehouseFirst
                     float distanceFactor = WarehouseFirst(ref incomingOffer, material, WAREHOUSE_OFFERTYPE.INCOMING);
@@ -654,7 +666,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     // CHECK OPTION: WarehouseReserveTrucks
                     bool canTransfer = WarehouseCanTransfer(ref incomingOffer, ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
 
-                    float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor;
+                    float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor * districtFactor;
                     if ((isLocalAllowed && canTransfer) && (distance < bestmatch_distance))
                     {
                         bestmatch_position = counterpart_offset * 256 + counterpart_index;
