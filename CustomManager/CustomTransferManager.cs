@@ -297,6 +297,9 @@ namespace MoreEffectiveTransfer.CustomManager
             if (!MoreEffectiveTransfer.optionWarehouseFirst)
                 return 1f;
 
+            if (!offer.Exclude) //TransferOffer.Exclude is only ever set by WarehouseAI!
+                return 1f;
+
             switch (material)
             {
                 case TransferReason.Oil:
@@ -346,6 +349,9 @@ namespace MoreEffectiveTransfer.CustomManager
             if (!MoreEffectiveTransfer.optionWarehouseReserveTrucks)
                 return true;
 
+            if (!(outgoingOffer.Exclude && outgoingOffer.Active))   //further checks only relevant if outgoing from warehouse and active
+                return true;
+
             switch (material)
             {
                 case TransferReason.Oil:
@@ -380,7 +386,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_truckCount;
                 Building.Flags isEmptying = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & Building.Flags.Downgrading);
 
-                float maxExport = (isEmptying!=Building.Flags.None) ? (total * 0.75f) : (total * 0.5f);
+                float maxExport = (total * 0.75f);
 
                 CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI,
                                        outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
