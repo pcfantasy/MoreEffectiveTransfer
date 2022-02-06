@@ -280,7 +280,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
             if (offerOut.Building != 0) buildingOutgoing = offerOut.Building;
             else if (offerOut.Vehicle != 0) buildingOutgoing = _VehicleManager.m_vehicles.m_buffer[offerOut.Vehicle].m_sourceBuilding;
-            else if (offerOut.Citizen != 0) buildingOutgoing = _CitizenManager.m_citizens.m_buffer[offerIn.Citizen].m_homeBuilding;
+            else if (offerOut.Citizen != 0) buildingOutgoing = _CitizenManager.m_citizens.m_buffer[offerOut.Citizen].m_homeBuilding;
 
             // get respective districts
             byte districtIncoming = _DistrictManager.GetDistrict(_BuildingManager.m_buildings.m_buffer[buildingIncoming].m_position);
