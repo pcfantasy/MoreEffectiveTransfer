@@ -453,8 +453,8 @@ namespace MoreEffectiveTransfer.CustomManager
 
             // function scope variables
             int offer_offset;
-            int offerCountIncoming, offerTotalCountIncoming = 0;
-            int offerCountOutgoing, offerTotalCountOutgoing = 0;
+            int offerCountIncoming;
+            int offerCountOutgoing;
 
             // DEBUG LOGGING
             DebugLog.DebugMsg($"-- TRANSFER REASON: {material.ToString()}, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}");
@@ -464,17 +464,11 @@ namespace MoreEffectiveTransfer.CustomManager
                 offer_offset = (int)material * 8 + priority;
                 offerCountIncoming = m_incomingCount[offer_offset];
                 offerCountOutgoing = m_outgoingCount[offer_offset];
-                offerTotalCountIncoming += offerCountIncoming;
-                offerTotalCountOutgoing += offerCountOutgoing;
 
                 DebugLog.DebugMsg($"   #Offers@priority {priority} : {offerCountIncoming} in, {offerCountOutgoing} out");
                 DebugPrintAllOffers(material, offer_offset, offerCountIncoming, offerCountOutgoing);
             }
 #endif
-
-            // guard: nothing to match?
-            if (offerTotalCountIncoming == 0 || offerTotalCountOutgoing == 0)
-                goto END_OFFERMATCHING;
 
 
             // Select offer matching algorithm
@@ -498,7 +492,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     // loop all offers within this priority
                     for (int offerIndex = 0; offerIndex < offerCountOutgoing; offerIndex++)
                     {
-                        if (m_incomingAmount[(int)material] == 0 || offerTotalCountIncoming == 0)
+                        if (m_incomingAmount[(int)material] == 0)
                         {
                             DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]} ###");
                             goto END_OFFERMATCHING;
