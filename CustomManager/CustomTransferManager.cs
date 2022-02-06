@@ -453,29 +453,27 @@ namespace MoreEffectiveTransfer.CustomManager
 
             // function scope variables
             int offer_offset;
-            int offerCountIncoming, offerCountIncomingTotal = 0;
-            int offerCountOutgoing, offerCountOutgoingTotal = 0;
-            int offerAmountIncoming = 0;
-            int offerAmountOutgoing = 0;
+            int offerCountIncoming, offerTotalCountIncoming = 0;
+            int offerCountOutgoing, offerTotalCountOutgoing = 0;
 
             // DEBUG LOGGING
-            DebugLog.DebugMsg($"-- TRANSFER REASON: {material.ToString()}");
+            DebugLog.DebugMsg($"-- TRANSFER REASON: {material.ToString()}, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}");
+#if (DEBUG)
             for (int priority = 7; priority >= 0; priority--)
             {
                 offer_offset = (int)material * 8 + priority;
                 offerCountIncoming = m_incomingCount[offer_offset];
                 offerCountOutgoing = m_outgoingCount[offer_offset];
-                offerCountIncomingTotal += offerCountIncoming;
-                offerCountOutgoingTotal += offerCountOutgoing;
-                offerAmountIncoming = m_incomingAmount[(int)material];
-                offerAmountOutgoing = m_outgoingAmount[(int)material];
+                offerTotalCountIncoming += offerCountIncoming;
+                offerTotalCountOutgoing += offerCountOutgoing;
 
                 DebugLog.DebugMsg($"   #Offers@priority {priority} : {offerCountIncoming} in, {offerCountOutgoing} out");
                 DebugPrintAllOffers(material, offer_offset, offerCountIncoming, offerCountOutgoing);
             }
+#endif
 
             // guard: nothing to match?
-            if (offerCountIncomingTotal == 0 || offerCountOutgoingTotal == 0)
+            if (offerTotalCountIncoming == 0 || offerTotalCountOutgoing == 0)
                 goto END_OFFERMATCHING;
 
 
@@ -500,6 +498,12 @@ namespace MoreEffectiveTransfer.CustomManager
                     // loop all offers within this priority
                     for (int offerIndex = 0; offerIndex < offerCountOutgoing; offerIndex++)
                     {
+                        if (m_incomingAmount[(int)material] == 0 || offerTotalCountIncoming == 0)
+                        {
+                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]} ###");
+                            goto END_OFFERMATCHING;
+                        }
+                       
                         MatchOutgoingOffer(material, offer_offset, priority, prio_lower_limit, offerIndex);
                     }
 
@@ -525,6 +529,12 @@ namespace MoreEffectiveTransfer.CustomManager
                     // loop all offers within this priority
                     for (int offerIndex = 0; offerIndex < offerCountIncoming; offerIndex++)
                     {
+                        if (m_outgoingAmount[(int)material] == 0)
+                        {
+                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]} ###");
+                            goto END_OFFERMATCHING;
+                        }
+
                         MatchIncomingOffer(material, offer_offset, priority, prio_lower_limit, offerIndex);
                     }
 
@@ -550,6 +560,12 @@ namespace MoreEffectiveTransfer.CustomManager
                                                                         
                     for (int offerIndex = 0, indexIn=0, indexOut=0; offerIndex < maxoffers; offerIndex++, indexIn++, indexOut++) // loop all incoming+outgoing offers within this priority
                     {
+                        if (m_incomingAmount[(int)material] == 0 || m_outgoingAmount[(int)material] == 0)
+                        {
+                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]} ###");
+                            goto END_OFFERMATCHING;
+                        }
+
                         if (indexIn < offerCountIncoming) MatchIncomingOffer(material, offer_offset, priority, prio_lower_limit, indexIn);
                         if (indexOut < offerCountOutgoing) MatchOutgoingOffer(material, offer_offset, priority, prio_lower_limit, indexOut);
                     }
@@ -626,6 +642,8 @@ namespace MoreEffectiveTransfer.CustomManager
                 // reduce offer amount
                 incomingOffer.Amount -= deltaamount;
                 m_outgoingOffers[bestmatch_position].Amount -= deltaamount;
+                m_incomingAmount[(int)material] -= deltaamount;
+                m_outgoingAmount[(int)material] -= deltaamount;
             }
         }
 
@@ -691,6 +709,8 @@ namespace MoreEffectiveTransfer.CustomManager
                 // reduce offer amount
                 outgoingOffer.Amount -= deltaamount;
                 m_incomingOffers[bestmatch_position].Amount -= deltaamount;
+                m_incomingAmount[(int)material] -= deltaamount;
+                m_outgoingAmount[(int)material] -= deltaamount;
             }
         }
 
