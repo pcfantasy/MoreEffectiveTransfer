@@ -216,12 +216,13 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority, ref float distanceModifier)
+        private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority, out float distanceModifier)
         {
             const int PRIORITY_THRESHOLD_LOCAL = 3;     //upper prios also get non-local fulfillment
             const float LOCAL_DISTRICT_MODIFIER = 0.05f;   //modifier for distance within same district
             bool isMoveTransfer = false;
             bool isLocal = false;
+            distanceModifier = 1.0f;
 
             // guard: current option setting?
             if (!MoreEffectiveTransfer.optionPreferLocalService)
@@ -593,7 +594,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
                     // CHECK OPTION: preferlocalservice
                     float districtFactor = 1f;
-                    bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority, ref districtFactor);
+                    bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority, out districtFactor);
 
                     // CHECK OPTION: WarehouseFirst
                     float distanceFactor = WarehouseFirst(ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
@@ -658,7 +659,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
                     // CHECK OPTION: preferlocalservice
                     float districtFactor = 1f;
-                    bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority, ref districtFactor);
+                    bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority, out districtFactor);
 
                     // CHECK OPTION: WarehouseFirst
                     float distanceFactor = WarehouseFirst(ref incomingOffer, material, WAREHOUSE_OFFERTYPE.INCOMING);
