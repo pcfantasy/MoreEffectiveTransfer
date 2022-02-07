@@ -101,6 +101,15 @@ On Github: https://github.com/TheDogKSP/MoreEffectiveTransfer
 License: MIT
 <br />
 Be sure to always respect pcfantasy's original copyright!
+<br />
+This mod uses the Harmony2 library by Andreas Pardeike.
+
+# Incompatible mods:
+(1) Original More Effective Transfer Manager by pcfantasy. Please completely unsubscribe original before using this one.<br/>
+(2) District Service Limit (any version)<br/>
+(3) Enhanced District Services <br/>
+(4) Transfer Broker - it does the same thing (completely replacing the vanilla transfer manager), so use one or another, but never both!
+<br/>
 
 # Contributions wanted
 Contributions in the form of Github Pull Requests are welcome!
