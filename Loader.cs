@@ -37,6 +37,7 @@ namespace MoreEffectiveTransfer
                     {
                         DebugLog.LogToFileOnly("New Game");
                     }
+
                 }
             }
         }

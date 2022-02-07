@@ -5,6 +5,7 @@ using MoreEffectiveTransfer.Util;
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace MoreEffectiveTransfer.CustomManager
@@ -88,7 +89,6 @@ namespace MoreEffectiveTransfer.CustomManager
             _init = true;
         }
 
-
         public static bool CanUseNewMatchOffers(TransferReason material)
         {
             switch (material)
@@ -152,6 +152,8 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
+
+        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static OFFER_MATCHMODE GetMatchOffersMode(TransferReason material)
         {
             //incoming first: pick highest priority outgoing offers by distance
@@ -216,6 +218,8 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
+
+        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority, out float distanceModifier)
         {
             const int PRIORITY_THRESHOLD_LOCAL = 3;     //upper prios also get non-local fulfillment
@@ -303,6 +307,8 @@ namespace MoreEffectiveTransfer.CustomManager
             return isLocal;
         }
 
+
+        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float WarehouseFirst(ref TransferOffer offer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
         {
             if (!MoreEffectiveTransfer.optionWarehouseFirst)
@@ -355,6 +361,8 @@ namespace MoreEffectiveTransfer.CustomManager
             return 1f;
         }
 
+
+        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool WarehouseCanTransfer(ref TransferOffer incomingOffer, ref TransferOffer outgoingOffer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
         {
             if (!MoreEffectiveTransfer.optionWarehouseReserveTrucks)
@@ -441,11 +449,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
         unsafe public static void MatchOffers(TransferReason material)
         {
-            //init on first call
-            if (!_init)
-            {
-                Init();
-            }
+            const int REJECT_LOW_PRIORITY = 1;  //reject priorities below
 
             // guard: ignore transferreason.none
             if (material == TransferReason.None)
@@ -482,7 +486,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 DebugLog.DebugMsg($"   ###MatchMode OUTGOING FIRST###");
 
                 // loop outgoing offers by descending priority
-                for (int priority = 7; priority >= 0; priority--)
+                for (int priority = 7; priority >= REJECT_LOW_PRIORITY; priority--)
                 {
                     offer_offset = (int)material * 8 + priority;
                     offerCountIncoming = m_incomingCount[offer_offset];
@@ -513,7 +517,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 DebugLog.DebugMsg($"   ###MatchMode INCOMING FIRST###");
 
                 // loop incoming offers by descending priority
-                for (int priority = 7; priority >= 0; priority--)
+                for (int priority = 7; priority >= REJECT_LOW_PRIORITY; priority--)
                 {
                     offer_offset = (int)material * 8 + priority;
                     offerCountIncoming = m_incomingCount[offer_offset];
@@ -544,7 +548,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 DebugLog.DebugMsg($"   ###MatchMode BALANCED###");
 
                 // loop incoming offers by descending priority
-                for (int priority = 7; priority >= 0; priority--)
+                for (int priority = 7; priority >= REJECT_LOW_PRIORITY; priority--)
                 {
                     offer_offset = (int)material * 8 + priority;
                     offerCountIncoming = m_incomingCount[offer_offset];
@@ -574,6 +578,8 @@ namespace MoreEffectiveTransfer.CustomManager
             ClearAllTransferOffers(material);
         }
 
+
+        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         unsafe private static void MatchIncomingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
         {
             // Get incoming offer reference:
@@ -641,6 +647,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
+        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         unsafe private static void MatchOutgoingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
         {
             // Get Outgoing offer reference:
@@ -708,6 +715,8 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
+
+        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ClearAllTransferOffers(TransferReason material)
         {
             for (int k = 0; k < 8; k++)

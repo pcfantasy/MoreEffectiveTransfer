@@ -16,6 +16,9 @@ namespace MoreEffectiveTransfer
         {
             base.OnBeforeSimulationFrame();
 
+            if (!isFirstTime)
+                return;
+
             if (Loader.CurrentLoadMode == LoadMode.LoadGame || Loader.CurrentLoadMode == LoadMode.NewGame)
             {
                 if (MoreEffectiveTransfer.IsEnabled)
@@ -30,6 +33,12 @@ namespace MoreEffectiveTransfer
                     }
 
                     CheckDetour();
+
+                    // init transfer manager
+                    if (!CustomManager.CustomTransferManager._init)
+                        CustomManager.CustomTransferManager.Init();
+                    
+                    DebugLog.LogToFileOnly("ThreadingExtension.OnBeforeSimulationFrame: all inits completed.");
                 }
             }
         }
