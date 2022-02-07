@@ -25,14 +25,14 @@ namespace MoreEffectiveTransfer
 #endif
 
         // SERVICE options
-        public static bool optionPreferLocalService = true;
+        public static bool optionPreferLocalService = false;
         
         // WAREHOUSE options
-        public static bool optionWarehouseFirst = true;
-        public static bool optionWarehouseReserveTrucks = true;
+        public static bool optionWarehouseFirst = false;
+        public static bool optionWarehouseReserveTrucks = false;
         
         // EXPORT options
-        public static bool optionPreferExportShipPlaneTrain = true;
+        public static bool optionPreferExportShipPlaneTrain = false;
 
         // RUNTIME settings:
         public static float shipStationDistanceRandom = 1f;
