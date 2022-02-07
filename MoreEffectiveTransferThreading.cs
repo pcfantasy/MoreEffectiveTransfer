@@ -36,9 +36,11 @@ namespace MoreEffectiveTransfer
 
                     // init transfer manager
                     if (!CustomManager.CustomTransferManager._init)
+                    {
                         CustomManager.CustomTransferManager.Init();
-                    
-                    DebugLog.LogToFileOnly("ThreadingExtension.OnBeforeSimulationFrame: all inits completed.");
+                        DebugLog.LogToFileOnly("ThreadingExtension.OnBeforeSimulationFrame: all inits completed.");
+                    }
+
                 }
             }
         }
