@@ -3,7 +3,7 @@ This is a continuation of <b><i>pcfantasy's</i> More Effective Transfer Manager<
  (https://steamcommunity.com/sharedfiles/filedetails/?id=1680840913).
 <br /><br />
 He was so kind as to license his code under the MIT license for us, so if you like this mod, please take the time to go to the above posting and show your appreciation for his original work!
-<br />
+<br /><br />
 The core code for the match-making logic has been mostly completely rewritten, but with pcfantasy's original idea and design in mind.
 <br /><br />
 
@@ -22,7 +22,7 @@ This mod attempts to improve the situation by:
 ## What it does not
 This mod only affects supply/demand involving "building based" services and goods. With the exception of health care (hospital visits) it <b>does not affect any "citizen activity based" services</b>, such as:
 school, leisure, shopping, going to work, ...
-<br />
+<br /><br />
 All of these matches are going through the vanilla transfer manager, so: citizens go to any school as they like, they go shopping wherever they please, they pick a work place as they want, and they dont just go to the nearby park, instead travelling all across the city to the fancy 5* zoo.
 This is intentional - the Cims value their freedom and certainly dont accept being restricted to their district...
 <br /><br />
@@ -77,14 +77,12 @@ TLDR: you notice in your city that garbage trucks go from A to B, and from B to 
 
 # Impact and Performance
 As this transfer manager does a lot more than the vanilla one, it naturally executes more work on the CPU and thus taxes your system a bit more than pure Vanilla.
-<br />
 Care has been taken to implement these additional functionalities as efficiently as possible.
 I have done some long-term measurement with the following results:
 <br /><br />
 City: "Cim City" (Vanilla.crp) by ThisHero		(https://steamcommunity.com/sharedfiles/filedetails/?id=2117400989)
 <br />
 It is a massive pure Vanilla+DLC city, spanning 25 tiles and having over 300,000 cims in it, with a stable economy suitable for running unattended.
-<br />
 Additional mods used to gather statistics:
 <ul>
 <li>Enhanced Outside Connections View		https://steamcommunity.com/sharedfiles/filedetails/?id=2368396560
