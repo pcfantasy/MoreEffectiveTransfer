@@ -1,4 +1,32 @@
 # Inner workings
+This is a continuation of <b><i>pcfantasy's</i> More Effective Transfer Manager</b>
+ (https://steamcommunity.com/sharedfiles/filedetails/?id=1680840913).
+<br /><br />
+He was so kind as to license his code under the MIT license for us, so if you like this mod, please take the time to go to the above posting and show your appreciation for his original work!
+<br />
+The core code for the match-making logic has been mostly completely rewritten, but with pcfantasy's original idea and design in mind.
+<br /><br />
+
+
+## What it does
+The vanilla transfer managers handles service requests and goods transfers by matching highest priority orders (incoming and outgoing) first, regardless of distance.
+The observed effect is that trucks go from A to B, and from B to A; Fire response is inefficient if fire fighters have to rush trough heavy traffic across the map, and problem such as garbage or crime are unattended for longer than necessary.
+<br />
+This mod attempts to improve the situation by:
+<ul>
+<li>Optimizes the service dispatching and goods transfer for industries. All match-making between supply & demand is done by shortest distance ("as the crow flies", not actual pathfinding distance!)
+<li>Different match-making modes carefully selected per service / goods: OUTGOING_FIRST (most services), INCOMING FIRST (transfers and maintenance), and BALANCED (goods)
+<li>Additional options to further improve service locality and warehouse effectiveness. If they work heavily depend on how your city is structured. YMMV.
+</ul>
+
+## What it does not
+This mod only affects supply/demand involving "building based" services and goods. With the exception of health care (hospital visits) it <b>does not affect any "citizen activity based" services</b>, such as:
+school, leisure, shopping, going to work, ...
+<br />
+All of these matches are going through the vanilla transfer manager, so: citizens go to any school as they like, they go shopping wherever they please, they pick a work place as they want, and they dont just go to the nearby park, instead travelling all across the city to the fancy 5* zoo.
+This is intentional - the Cims value their freedom and certainly dont accept being restricted to their district...
+<br /><br />
+
 
 ## Settings and their effect
 
@@ -46,3 +74,37 @@ TLDR: you notice in your city that garbage trucks go from A to B, and from B to 
 [English version](https://github.com/pcfantasy/MoreEffectiveTransfer/wiki/English-UG) <br>
 #### MoreEffectiveTransfer 说明书
 [MoreEffectiveTransfer 模组说明书](https://github.com/pcfantasy/MoreEffectiveTransfer/wiki/%E4%B8%AD%E6%96%87%E8%AF%B4%E6%98%8E%E4%B9%A6) <br>
+
+# Impact and Performance
+As this transfer manager does a lot more than the vanilla one, it naturally executes more work on the CPU and thus taxes your system a bit more than pure Vanilla.
+<br />
+Care has been taken to implement these additional functionalities as efficiently as possible.
+I have done some long-term measurement with the following results:
+<br /><br />
+City: "Cim City" (Vanilla.crp) by ThisHero		(https://steamcommunity.com/sharedfiles/filedetails/?id=2117400989)
+<br />
+It is a massive pure Vanilla+DLC city, spanning 25 tiles and having over 300,000 cims in it, with a stable economy suitable for running unattended.
+<br />
+Additional mods used to gather statistics:
+<ul>
+<li>Enhanced Outside Connections View		https://steamcommunity.com/sharedfiles/filedetails/?id=2368396560
+<li>More City statistics		https://steamcommunity.com/sharedfiles/filedetails/?id=2685974449
+</ul>
+<br />
+Letting the sumulation run for almost 1 year resulted in the following performance statistics:
+<ul>
+<li>* VANILLA TRANSFER MANAGER: NUM INVOCATIONS: 213164, TOTAL MS: 83101, <b>AVG TIME/INVOCATION: 0.3898454ms</b>
+<li>* NEW TRANSFER MANAGER: NUM INVOCATIONS: 160056, TOTAL MS: 64400, <b>AVG TIME/INVOCATION: 0.4023592ms</b>
+</ul>
+
+# Source Code
+On Github: https://github.com/TheDogKSP/MoreEffectiveTransfer
+<br />
+License: MIT
+<br />
+Be sure to always respect pcfantasy's original copyright!
+
+# Contributions wanted
+Contributions in the form of Github Pull Requests are welcome!
+Unfortunately with the rewrite of this mod the original localizations have been lost. If you want to provide a localization to any language, this is always welcome!
+
