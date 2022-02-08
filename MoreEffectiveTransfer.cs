@@ -63,12 +63,12 @@ namespace MoreEffectiveTransfer
 
         public void OnEnabled()
         {
-            DebugLog.LogToFileOnly(Name + ": VERSION: " + MOD_VERSION + ", BUILD TYPE: " + BUILD_TYPE);
-
             IsEnabled = true;
             FileStream fs = File.Create("MoreEffectiveTransfer.txt");
             fs.Close();
             HarmonyHelper.EnsureHarmonyInstalled();
+
+            DebugLog.LogToFileOnly(Name + ": VERSION: " + MOD_VERSION + ", BUILD TYPE: " + BUILD_TYPE);
         }
 
         public void OnDisabled()
