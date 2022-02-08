@@ -23,7 +23,7 @@ This mod attempts to improve the situation by:
 </ul>
 
 ## What it does not
-This mod only affects supply/demand involving "building based" services and goods. With the exception of health care (hospital visits) it <b>does not affect any "citizen activity based" services</b>, such as:
+This mod only affects supply/demand involving "building based" services and goods (=a building is sending out some vehicle to service/transfer something somewhere). With the exception of health care (hospital visits) it <b>does not affect any "citizen activity based" services</b> (=a cim actively travels somewhere for some reason), such as:
 school, leisure, shopping, going to work, ...
 <br /><br />
 All of these matches are going through the vanilla transfer manager, so: citizens go to any school as they like, they go shopping wherever they please, they pick a work place as they want, and they dont just go to the nearby park, instead travelling all across the city to the fancy 5* zoo.
