@@ -10,14 +10,16 @@ The core code for the match-making logic has been mostly completely rewritten, b
 
 ## What it does
 The vanilla transfer managers handles service requests and goods transfers by matching highest priority orders (incoming and outgoing) first, regardless of distance.
-The observed effect is that trucks go from A to B, and from B to A; Fire response is inefficient if fire fighters have to rush trough heavy traffic across the map, and problem such as garbage or crime are unattended for longer than necessary.
+The observed effect is that trucks go from A to B, and from B to A; fire response is inefficient if fire fighters have to rush through heavy traffic across the map, and problems such as garbage or crime are unattended for longer than necessary.
+<br/>
 You can learn more about the inner workings of the vanilla transfer manager by reading the excellent article here: https://jamesmonger.com/2021/02/24/cities-skylines-trading-market.html
 <br />
 This mod attempts to improve the situation by:
 <ul>
-<li>Optimizes the service dispatching and goods transfer for industries. All match-making between supply & demand is done by shortest distance ("as the crow flies", not actual pathfinding distance!)
-<li>Different match-making modes carefully selected per service / goods: OUTGOING_FIRST (most services), INCOMING FIRST (transfers and maintenance), and BALANCED (goods)
-<li>Additional options to further improve service locality and warehouse effectiveness. If they work heavily depend on how your city is structured. YMMV.
+<li>Optimizes the service dispatching and goods transfer for industries. All match-making between supply & demand is done by shortest distance ("as the crow flies", not actual pathfinding distance!).
+<li>Serves highest priority requests (=more urgent problems) first, working its way down the queue (like vanilla).
+<li>Different match-making modes carefully selected per service / goods: OUTGOING_FIRST (most services), INCOMING FIRST (transfers and maintenance), and BALANCED (goods).
+<li>Additional options to further improve service locality and warehouse effectiveness. If they work as intended heavily depends on how your city is structured, though. YMMV.
 </ul>
 
 ## What it does not
