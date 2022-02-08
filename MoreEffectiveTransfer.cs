@@ -12,7 +12,18 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool debugMode = false;
 
+        public const string MOD_VERSION = "2.0.0.220208";
+#if (DEBUG)
+        public const string BUILD_TYPE = "DEBUG";
+#elif (PROFILE)
+        public const string BUILD_TYPE = "PROFILE";
+#elif (RELEASE)
+        public const string BUILD_TYPE = "RELEASE";
+#else
+        public const string BUILD_TYPE = "UNKNOWN";
+#endif
         public const string SETTINGS_VERSION = "2.0.0";
+
 
         // MAIN switch, mainly for debugging/profiling
         public static bool optionEnableNewTransferManager = true;
@@ -52,6 +63,8 @@ namespace MoreEffectiveTransfer
 
         public void OnEnabled()
         {
+            DebugLog.LogToFileOnly(Name + ": VERSION: " + MOD_VERSION + ", BUILD TYPE: " + BUILD_TYPE);
+
             IsEnabled = true;
             FileStream fs = File.Create("MoreEffectiveTransfer.txt");
             fs.Close();
