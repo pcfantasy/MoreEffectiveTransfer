@@ -223,7 +223,7 @@ namespace MoreEffectiveTransfer.CustomManager
         private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority, out float distanceModifier)
         {
             const int PRIORITY_THRESHOLD_LOCAL = 3;     //upper prios also get non-local fulfillment
-            const float LOCAL_DISTRICT_MODIFIER = 0.05f;   //modifier for distance within same district
+            const float LOCAL_DISTRICT_MODIFIER = 0.25f;   //modifier for distance within same district
             bool isMoveTransfer = false;
             bool isLocal = false;
             distanceModifier = 1.0f;
@@ -311,38 +311,10 @@ namespace MoreEffectiveTransfer.CustomManager
         [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float WarehouseFirst(ref TransferOffer offer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
         {
+            const float WAREHOUSE_MODIFIER = 0.1f;   //modifier for distance for warehouse
+
             if (!MoreEffectiveTransfer.optionWarehouseFirst)
                 return 1f;
-
-            if (!offer.Exclude) //TransferOffer.Exclude is only ever set by WarehouseAI!
-                return 1f;
-
-            switch (material)
-            {
-                case TransferReason.Oil:
-                case TransferReason.Ore:
-                case TransferReason.Coal:
-                case TransferReason.Petrol:
-                case TransferReason.Food:
-                case TransferReason.Grain:
-                case TransferReason.Lumber:
-                case TransferReason.Logs:
-                case TransferReason.Goods:
-                case TransferReason.LuxuryProducts:
-                case TransferReason.AnimalProducts:
-                case TransferReason.Flours:
-                case TransferReason.Petroleum:
-                case TransferReason.Plastics:
-                case TransferReason.Metals:
-                case TransferReason.Glass:
-                case TransferReason.PlanedTimber:
-                case TransferReason.Paper:
-                case TransferReason.Fish:
-                    break;
-
-                default:
-                    return 1f;
-            }
 
             if (offer.Exclude)  //TransferOffer.Exclude is only ever set by WarehouseAI!
             {
@@ -353,9 +325,9 @@ namespace MoreEffectiveTransfer.CustomManager
                 // emptying warehouses dont like to fulfill incoming offers
                 if ((whInOut == WAREHOUSE_OFFERTYPE.INCOMING && isEmptying != Building.Flags.None) ||
                     (whInOut == WAREHOUSE_OFFERTYPE.OUTGOING && isFilling != Building.Flags.None))
-                    return 0.1f;   //distance factorSqrt x10 further away than otherwise
+                    return WAREHOUSE_MODIFIER * 2;   //distance factorSqrt x2 further away
 
-                return 0.01f;       //WarehouseDIstanceFactorSqr = 1 / 10^2
+                return WAREHOUSE_MODIFIER;       //WarehouseDIstanceFactorSqr = 1 / 10
             }
 
             return 1f;
@@ -370,33 +342,6 @@ namespace MoreEffectiveTransfer.CustomManager
 
             if (!(outgoingOffer.Exclude && outgoingOffer.Active))   //further checks only relevant if outgoing from warehouse and active
                 return true;
-
-            switch (material)
-            {
-                case TransferReason.Oil:
-                case TransferReason.Ore:
-                case TransferReason.Coal:
-                case TransferReason.Petrol:
-                case TransferReason.Food:
-                case TransferReason.Grain:
-                case TransferReason.Lumber:
-                case TransferReason.Logs:
-                case TransferReason.Goods:
-                case TransferReason.LuxuryProducts:
-                case TransferReason.AnimalProducts:
-                case TransferReason.Flours:
-                case TransferReason.Petroleum:
-                case TransferReason.Plastics:
-                case TransferReason.Metals:
-                case TransferReason.Glass:
-                case TransferReason.PlanedTimber:
-                case TransferReason.Paper:
-                case TransferReason.Fish:
-                    break;
-
-                default:
-                    return true;
-            }
 
             // is outgoing a warehouse with active delivery, and is couterpart incoming an outside connection?
             if ((outgoingOffer.Exclude) && (outgoingOffer.Active) && (incomingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI is OutsideConnectionAI))
