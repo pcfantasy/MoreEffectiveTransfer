@@ -26,7 +26,8 @@ This mod attempts to improve the situation by:
 This mod only affects supply/demand involving "building based" services and goods (=a building is sending out some vehicle to service/transfer something somewhere). With the exception of health care (hospital visits) it <b>does not affect any "citizen activity based" services</b> (=a cim actively travels somewhere for some reason), such as:
 school, leisure, shopping, going to work, ...
 <br /><br />
-All of these matches are going through the vanilla transfer manager, so: citizens go to any school as they like, they go shopping wherever they please, they pick a work place as they want, and they dont just go to the nearby park, instead travelling all across the city to the fancy 5* zoo.
+All of these matches are going through the vanilla transfer manager, so: <br/>
+=> citizens go to any school as they like, they go shopping wherever they please, they pick a work place as they want, and they dont just go to the nearby park, instead travelling all across the city to the fancy 5* zoo.
 This is intentional - the Cims value their freedom and certainly dont accept being restricted to their district...
 <br /><br />
 This mod does not change the match-making to use actual pathfinding distance/routing. Using that would be very costly without optimized data structures and algorithms, and cannot be easily done. If you absolutely want a shortest-distance match-making with routing, I suggest you take a look at the <b>Transfer Broker</b> mod, which implements this (and multi-threads the implementation in order not to tank the simulation speed and frame rate).
