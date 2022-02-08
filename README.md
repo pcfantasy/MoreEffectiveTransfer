@@ -41,7 +41,7 @@ This setting further improves locality of services by further restricting the ma
 All low priority outgoing transfer requests will only match with services from the same district. If no matching services from the same district are available, the request is unfulfilled.
 As the problem (garbage, crime, ...) accumulates, the request will gain urgency and increase priority. Once reaching hiher priority it will be matched to fulfill, regardless of district restrictions (but still with a bias towards local district services).
 <br /><b>Effect:</b><br />
-While not quite duplicating mods such as DistrictServiceLimit or EnhancedDistrictServices, it ensures that most services stay local as much as possible, while at the same time ensuring that high priority requests will be serviced, even if that means a service has to "rush across the map".
+While not quite duplicating mods such as DistrictServiceLimit or EnhancedDistrictServices, it ensures that most services stay local as much as possible, while at the same time ensuring that high priority requests will eventually be serviced, even if that means a service has to "rush across the map".
 <br /><br />
 
 
