@@ -11,6 +11,7 @@ The core code for the match-making logic has been mostly completely rewritten, b
 ## What it does
 The vanilla transfer managers handles service requests and goods transfers by matching highest priority orders (incoming and outgoing) first, regardless of distance.
 The observed effect is that trucks go from A to B, and from B to A; Fire response is inefficient if fire fighters have to rush trough heavy traffic across the map, and problem such as garbage or crime are unattended for longer than necessary.
+You can learn more about the inner workings of the vanilla transfer manager by reading the excellent article here: https://jamesmonger.com/2021/02/24/cities-skylines-trading-market.html
 <br />
 This mod attempts to improve the situation by:
 <ul>
@@ -111,6 +112,12 @@ This mod uses the Harmony2 library by Andreas Pardeike.
 (3) Enhanced District Services <br/>
 (4) Transfer Broker - it does the same thing (completely replacing the vanilla transfer manager), so use one or another, but never both!
 <br/>
+
+# Recommended mods:
+(1) I highly recommend to use this mod in conjunction with <b>"Smarter Firefihgters: Improved AI" by themonthlydaily (https://steamcommunity.com/sharedfiles/filedetails/?id=2346565561).</b>
+<br/>
+While METM ensures that your fires are serviced by the cloeset fire department, Smarter Firefighters will make each fire truck (or copter) vehicle work relentlessly until everything is extinguished before calling it a day and returning to the station.
+With both mods together your city fire fighting force will actually be quite effective in containing and putting out fire spread.
 
 # Contributions wanted
 Contributions in the form of Github Pull Requests are welcome!
