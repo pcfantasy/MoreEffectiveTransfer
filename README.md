@@ -13,7 +13,7 @@ The vanilla transfer managers handles service requests and goods transfers by ma
 The observed effect is that trucks go from A to B, and from B to A; fire response is inefficient if fire fighters have to rush through heavy traffic across the map, and problems such as garbage or crime are unattended for longer than necessary.
 <br/>
 You can learn more about the inner workings of the vanilla transfer manager by reading the excellent article here: https://jamesmonger.com/2021/02/24/cities-skylines-trading-market.html
-<br />
+<br /><br />
 This mod attempts to improve the situation by:
 <ul>
 <li>Optimizes the service dispatching and goods transfer for industries. All match-making between supply & demand is done by shortest distance ("as the crow flies", not actual pathfinding distance!).
