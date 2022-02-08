@@ -37,7 +37,7 @@ This mod does not change the match-making to use actual pathfinding distance/rou
 
 ### Prefer local district services (recommended to enable)
 <b>Affects: garbage, police, health care, maintenance, mail, taxi</b><br />
-This setting further improves locality of services by further narrows down the matchmaking:<br />
+This setting further improves locality of services by further restricting the matchmaking:<br />
 All low priority outgoing transfer requests will only match with services from the same district. If no matching services from the same district are available, the request is unfulfilled.
 As the problem (garbage, crime, ...) accumulates, the request will gain urgency and increase priority. Once reaching hiher priority it will be matched to fulfill, regardless of district restrictions (but still with a bias towards local district services).
 <br /><b>Effect:</b><br />
