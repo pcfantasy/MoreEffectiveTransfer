@@ -117,7 +117,7 @@ This mod uses the Harmony2 library by Andreas Pardeike.
 <br/>
 
 # Recommended mods:
-(1) I highly recommend to use this mod in conjunction with <b>"Smarter Firefihgters: Improved AI" by themonthlydaily (https://steamcommunity.com/sharedfiles/filedetails/?id=2346565561).</b>
+(1) I highly recommend to use this mod in conjunction with <b>"Smarter Firefighters: Improved AI"</b> by themonthlydaily (https://steamcommunity.com/sharedfiles/filedetails/?id=2346565561).
 <br/>
 While METM ensures that your fires are serviced by the cloeset fire department, Smarter Firefighters will make each fire truck (or copter) vehicle work relentlessly until everything is extinguished before calling it a day and returning to the station.
 With both mods together your city fire fighting force will actually be quite effective in containing and putting out fire spread.
