@@ -344,20 +344,24 @@ namespace MoreEffectiveTransfer.CustomManager
                 return true;
 
             // is outgoing a warehouse with active delivery, and is couterpart incoming an outside connection?
-            if ((outgoingOffer.Exclude) && (outgoingOffer.Active) && (incomingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI is OutsideConnectionAI))
+            if ((outgoingOffer.Exclude) && (outgoingOffer.Active) && (incomingOffer.Building != 0))
             {
-                int count = 0, cargo = 0, capacity = 0, outside = 0;
-                int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_truckCount;
-                Building.Flags isEmptying = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & Building.Flags.Downgrading);
+                if (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI is OutsideConnectionAI)
+                {
+                    int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_truckCount;
+                    int count = 0, cargo = 0, capacity = 0, outside = 0;
 
-                float maxExport = (total * 0.75f);
+                    //Building.Flags isEmptying = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & Building.Flags.Downgrading);
 
-                CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI,
-                                       outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
+                    float maxExport = (total * 0.75f);
 
-                DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
-                if ((float) (outside + 1f) > maxExport)
-                    return false;
+                    CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI,
+                                           outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
+
+                    DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
+                    if ((float)(outside + 1f) > maxExport)
+                        return false;
+                }
             }
 
             return true;
@@ -402,8 +406,6 @@ namespace MoreEffectiveTransfer.CustomManager
 
             // function scope variables
             int offer_offset;
-            int offerCountIncoming;
-            int offerCountOutgoing;
 
             // DEBUG LOGGING
             DebugLog.DebugMsg($"-- TRANSFER REASON: {material.ToString()}, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}");
@@ -434,12 +436,10 @@ namespace MoreEffectiveTransfer.CustomManager
                 for (int priority = 7; priority >= REJECT_LOW_PRIORITY; priority--)
                 {
                     offer_offset = (int)material * 8 + priority;
-                    offerCountIncoming = m_incomingCount[offer_offset];
-                    offerCountOutgoing = m_outgoingCount[offer_offset];
                     int prio_lower_limit = Math.Max(0, 2 - priority);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1
 
                     // loop all offers within this priority
-                    for (int offerIndex = 0; offerIndex < offerCountOutgoing; offerIndex++)
+                    for (int offerIndex = 0; offerIndex < m_outgoingCount[offer_offset]; offerIndex++)
                     {
                         if (m_incomingAmount[(int)material] == 0)
                         {
@@ -465,12 +465,10 @@ namespace MoreEffectiveTransfer.CustomManager
                 for (int priority = 7; priority >= REJECT_LOW_PRIORITY; priority--)
                 {
                     offer_offset = (int)material * 8 + priority;
-                    offerCountIncoming = m_incomingCount[offer_offset];
-                    offerCountOutgoing = m_outgoingCount[offer_offset];
                     int prio_lower_limit = Math.Max(0, 2 - priority);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1
 
                     // loop all offers within this priority
-                    for (int offerIndex = 0; offerIndex < offerCountIncoming; offerIndex++)
+                    for (int offerIndex = 0; offerIndex < m_incomingCount[offer_offset]; offerIndex++)
                     {
                         if (m_outgoingAmount[(int)material] == 0)
                         {
@@ -496,10 +494,8 @@ namespace MoreEffectiveTransfer.CustomManager
                 for (int priority = 7; priority >= REJECT_LOW_PRIORITY; priority--)
                 {
                     offer_offset = (int)material * 8 + priority;
-                    offerCountIncoming = m_incomingCount[offer_offset];
-                    offerCountOutgoing = m_outgoingCount[offer_offset];
                     int prio_lower_limit = Math.Max(0, 2 - priority);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1                    
-                    int maxoffers = Math.Max(offerCountIncoming, offerCountOutgoing);
+                    int maxoffers = Math.Max(m_incomingCount[offer_offset], m_outgoingCount[offer_offset]);
                                                                         
                     for (int offerIndex = 0, indexIn=0, indexOut=0; offerIndex < maxoffers; offerIndex++, indexIn++, indexOut++) // loop all incoming+outgoing offers within this priority
                     {
@@ -509,8 +505,8 @@ namespace MoreEffectiveTransfer.CustomManager
                             goto END_OFFERMATCHING;
                         }
 
-                        if (indexIn < offerCountIncoming) MatchIncomingOffer(material, offer_offset, priority, prio_lower_limit, indexIn);
-                        if (indexOut < offerCountOutgoing) MatchOutgoingOffer(material, offer_offset, priority, prio_lower_limit, indexOut);
+                        if (indexIn < m_incomingCount[offer_offset]) MatchIncomingOffer(material, offer_offset, priority, prio_lower_limit, indexIn);
+                        if (indexOut < m_outgoingCount[offer_offset]) MatchOutgoingOffer(material, offer_offset, priority, prio_lower_limit, indexOut);
                     }
 
                 } //end loop priority
@@ -542,8 +538,7 @@ namespace MoreEffectiveTransfer.CustomManager
             for (int counterpart_prio = 7; counterpart_prio >= prio_lower_limit; counterpart_prio--)
             {
                 int counterpart_offset = (int)material * 8 + counterpart_prio;
-                int counterpart_offercount = m_outgoingCount[counterpart_offset];
-                for (int counterpart_index = 0; counterpart_index < counterpart_offercount; counterpart_index++)
+                for (int counterpart_index = 0; counterpart_index < m_outgoingCount[counterpart_offset]; counterpart_index++)
                 {
                     ref TransferOffer outgoingOffer = ref m_outgoingOffers[counterpart_offset * 256 + counterpart_index];
 
@@ -610,8 +605,7 @@ namespace MoreEffectiveTransfer.CustomManager
             for (int counterpart_prio = 7; counterpart_prio >= prio_lower_limit; counterpart_prio--)
             {
                 int counterpart_offset = (int)material * 8 + counterpart_prio;
-                int counterpart_offercount = m_incomingCount[counterpart_offset];
-                for (int counterpart_index = 0; counterpart_index < counterpart_offercount; counterpart_index++)
+                for (int counterpart_index = 0; counterpart_index < m_incomingCount[counterpart_offset]; counterpart_index++)
                 {
                     ref TransferOffer incomingOffer = ref m_incomingOffers[counterpart_offset * 256 + counterpart_index];
 
