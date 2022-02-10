@@ -12,7 +12,7 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool debugMode = false;
 
-        public const string MOD_VERSION = "2.0.0.220208";
+        public const string MOD_VERSION = "2.0.1.220210";
 #if (DEBUG)
         public const string BUILD_TYPE = "DEBUG";
 #elif (PROFILE)
@@ -53,7 +53,7 @@ namespace MoreEffectiveTransfer
 
         public string Name
         {
-            get { return "More Effective Transfer Manager"; }
+            get { return "More Effective Transfer Mngr (continued)"; }
         }
 
         public string Description

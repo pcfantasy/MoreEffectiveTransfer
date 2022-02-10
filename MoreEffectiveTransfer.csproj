@@ -39,9 +39,9 @@
     <SteamInstallPath>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\Valve\Steam', 'SteamPath', null, RegistryView.Registry64, RegistryView.Registry32))\</SteamInstallPath>
     <CitiesSkylinesInstallPath>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 255710', 'InstallLocation', null, RegistryView.Registry64, RegistryView.Registry32))\</CitiesSkylinesInstallPath>
     <!-- <CitiesSkylinesModsPath>$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\</CitiesSkylinesModsPath>-->
-    <!-- WORKSHOP BUILD: <CitiesSkylinesModsPath>$(CitiesSkylinesInstallPath)..\..\workshop\content\255710\1680840913\</CitiesSkylinesModsPath> -->
+    <!-- WORKSHOP BUILD: <CitiesSkylinesModsPath>$(CitiesSkylinesInstallPath)..\..\workshop\content\255710\metm\</CitiesSkylinesModsPath> -->
     <!-- LOCAL BUILD: -->
-    <CitiesSkylinesModsPath>C:\Users\Henne\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\1680840913\</CitiesSkylinesModsPath>
+    <CitiesSkylinesModsPath>C:\Users\Henne\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\metm\</CitiesSkylinesModsPath>
     <!-- END LOCAL BUILD -->
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Profile|AnyCPU'">
