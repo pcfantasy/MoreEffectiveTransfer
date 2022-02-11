@@ -7,6 +7,7 @@ He was so kind as to license his code under the MIT license for us, so if you li
 The core code for the match-making logic has been mostly completely rewritten, but with pcfantasy's original idea and design in mind.
 <br /><br />
 
+![This mod is compatible with the Airports DLC and the accompanying base game patch](https://i.imgur.com/NWy2c0D.png)
 
 ## What it does
 The vanilla transfer managers handles service requests and goods transfers by matching highest priority orders (incoming and outgoing) first, regardless of distance.
