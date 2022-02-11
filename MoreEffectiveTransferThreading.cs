@@ -12,9 +12,14 @@ namespace MoreEffectiveTransfer
         public const int HarmonyPatchNumExpected = 1; //was: 8
 
 
-        public override void OnBeforeSimulationFrame()
+        /// <summary>
+        /// Purpose: check harmony patches just before actual simulation is starting 
+        /// Moved to OnCreated from OnBeforeSimulation
+        /// </summary>
+        /// <param name="threading"></param>
+        public override void OnCreated(IThreading threading)
         {
-            base.OnBeforeSimulationFrame();
+            base.OnCreated(threading);
 
             if (!isFirstTime)
                 return;
@@ -23,28 +28,15 @@ namespace MoreEffectiveTransfer
             {
                 if (MoreEffectiveTransfer.IsEnabled)
                 {
-                    uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-                    int num4 = (int)(currentFrameIndex & 255u);
-                    if (num4 == 255)
-                    {
-                        MoreEffectiveTransfer.shipStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
-                        MoreEffectiveTransfer.trainStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
-                        MoreEffectiveTransfer.planeStationDistanceRandom = (float)Singleton<SimulationManager>.instance.m_randomizer.Int32(100, 200) * 0.005f;
-                    }
-
                     CheckDetour();
-
-                    // init transfer manager
-                    if (!CustomManager.CustomTransferManager._init)
-                    {
-                        CustomManager.CustomTransferManager.Init();
-                        DebugLog.LogToFileOnly("ThreadingExtension.OnBeforeSimulationFrame: all inits completed.");
-                    }
-
                 }
             }
         }
 
+
+        /// <summary>
+        /// Purpose: do actual checking of applied harmony patches vs expected patches
+        /// </summary>
         public void CheckDetour()
         {
             if (isFirstTime && Loader.DetourInited && Loader.HarmonyDetourInited)
@@ -52,11 +44,11 @@ namespace MoreEffectiveTransfer
                 isFirstTime = false;
                 if (Loader.DetourInited)
                 {
-                    DebugLog.LogToFileOnly("ThreadingExtension.OnBeforeSimulationFrame: First frame detected. Checking detours.");
+                    DebugLog.LogToFileOnly("ThreadingExtension: First frame detected. Checking detours.");
                     if (Loader.HarmonyDetourFailed)
                     {
-                        string error = "MoreEffectiveTransfer HarmonyDetourInit is failed, Send MoreEffectiveTransfer.txt to Author.";
-                        DebugLog.LogToFileOnly(error);
+                        string error = "HarmonyDetourInit is failed, Send MoreEffectiveTransfer.txt to Author.";
+                        DebugLog.LogAll(error);
                         UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", error, true);
                     }
                     else
@@ -85,7 +77,7 @@ namespace MoreEffectiveTransfer
                         if (i != HarmonyPatchNumExpected)
                         {
                             string error = $"MoreEffectiveTransfer HarmonyDetour Patch Num is {i}, expected: {HarmonyPatchNumExpected}. Send MoreEffectiveTransfer.txt to Author.";
-                            DebugLog.LogToFileOnly(error);
+                            DebugLog.LogAll(error);
                             UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", error, true);
                         }
                     }

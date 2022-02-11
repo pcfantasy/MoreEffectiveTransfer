@@ -40,16 +40,12 @@ namespace MoreEffectiveTransfer.CustomManager
         public static void InitDelegate()
         {
             TransferManagerStartTransferDG = FastDelegateFactory.Create<TransferManagerStartTransfer>(typeof(TransferManager), "StartTransfer", instanceMethod: true);
-            TransferManagerGetDistanceMultiplierDG = FastDelegateFactory.Create<TransferManagerGetDistanceMultiplier>(typeof(TransferManager), "GetDistanceMultiplier", instanceMethod: false);
 
             CustomCommonBuildingAI.InitDelegate();
         }
 
         public delegate void TransferManagerStartTransfer(TransferManager TransferManager, TransferReason material, TransferOffer offerOut, TransferOffer offerIn, int delta);
         public static TransferManagerStartTransfer TransferManagerStartTransferDG;
-
-        public delegate float TransferManagerGetDistanceMultiplier(TransferManager.TransferReason material);
-        public static TransferManagerGetDistanceMultiplier TransferManagerGetDistanceMultiplierDG;
         #endregion
 
 
@@ -88,6 +84,34 @@ namespace MoreEffectiveTransfer.CustomManager
 
             _init = true;
         }
+
+
+        public static void CheckInit()
+        {
+            if (_init)
+            {
+                DebugLog.LogToFileOnly("Checking initializations...");
+                DebugLog.LogToFileOnly($"- TransferManager instance: {_TransferManager}");
+                DebugLog.LogToFileOnly($"- TransferManager instance: {_InstanceManager}");
+                DebugLog.LogToFileOnly($"- TransferManager instance: {_BuildingManager}");
+                DebugLog.LogToFileOnly($"- TransferManager instance: {_VehicleManager}");
+                DebugLog.LogToFileOnly($"- TransferManager instance: {_CitizenManager}");
+                DebugLog.LogToFileOnly($"- TransferManager instance: {_DistrictManager}");
+
+                DebugLog.LogToFileOnly("Checking delegates...");
+                DebugLog.LogToFileOnly($"- TransferManagerStartTransferDG instance: {TransferManagerStartTransferDG}");
+                DebugLog.LogToFileOnly($"- CustomCommonBuildingAI.CalculateOwnVehicles instance: {CustomCommonBuildingAI.CalculateOwnVehicles}");
+
+                if ((_TransferManager != null) && (_InstanceManager != null) && (_BuildingManager != null) && (_VehicleManager != null) && (_CitizenManager != null) &&
+                    (_DistrictManager != null) && (TransferManagerStartTransferDG != null) && (CustomCommonBuildingAI.CalculateOwnVehicles != null))
+                    DebugLog.LogToFileOnly("ALL INIT CHECKS PASSED. This should work.");
+                else
+                {
+                    DebugLog.LogAll("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Please generate mod list and harmony report!");
+                }
+            }
+        }
+
 
         public static bool CanUseNewMatchOffers(TransferReason material)
         {
@@ -399,6 +423,14 @@ namespace MoreEffectiveTransfer.CustomManager
         unsafe public static void MatchOffers(TransferReason material)
         {
             const int REJECT_LOW_PRIORITY = 1;  //reject priorities below
+
+            // delayed initialization until first call
+            if (!_init)
+            {
+                Init();
+                CheckInit();
+            }
+
 
             // guard: ignore transferreason.none
             if (material == TransferReason.None)

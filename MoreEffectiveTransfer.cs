@@ -12,7 +12,7 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool debugMode = false;
 
-        public const string MOD_VERSION = "2.0.1.220210";
+        public const string MOD_VERSION = "2.0.2.220211";
 #if (DEBUG)
         public const string BUILD_TYPE = "DEBUG";
 #elif (PROFILE)
@@ -66,8 +66,8 @@ namespace MoreEffectiveTransfer
             IsEnabled = true;
             FileStream fs = File.Create("MoreEffectiveTransfer.txt");
             fs.Close();
-            HarmonyHelper.EnsureHarmonyInstalled();
 
+            HarmonyHelper.EnsureHarmonyInstalled();
             DebugLog.LogToFileOnly(Name + ": VERSION: " + MOD_VERSION + ", BUILD TYPE: " + BUILD_TYPE);
         }
 

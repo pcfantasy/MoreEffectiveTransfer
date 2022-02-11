@@ -10,7 +10,6 @@ namespace MoreEffectiveTransfer
         public static bool DetourInited = false;
         public static bool HarmonyDetourInited = false;
         public static bool HarmonyDetourFailed = true;
-        public static bool isGuiRunning = false;
 
 
         public override void OnCreated(ILoading loading)
