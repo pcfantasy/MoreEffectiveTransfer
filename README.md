@@ -31,7 +31,7 @@ All of these matches are going through the vanilla transfer manager, so: <br/>
 => citizens go to any school as they like, they go shopping wherever they please, they pick a work place as they want, and they dont just go to the nearby park, instead travelling all across the city to the fancy 5* zoo.<br/>
 This is intentional - the Cims value their freedom and certainly dont accept being restricted to their district...
 <br /><br />
-This mod does not change the match-making to use actual pathfinding distance/routing. Using that would be very costly without optimized data structures and algorithms, and cannot be easily done. If you absolutely want a quickest-route-distance match-making, I suggest you take a look at the <b>Transfer Broker</b> mod, which implements this (and multi-threads the implementation in order not to tank the simulation speed and frame rate).
+This mod does not change the match-making to use actual pathfinding distance/routing. Using that would be very costly without optimized data structures and algorithms, and cannot be easily done. 
 
 
 ## Settings and their effect
@@ -114,7 +114,7 @@ This mod uses the Harmony2 library by Andreas Pardeike.
 (1) Original More Effective Transfer Manager by pcfantasy. Please completely unsubscribe original before using this one.<br/>
 (2) District Service Limit (any version)<br/>
 (3) Enhanced District Services <br/>
-(4) Transfer Broker - it does the same thing (completely replacing the vanilla transfer manager), so use one or another, but never both!
+(4) Transfer Broker - MALWARE WARNING! DO NOT USE!
 <br/>
 
 # Recommended mods:
