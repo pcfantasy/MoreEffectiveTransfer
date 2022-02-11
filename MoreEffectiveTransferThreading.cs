@@ -1,8 +1,7 @@
-﻿using ColossalFramework;
-using ColossalFramework.UI;
-using HarmonyLib;
+﻿using ColossalFramework.UI;
 using ICities;
 using MoreEffectiveTransfer.Util;
+using HarmonyLib;
 
 namespace MoreEffectiveTransfer
 {
@@ -49,7 +48,7 @@ namespace MoreEffectiveTransfer
                     {
                         string error = "HarmonyDetourInit is failed, Send MoreEffectiveTransfer.txt to Author.";
                         DebugLog.LogAll(error);
-                        UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", error, true);
+                        UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("METM Incompatibility Issue", error, true);
                     }
                     else
                     {

@@ -85,7 +85,6 @@ namespace MoreEffectiveTransfer.CustomManager
             _init = true;
         }
 
-
         public static void CheckInit()
         {
             if (_init)
@@ -107,7 +106,10 @@ namespace MoreEffectiveTransfer.CustomManager
                     DebugLog.LogToFileOnly("ALL INIT CHECKS PASSED. This should work.");
                 else
                 {
-                    DebugLog.LogAll("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Please generate mod list and harmony report!");
+                    DebugLog.LogAll("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Generating mod list and harmony report...");
+                    DebugLog.ReportAllHarmonyPatches();
+                    DebugLog.ReportAllMods();
+                    DebugLog.LogAll("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Please check log >MoreEffectiveTransfer.txt< in CSL directory!", true);
                 }
             }
         }

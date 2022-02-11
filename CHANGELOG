@@ -2,6 +2,8 @@
 
 **PENDING RELEASE**
 
+-- 2.0.2.220211 --
+* adding init checks & better logging for incompatible mods
 
 -- 2.0.1.220210 --
 * added Japanese translation, provided by shg166
