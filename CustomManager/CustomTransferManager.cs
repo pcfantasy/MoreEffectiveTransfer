@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
+
 namespace MoreEffectiveTransfer.CustomManager
 {
     public class CustomTransferManager : TransferManager
