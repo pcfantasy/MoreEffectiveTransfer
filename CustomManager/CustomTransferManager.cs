@@ -179,7 +179,7 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
-        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static OFFER_MATCHMODE GetMatchOffersMode(TransferReason material)
         {
             //incoming first: pick highest priority outgoing offers by distance
@@ -554,7 +554,7 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
-        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         unsafe private static void MatchIncomingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
         {
             // Get incoming offer reference:
@@ -621,7 +621,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         unsafe private static void MatchOutgoingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
         {
             // Get Outgoing offer reference:
