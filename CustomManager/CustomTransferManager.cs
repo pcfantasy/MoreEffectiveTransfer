@@ -91,12 +91,12 @@ namespace MoreEffectiveTransfer.CustomManager
             if (_init)
             {
                 DebugLog.LogToFileOnly("Checking initializations...");
-                DebugLog.LogToFileOnly($"- TransferManager instance: {_TransferManager}");
-                DebugLog.LogToFileOnly($"- TransferManager instance: {_InstanceManager}");
-                DebugLog.LogToFileOnly($"- TransferManager instance: {_BuildingManager}");
-                DebugLog.LogToFileOnly($"- TransferManager instance: {_VehicleManager}");
-                DebugLog.LogToFileOnly($"- TransferManager instance: {_CitizenManager}");
-                DebugLog.LogToFileOnly($"- TransferManager instance: {_DistrictManager}");
+                DebugLog.LogToFileOnly($"- _TransferManager instance: {_TransferManager}");
+                DebugLog.LogToFileOnly($"- _InstanceManager instance: {_InstanceManager}");
+                DebugLog.LogToFileOnly($"- _BuildingManager instance: {_BuildingManager}");
+                DebugLog.LogToFileOnly($"- _VehicleManager instance: {_VehicleManager}");
+                DebugLog.LogToFileOnly($"- _CitizenManager instance: {_CitizenManager}");
+                DebugLog.LogToFileOnly($"- _DistrictManager instance: {_DistrictManager}");
 
                 DebugLog.LogToFileOnly("Checking delegates...");
                 DebugLog.LogToFileOnly($"- TransferManagerStartTransferDG instance: {TransferManagerStartTransferDG}");
