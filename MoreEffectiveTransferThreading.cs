@@ -1,4 +1,5 @@
-﻿using ColossalFramework.UI;
+﻿/*
+using ColossalFramework.UI;
 using ICities;
 using MoreEffectiveTransfer.Util;
 using HarmonyLib;
@@ -23,12 +24,15 @@ namespace MoreEffectiveTransfer
             if (!isFirstTime)
                 return;
 
+            DebugLog.LogToFileOnly("ThreadingExtension: OnCreated.");
+            if (MoreEffectiveTransfer.IsEnabled)
+            {
+                CheckDetour();
+            }
+
             if (Loader.CurrentLoadMode == LoadMode.LoadGame || Loader.CurrentLoadMode == LoadMode.NewGame)
             {
-                if (MoreEffectiveTransfer.IsEnabled)
-                {
-                    CheckDetour();
-                }
+
             }
         }
 
@@ -88,5 +92,7 @@ namespace MoreEffectiveTransfer
                 }
             }
         }
+ 
     }
 }
+*/

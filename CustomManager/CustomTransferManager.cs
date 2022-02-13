@@ -448,8 +448,8 @@ namespace MoreEffectiveTransfer.CustomManager
             for (int priority = 7; priority >= 0; priority--)
             {
                 offer_offset = (int)material * 8 + priority;
-                offerCountIncoming = m_incomingCount[offer_offset];
-                offerCountOutgoing = m_outgoingCount[offer_offset];
+                int offerCountIncoming = m_incomingCount[offer_offset];
+                int offerCountOutgoing = m_outgoingCount[offer_offset];
 
                 DebugLog.DebugMsg($"   #Offers@priority {priority} : {offerCountIncoming} in, {offerCountOutgoing} out");
                 DebugPrintAllOffers(material, offer_offset, offerCountIncoming, offerCountOutgoing);
