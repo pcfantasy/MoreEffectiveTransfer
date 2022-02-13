@@ -474,7 +474,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 for (int priority = 7; priority >= ALL_PRIORITIES; --priority)
                 {
                     offer_offset = (int)material * 8 + priority;
-                    int prio_lower_limit = Math.Max(0, 2 - priority);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1
+                    int prio_lower_limit = 0; // Math.Max(0, 2 - priority);   //new: allow all priority matches
 
                     // loop all offers within this priority
                     for (int offerIndex = 0; offerIndex < m_outgoingCount[offer_offset]; offerIndex++)
@@ -503,7 +503,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 for (int priority = 7; priority >= ALL_PRIORITIES; --priority)
                 {
                     offer_offset = (int)material * 8 + priority;
-                    int prio_lower_limit = Math.Max(0, 2 - priority);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1
+                    int prio_lower_limit = 0; // Math.Max(0, 2 - priority);   //new: allow all priority matches
 
                     // loop all offers within this priority
                     for (int offerIndex = 0; offerIndex < m_incomingCount[offer_offset]; offerIndex++)
