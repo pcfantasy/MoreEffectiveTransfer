@@ -91,7 +91,6 @@
     <Compile Include="Util\Localization.cs" />
     <Compile Include="MoreEffectiveTransfer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MoreEffectiveTransferThreading.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Locales\**\*.txt">
