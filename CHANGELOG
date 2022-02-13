@@ -1,9 +1,11 @@
 -- CHANGELOG --
 
 -- PENDING RELEASE --
-* update to latest citiesharmony package
-* code optimizations
 
+-- 2.0.3.220213 --
+* update to latest citiesharmony package
+* code reorg
+* (hopefully) fixes service disptaching (eg deathcare)
 
 -- 2.0.2.220211 --
 * adding init checks & better logging for incompatible mods

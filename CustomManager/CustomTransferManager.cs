@@ -423,8 +423,10 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
+        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         unsafe public static void MatchOffers(TransferReason material)
         {
+            const int ALL_PRIORITIES = 0;
             const int REJECT_LOW_PRIORITY = 1;  //reject priorities below
 
             // delayed initialization until first call
@@ -445,7 +447,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // DEBUG LOGGING
             DebugLog.DebugMsg($"-- TRANSFER REASON: {material.ToString()}, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}");
 #if (DEBUG)
-            for (int priority = 7; priority >= 0; priority--)
+            for (int priority = 7; priority >= 0; --priority)
             {
                 offer_offset = (int)material * 8 + priority;
                 int offerCountIncoming = m_incomingCount[offer_offset];
@@ -466,9 +468,10 @@ namespace MoreEffectiveTransfer.CustomManager
             if (match_mode == OFFER_MATCHMODE.OUTGOING_FIRST)
             {
                 DebugLog.DebugMsg($"   ###MatchMode OUTGOING FIRST###");
+                bool has_counterpart_offers = true;
 
-                // loop outgoing offers by descending priority
-                for (int priority = 7; priority >= REJECT_LOW_PRIORITY; priority--)
+                // 1st loop: all OUTGOING offers by descending priority
+                for (int priority = 7; priority >= ALL_PRIORITIES; --priority)
                 {
                     offer_offset = (int)material * 8 + priority;
                     int prio_lower_limit = Math.Max(0, 2 - priority);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1
@@ -476,15 +479,14 @@ namespace MoreEffectiveTransfer.CustomManager
                     // loop all offers within this priority
                     for (int offerIndex = 0; offerIndex < m_outgoingCount[offer_offset]; offerIndex++)
                     {
-                        if (m_incomingAmount[(int)material] == 0)
+                        if (m_incomingAmount[(int)material] <= 0 || !has_counterpart_offers)
                         {
-                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]} ###");
+                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}, has_counterparts {has_counterpart_offers} ###");
                             goto END_OFFERMATCHING;
                         }
-                       
-                        MatchOutgoingOffer(material, offer_offset, priority, prio_lower_limit, offerIndex);
-                    }
 
+                        has_counterpart_offers = MatchOutgoingOffer(material, offer_offset, priority, prio_lower_limit, offerIndex);
+                    }
                 } //end loop priority
 
             } //end OFFER_MATCHMODE.OUTGOING_FIRST
@@ -495,9 +497,10 @@ namespace MoreEffectiveTransfer.CustomManager
             if (match_mode == OFFER_MATCHMODE.INCOMING_FIRST)
             {
                 DebugLog.DebugMsg($"   ###MatchMode INCOMING FIRST###");
+                bool has_counterpart_offers = true;
 
-                // loop incoming offers by descending priority
-                for (int priority = 7; priority >= REJECT_LOW_PRIORITY; priority--)
+                // 1st loop: all INCOMING offers by descending priority
+                for (int priority = 7; priority >= ALL_PRIORITIES; --priority)
                 {
                     offer_offset = (int)material * 8 + priority;
                     int prio_lower_limit = Math.Max(0, 2 - priority);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1
@@ -505,15 +508,14 @@ namespace MoreEffectiveTransfer.CustomManager
                     // loop all offers within this priority
                     for (int offerIndex = 0; offerIndex < m_incomingCount[offer_offset]; offerIndex++)
                     {
-                        if (m_outgoingAmount[(int)material] == 0)
+                        if (m_outgoingAmount[(int)material] <= 0 || !has_counterpart_offers)
                         {
-                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]} ###");
+                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}, has_counterparts {has_counterpart_offers} ###");
                             goto END_OFFERMATCHING;
                         }
 
-                        MatchIncomingOffer(material, offer_offset, priority, prio_lower_limit, offerIndex);
+                        has_counterpart_offers = MatchIncomingOffer(material, offer_offset, priority, prio_lower_limit, offerIndex);
                     }
-
                 } //end loop priority
 
             } //end OFFER_MATCHMODE.INCOMING_FIRST
@@ -524,9 +526,10 @@ namespace MoreEffectiveTransfer.CustomManager
             if (match_mode == OFFER_MATCHMODE.BALANCED)
             {
                 DebugLog.DebugMsg($"   ###MatchMode BALANCED###");
+                bool has_counterpart_offers = true;
 
                 // loop incoming offers by descending priority
-                for (int priority = 7; priority >= REJECT_LOW_PRIORITY; priority--)
+                for (int priority = 7; priority >= REJECT_LOW_PRIORITY; --priority)
                 {
                     offer_offset = (int)material * 8 + priority;
                     int prio_lower_limit = Math.Max(0, 2 - priority);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1                    
@@ -534,14 +537,15 @@ namespace MoreEffectiveTransfer.CustomManager
                                                                         
                     for (int offerIndex = 0, indexIn=0, indexOut=0; offerIndex < maxoffers; offerIndex++, indexIn++, indexOut++) // loop all incoming+outgoing offers within this priority
                     {
-                        if (m_incomingAmount[(int)material] == 0 || m_outgoingAmount[(int)material] == 0)
+                        if (m_incomingAmount[(int)material] <= 0 || m_outgoingAmount[(int)material] <= 0 || !has_counterpart_offers)
                         {
-                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]} ###");
+                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}, has_counterparts {has_counterpart_offers} ###");
                             goto END_OFFERMATCHING;
                         }
 
-                        if (indexIn < m_incomingCount[offer_offset]) MatchIncomingOffer(material, offer_offset, priority, prio_lower_limit, indexIn);
-                        if (indexOut < m_outgoingCount[offer_offset]) MatchOutgoingOffer(material, offer_offset, priority, prio_lower_limit, indexOut);
+                        has_counterpart_offers = false;
+                        if (indexIn  < m_incomingCount[offer_offset]) has_counterpart_offers |= MatchIncomingOffer(material, offer_offset, priority, prio_lower_limit, indexIn);
+                        if (indexOut < m_outgoingCount[offer_offset]) has_counterpart_offers |= MatchOutgoingOffer(material, offer_offset, priority, prio_lower_limit, indexOut);
                     }
 
                 } //end loop priority
@@ -555,22 +559,24 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
+        /// <returns>counterpartmacthesleft?</returns>
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        unsafe private static void MatchIncomingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
+        unsafe private static bool MatchIncomingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
         {
             // Get incoming offer reference:
             ref TransferOffer incomingOffer = ref m_incomingOffers[offer_offset * 256 + offerIndex];
 
             // guard: offer valid?
-            if (incomingOffer.Amount == 0) return;
+            if (incomingOffer.Amount <= 0) return true;
 
-            DebugLog.DebugMsg($"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}");
+            DebugLog.DebugMsg($"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}, priority: {priority}, remaining amount outgoing: {m_outgoingAmount[(int)material]}");
 
             int bestmatch_position = -1;
             float bestmatch_distance = float.MaxValue;
+            bool counterpartMatchesLeft = false;
 
             // loop through all matching counterpart offers and find closest one
-            for (int counterpart_prio = 7; counterpart_prio >= prio_lower_limit; counterpart_prio--)
+            for (int counterpart_prio = 7; counterpart_prio >= prio_lower_limit; --counterpart_prio)
             {
                 int counterpart_offset = (int)material * 8 + counterpart_prio;
                 for (int counterpart_index = 0; counterpart_index < m_outgoingCount[counterpart_offset]; counterpart_index++)
@@ -600,6 +606,7 @@ namespace MoreEffectiveTransfer.CustomManager
                         bestmatch_distance = distance;
                     }
 
+                    counterpartMatchesLeft = true;
                     DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
                 }
             }
@@ -620,24 +627,29 @@ namespace MoreEffectiveTransfer.CustomManager
                 m_incomingAmount[(int)material] -= deltaamount;
                 m_outgoingAmount[(int)material] -= deltaamount;
             }
+
+            return counterpartMatchesLeft;
         }
 
+
+        /// <returns>counterpartmacthesleft?</returns>
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        unsafe private static void MatchOutgoingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
+        unsafe private static bool MatchOutgoingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
         {
             // Get Outgoing offer reference:
             ref TransferOffer outgoingOffer = ref m_outgoingOffers[offer_offset * 256 + offerIndex];
 
             // guard: offer valid?
-            if (outgoingOffer.Amount == 0) return;
+            if (outgoingOffer.Amount <= 0) return true;
 
-            DebugLog.DebugMsg($"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}");
+            DebugLog.DebugMsg($"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}, priority: {priority}, remaining amount incoming: {m_incomingAmount[(int)material]}");
 
             int bestmatch_position = -1;
             float bestmatch_distance = float.MaxValue;
+            bool counterpartMatchesLeft = false;
 
             // loop through all matching counterpart offers and find closest one
-            for (int counterpart_prio = 7; counterpart_prio >= prio_lower_limit; counterpart_prio--)
+            for (int counterpart_prio = 7; counterpart_prio >= prio_lower_limit; --counterpart_prio)
             {
                 int counterpart_offset = (int)material * 8 + counterpart_prio;
                 for (int counterpart_index = 0; counterpart_index < m_incomingCount[counterpart_offset]; counterpart_index++)
@@ -667,6 +679,7 @@ namespace MoreEffectiveTransfer.CustomManager
                         bestmatch_distance = distance;
                     }
 
+                    counterpartMatchesLeft = true;
                     DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
                 }
             }
@@ -687,13 +700,15 @@ namespace MoreEffectiveTransfer.CustomManager
                 m_incomingAmount[(int)material] -= deltaamount;
                 m_outgoingAmount[(int)material] -= deltaamount;
             }
+
+            return counterpartMatchesLeft;
         }
 
 
         [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ClearAllTransferOffers(TransferReason material)
         {
-            for (int k = 0; k < 8; k++)
+            for (int k = 0; k < 8; ++k)
             {
                 int material_offset = (int)material * 8 + k;
                 m_incomingCount[material_offset] = 0;

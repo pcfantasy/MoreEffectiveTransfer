@@ -12,7 +12,7 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool debugMode = false;
 
-        public const string MOD_VERSION = "2.0.2.220211";
+        public const string MOD_VERSION = "2.0.3.220213";
 #if (DEBUG)
         public const string BUILD_TYPE = "DEBUG";
 #elif (PROFILE)
