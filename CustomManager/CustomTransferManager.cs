@@ -373,21 +373,28 @@ namespace MoreEffectiveTransfer.CustomManager
             // is outgoing a warehouse with active delivery, and is couterpart incoming an outside connection?
             if ((outgoingOffer.Exclude) && (outgoingOffer.Active) && (incomingOffer.Building != 0))
             {
-                if (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI)
+                if (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is WarehouseAI)
                 {
-                    int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI).m_truckCount;
-                    int count = 0, cargo = 0, capacity = 0, outside = 0;
+                    try
+                    {
+                        int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI).m_truckCount;
+                        int count = 0, cargo = 0, capacity = 0, outside = 0;
 
-                    //Building.Flags isEmptying = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & Building.Flags.Downgrading);
+                        //Building.Flags isEmptying = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & Building.Flags.Downgrading);
 
-                    float maxExport = (total * 0.75f);
+                        float maxExport = (total * 0.75f);
 
-                    CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI,
-                                           outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
+                        CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI,
+                                               outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
 
-                    DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
-                    if ((float)(outside + 1f) > maxExport)
-                        return false;
+                        DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
+                        if ((float)(outside + 1f) > maxExport)
+                            return false;
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugLog.LogAll($"Exception: {ex.Message} -- BUILDING IS: {outgoingOffer.Building}, {_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building]}, AI: {_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI}");
+                    }
                 }
             }
 

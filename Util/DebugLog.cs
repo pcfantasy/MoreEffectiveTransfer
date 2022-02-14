@@ -1,14 +1,15 @@
-﻿using ColossalFramework.Plugins;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Diagnostics;
+using System.Reflection;
 using ColossalFramework;
-using HarmonyLib;
-using static ColossalFramework.Plugins.PluginManager;
+using ColossalFramework.Plugins;
+using ColossalFramework.UI;
 using ICities;
+using UnityEngine;
+using static ColossalFramework.Plugins.PluginManager;
 
 namespace MoreEffectiveTransfer.Util
 {
@@ -18,13 +19,14 @@ namespace MoreEffectiveTransfer.Util
         public static void LogAll(string msg, bool popup = false)
         {
             LogToFileOnly($"[METM] ERROR: {msg}");
-            CODebugBase<LogChannel>.Error(LogChannel.Core, $"METM ERROR: {msg}");
+            UnityEngine.Debug.LogError($"[METM] ERROR: {msg}");
             if (popup)
                 DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, $"[METM] ERROR: {msg}");
         }
 
         public static void LogToFileOnly(string msg)
         {
+            UnityEngine.Debug.LogError($"[METM] {msg}");
             using (FileStream fileStream = new FileStream("MoreEffectiveTransfer.txt", FileMode.Append))
             {
                 StreamWriter streamWriter = new StreamWriter(fileStream);
