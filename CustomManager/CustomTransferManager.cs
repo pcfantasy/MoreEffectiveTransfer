@@ -225,6 +225,8 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Snow:               //outgoing (passive) from netsegements, incoming (active) from snowdumps
                 case TransferReason.Mail:               //outgoing (passive) from buidings, incoming(active) from postoffice
                 case TransferReason.OutgoingMail:       //outside connections incoming(passive)
+                case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
+                case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
                     return OFFER_MATCHMODE.OUTGOING_FIRST;
 
                 case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
@@ -232,8 +234,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.SickMove:           //TODO: unclear
                 case TransferReason.DeadMove:           //outgoing (active) from emptying, incoming (passive) from receiving
                 case TransferReason.SnowMove:           //outgoing (active) from emptying snowdumps, incoming (passive) from receiving
-                case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
-                case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
                 case TransferReason.IncomingMail:       //outside connections outgoing(active), incoming(passive) from postsortingfacilities
                 case TransferReason.SortedMail:         //outside connections outgoing(active), incoming(passive) from postoffice
                 case TransferReason.UnsortedMail:       //outgoing(active) from ???, incoming(passive) from postsortingfacilities
