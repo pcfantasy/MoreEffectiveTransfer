@@ -246,7 +246,7 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
-        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority, out float distanceModifier)
         {
             const int PRIORITY_THRESHOLD_LOCAL = 3;     //upper prios also get non-local fulfillment
@@ -335,7 +335,7 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
-        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static float WarehouseFirst(ref TransferOffer offer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
         {
             const float WAREHOUSE_MODIFIER = 0.1f;   //modifier for distance for warehouse
@@ -361,7 +361,7 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
-        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static bool WarehouseCanTransfer(ref TransferOffer incomingOffer, ref TransferOffer outgoingOffer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
         {
             if (!MoreEffectiveTransfer.optionWarehouseReserveTrucks)
@@ -474,7 +474,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 for (int priority = 7; priority >= ALL_PRIORITIES; --priority)
                 {
                     offer_offset = (int)material * 8 + priority;
-                    int prio_lower_limit = 0; // Math.Max(0, 2 - priority);   //new: allow all priority matches
+                    int prio_lower_limit = Math.Max(0, 2 - priority);
 
                     // loop all offers within this priority
                     for (int offerIndex = 0; offerIndex < m_outgoingCount[offer_offset]; offerIndex++)
@@ -503,7 +503,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 for (int priority = 7; priority >= ALL_PRIORITIES; --priority)
                 {
                     offer_offset = (int)material * 8 + priority;
-                    int prio_lower_limit = 0; // Math.Max(0, 2 - priority);   //new: allow all priority matches
+                    int prio_lower_limit = Math.Max(0, 2 - priority);
 
                     // loop all offers within this priority
                     for (int offerIndex = 0; offerIndex < m_incomingCount[offer_offset]; offerIndex++)
