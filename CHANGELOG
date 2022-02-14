@@ -2,6 +2,10 @@
 
 -- PENDING RELEASE --
 
+-- 2.0.4.220214 --
+* compatible with Barges mod by bloodypenguin (shouldnt crash anymore with builtin warehouse)
+* move road and park maintenance from incoming to outgoing match mode
+
 -- 2.0.3.220213 --
 * update to latest citiesharmony package
 * code reorg

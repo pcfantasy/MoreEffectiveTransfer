@@ -373,6 +373,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // is outgoing a warehouse with active delivery, and is couterpart incoming an outside connection?
             if ((outgoingOffer.Exclude) && (outgoingOffer.Active) && (incomingOffer.Building != 0))
             {
+                // guards: there are warehouses that DO NOT derive from warehouseAI, notably BARGES by bloodypenguin. We ignore them here and just allow any transfer.
                 if (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is WarehouseAI)
                 {
                     try
