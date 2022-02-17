@@ -118,7 +118,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
         public static bool CanUseNewMatchOffers(TransferReason material)
         {
-            if (material == TransferReason.ParkMaintenance || material == TransferReason.RoadMaintenance)
+            if (material == TransferReason.Sick || material == TransferReason.Sick2 || material == TransferReason.SickMove)
                 return true;
             else return false;
 
@@ -229,13 +229,13 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Snow:               //outgoing (passive) from netsegements, incoming (active) from snowdumps
                 case TransferReason.Mail:               //outgoing (passive) from buidings, incoming(active) from postoffice
                 case TransferReason.OutgoingMail:       //outside connections incoming(passive)
+                case TransferReason.SickMove:           //outgoing(active) from medcopter, incoming(passive) from hospitals -> moved to outgoing first so closest clinic is used
                     return OFFER_MATCHMODE.OUTGOING_FIRST;
 
                 case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
                 case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
                 case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
                 case TransferReason.CriminalMove:       //TODO: unclear
-                case TransferReason.SickMove:           //TODO: unclear
                 case TransferReason.DeadMove:           //outgoing (active) from emptying, incoming (passive) from receiving
                 case TransferReason.SnowMove:           //outgoing (active) from emptying snowdumps, incoming (passive) from receiving
                 case TransferReason.IncomingMail:       //outside connections outgoing(active), incoming(passive) from postsortingfacilities

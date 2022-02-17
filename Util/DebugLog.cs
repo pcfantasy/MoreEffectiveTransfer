@@ -27,7 +27,9 @@ namespace MoreEffectiveTransfer.Util
 
         public static void LogToFileOnly(string msg, bool outputlog = true)
         {
-            UnityEngine.Debug.LogError($"[METM] {msg}");
+            if (outputlog)
+                UnityEngine.Debug.LogError($"[METM] {msg}");
+
             using (FileStream fileStream = new FileStream("MoreEffectiveTransfer.txt", FileMode.Append))
             {
                 StreamWriter streamWriter = new StreamWriter(fileStream);
@@ -41,7 +43,6 @@ namespace MoreEffectiveTransfer.Util
         public static void DebugMsg(string msg)
         {
             LogToFileOnly(msg, false);
-            //DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, $"[METM]: {msg}");
         }
 
         public static void ReportAllHarmonyPatches()
