@@ -118,10 +118,6 @@ namespace MoreEffectiveTransfer.CustomManager
 
         public static bool CanUseNewMatchOffers(TransferReason material)
         {
-            if (material == TransferReason.Sick || material == TransferReason.Sick2 || material == TransferReason.SickMove)
-                return true;
-            else return false;
-
             switch (material)
             {
                 // Goods & Service for new transfer manager:
@@ -153,8 +149,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.OutgoingMail:
                 case TransferReason.Taxi:                      
                 
-                // Block 2: Goods
-                    
+                // Block 2: Goods                    
                 case TransferReason.Goods:
                 case TransferReason.Oil:
                 case TransferReason.Ore:
@@ -224,18 +219,18 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Dead:               //Dead: outgoing offer (passive) 
                 case TransferReason.Sick:               //Sick: outgoing offer (passive) [special case: citizen with outgoing and active]
                 case TransferReason.Sick2:              //Sick2: helicopter
-                case TransferReason.Collapsed:          //Collapsed: outgoing (passive)
+                case TransferReason.SickMove:           //outgoing(active) from medcopter, incoming(passive) from hospitals -> moved to outgoing first so closest clinic is used
+                case TransferReason.Collapsed:          //Collapsed: outgoing (passive) from buildings
                 case TransferReason.Collapsed2:         //Collapsed2: helicopter
                 case TransferReason.Snow:               //outgoing (passive) from netsegements, incoming (active) from snowdumps
                 case TransferReason.Mail:               //outgoing (passive) from buidings, incoming(active) from postoffice
                 case TransferReason.OutgoingMail:       //outside connections incoming(passive)
-                case TransferReason.SickMove:           //outgoing(active) from medcopter, incoming(passive) from hospitals -> moved to outgoing first so closest clinic is used
+                case TransferReason.CriminalMove:       //outging (passive) from policestations, incoming(active) from prisons
                     return OFFER_MATCHMODE.OUTGOING_FIRST;
 
                 case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
                 case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
                 case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
-                case TransferReason.CriminalMove:       //TODO: unclear
                 case TransferReason.DeadMove:           //outgoing (active) from emptying, incoming (passive) from receiving
                 case TransferReason.SnowMove:           //outgoing (active) from emptying snowdumps, incoming (passive) from receiving
                 case TransferReason.IncomingMail:       //outside connections outgoing(active), incoming(passive) from postsortingfacilities
