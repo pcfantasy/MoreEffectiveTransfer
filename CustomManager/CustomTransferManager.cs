@@ -363,41 +363,58 @@ namespace MoreEffectiveTransfer.CustomManager
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static bool WarehouseCanTransfer(ref TransferOffer incomingOffer, ref TransferOffer outgoingOffer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
         {
-            if (!MoreEffectiveTransfer.optionWarehouseReserveTrucks)
-                return true;
-
-            if (!(outgoingOffer.Exclude && outgoingOffer.Active))   //further checks only relevant if outgoing from warehouse and active
-                return true;
-
-            // is outgoing a warehouse with active delivery, and is couterpart incoming an outside connection?
-            if ((outgoingOffer.Exclude) && (outgoingOffer.Active) && (incomingOffer.Building != 0))
+            // Option: optionWarehouseReserveTrucks
+            if ((MoreEffectiveTransfer.optionWarehouseReserveTrucks) && (outgoingOffer.Exclude && outgoingOffer.Active)) //further checks only relevant if outgoing from warehouse and active
             {
-                // guards: there are warehouses that DO NOT derive from warehouseAI, notably BARGES by bloodypenguin. We ignore them here and just allow any transfer.
-                if (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is WarehouseAI)
+                // is outgoing a warehouse with active delivery, and is counterpart incoming an outside connection?
+                if ((incomingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is WarehouseAI))
                 {
-                    try
-                    {
-                        int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI).m_truckCount;
-                        int count = 0, cargo = 0, capacity = 0, outside = 0;
+                    // guards: there are warehouses that DO NOT derive from warehouseAI, notably BARGES by bloodypenguin. We ignore them here and just allow any transfer.
+                    int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI).m_truckCount;
+                    int count = 0, cargo = 0, capacity = 0, outside = 0;
+                    float maxExport = (total * 0.75f);
 
-                        //Building.Flags isEmptying = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & Building.Flags.Downgrading);
+                    CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI,
+                                            outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
 
-                        float maxExport = (total * 0.75f);
-
-                        CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI,
-                                               outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
-
-                        DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
-                        if ((float)(outside + 1f) > maxExport)
-                            return false;
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugLog.LogAll($"Exception: {ex.Message} -- BUILDING IS: {outgoingOffer.Building}, {_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building]}, AI: {_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI}");
-                    }
+                    DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
+                    if ((float)(outside + 1f) > maxExport)
+                        return false;   //dont need further checks, we would be over reserved truck limit
                 }
             }
 
+            // Option: optionWarehouseNewBalanced
+            if (MoreEffectiveTransfer.optionWarehouseNewBalanced && (outgoingOffer.Exclude || incomingOffer.Exclude))
+            {
+                // attempting to import?
+                if ((incomingOffer.Exclude) && (outgoingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is WarehouseAI))
+                {
+                    bool isBalanced = (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Downgrading)) == Building.Flags.None &&
+                                      (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
+
+                    float current_filllevel = (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity * 1.0f);
+                    DebugLog.DebugMsg($"       ** warehouse wants to import, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
+
+                    if (isBalanced && current_filllevel > 0.25f)
+                        return false;   //over 25% fill level: no more imports!
+                }
+
+                // attempting to export?
+                else if ((outgoingOffer.Exclude) && (incomingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is WarehouseAI))
+                {
+                    bool isBalanced = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & (Building.Flags.Downgrading)) == Building.Flags.None &&
+                                      (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
+
+                    float current_filllevel = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity * 1.0f);
+                    DebugLog.DebugMsg($"       ** warehouse wants to export, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
+                    
+                    if (isBalanced && current_filllevel < 0.9f)
+                        return false;   //under 90% fill level: no more exports!
+                }
+
+            }
+
+            // all good -> allow transfer
             return true;
         }
 
