@@ -1,7 +1,7 @@
 -- CHANGELOG --
 
 -- PENDING RELEASE --
-* some more match mode fine-tuning
+* some more match mode fine-tuning (fixes bug #7 with medcopters)
 
 
 -- 2.0.4.220214 --
