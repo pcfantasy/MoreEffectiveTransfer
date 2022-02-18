@@ -273,7 +273,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Fire:
                 case TransferReason.Fire2:
                 case TransferReason.ForestFire:
-                case TransferReason.Dead:
+                //case TransferReason.Dead:     //disabled because people dont understand how to ensure enough service for a district when prefer local is on :(
                 case TransferReason.Sick:
                 case TransferReason.Sick2:
                 case TransferReason.Collapsed:
@@ -291,7 +291,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.GarbageMove:
                 case TransferReason.GarbageTransfer:
                 case TransferReason.CriminalMove:
-                case TransferReason.SickMove:
+                //case TransferReason.SickMove: //removed,as using homebuilding for medcopter does not make sense. let it choose closest clinic for dropoff
                 case TransferReason.DeadMove:
                 case TransferReason.SnowMove:
                     isMoveTransfer = true;      //Move Transfers: incoming offer is passive, allow move/emptying to global district buildings
