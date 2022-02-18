@@ -12,7 +12,7 @@ namespace MoreEffectiveTransfer
         public static bool IsEnabled = false;
         public static bool debugMode = false;
 
-        public const string MOD_VERSION = "2.0.4.220214";
+        public const string MOD_VERSION = "2.0.5.DEBUG";
 #if (DEBUG)
         public const string BUILD_TYPE = "DEBUG";
 #elif (PROFILE)
@@ -41,6 +41,7 @@ namespace MoreEffectiveTransfer
         // WAREHOUSE options
         public static bool optionWarehouseFirst = false;
         public static bool optionWarehouseReserveTrucks = false;
+        public static bool optionWarehouseNewBalanced = false;
         
         // EXPORT options
         public static bool optionPreferExportShipPlaneTrain = false;
@@ -87,7 +88,8 @@ namespace MoreEffectiveTransfer
             streamWriter.WriteLine(optionWarehouseFirst);
             streamWriter.WriteLine(optionWarehouseReserveTrucks);
             streamWriter.WriteLine(optionPreferExportShipPlaneTrain);
-            
+            streamWriter.WriteLine(optionWarehouseNewBalanced);
+
             streamWriter.Flush();
             fs.Close();
         }
@@ -118,7 +120,10 @@ namespace MoreEffectiveTransfer
                 optionWarehouseReserveTrucks = (strLine == "True") ? true : false;
                 
                 strLine = sr.ReadLine();
-                optionPreferExportShipPlaneTrain = (strLine == "True") ? true : false;               
+                optionPreferExportShipPlaneTrain = (strLine == "True") ? true : false;
+
+                strLine = sr.ReadLine();
+                optionWarehouseNewBalanced = (strLine == "True") ? true : false;
 
                 sr.Close();
                 fs.Close();
@@ -144,9 +149,15 @@ namespace MoreEffectiveTransfer
             group2.AddCheckbox(Localization.Get("optionWarehouseFirst"), optionWarehouseFirst, (index) => setOptionWarehouseFirst(index));
             UIPanel txtPanel2 = (group2 as UIHelper).self as UIPanel;
             UILabel txtLabel21 = AddDescription(txtPanel2, "optionWarehouseFirst_txt", txtPanel2, 1.0f, Localization.Get("optionWarehouseFirst_txt"));
+            UILabel txtLabel21_spacer = AddDescription(txtPanel2, "txtLabel21_spacer", txtPanel2, 1.0f, "");
 
             group2.AddCheckbox(Localization.Get("optionWarehouseReserveTrucks"), optionWarehouseReserveTrucks, (index) => setOptionWarehouseReserveTrucks(index));
             UILabel txtLabel22 = AddDescription(txtPanel2, "optionWarehouseReserveTrucks_txt", txtPanel2, 1.0f, Localization.Get("optionWarehouseReserveTrucks_txt"));
+            UILabel txtLabel22_spacer = AddDescription(txtPanel2, "txtLabel22_spacer", txtPanel2, 1.0f, "");
+
+            group2.AddCheckbox(Localization.Get("optionWarehouseNewBalanced"), optionWarehouseNewBalanced, (index) => setOptionWarehouseNewBalanced(index));
+            UILabel txtLabel23 = AddDescription(txtPanel2, "optionWarehouseNewBalanced_txt", txtPanel2, 1.0f, Localization.Get("optionWarehouseNewBalanced_txt"));
+
 
             UIHelperBase group3 = helper.AddGroup(Localization.Get("GROUP_EXPORTIMPORT_OPTIONS"));
             group3.AddCheckbox(Localization.Get("optionPreferExportShipPlaneTrain"), optionPreferExportShipPlaneTrain, (index) => setOptionPreferExportShipPlaneTrain(index));
@@ -171,7 +182,7 @@ namespace MoreEffectiveTransfer
             desc.textScale = fontScale;
             desc.textColor = m_greyColor;
             desc.text = text;
-            desc.relativePosition = new UnityEngine.Vector3(alignTo.relativePosition.x + 26f, alignTo.relativePosition.y + alignTo.height);
+            desc.relativePosition = new UnityEngine.Vector3(alignTo.relativePosition.x + 26f, alignTo.relativePosition.y + alignTo.height + 10);
             return desc;
         }
 
@@ -206,5 +217,12 @@ namespace MoreEffectiveTransfer
             optionPreferExportShipPlaneTrain = index;
             SaveSetting();
         }
+
+        public void setOptionWarehouseNewBalanced(bool index)
+        {
+            optionWarehouseNewBalanced = index;
+            SaveSetting();
+        }
+
     }
 }

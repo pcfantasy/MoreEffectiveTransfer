@@ -149,8 +149,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.OutgoingMail:
                 case TransferReason.Taxi:                      
                 
-                // Block 2: Goods
-                    
+                // Block 2: Goods                    
                 case TransferReason.Goods:
                 case TransferReason.Oil:
                 case TransferReason.Ore:
@@ -220,18 +219,18 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Dead:               //Dead: outgoing offer (passive) 
                 case TransferReason.Sick:               //Sick: outgoing offer (passive) [special case: citizen with outgoing and active]
                 case TransferReason.Sick2:              //Sick2: helicopter
-                case TransferReason.Collapsed:          //Collapsed: outgoing (passive)
+                case TransferReason.SickMove:           //outgoing(active) from medcopter, incoming(passive) from hospitals -> moved to outgoing first so closest clinic is used
+                case TransferReason.Collapsed:          //Collapsed: outgoing (passive) from buildings
                 case TransferReason.Collapsed2:         //Collapsed2: helicopter
                 case TransferReason.Snow:               //outgoing (passive) from netsegements, incoming (active) from snowdumps
                 case TransferReason.Mail:               //outgoing (passive) from buidings, incoming(active) from postoffice
                 case TransferReason.OutgoingMail:       //outside connections incoming(passive)
-                case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
-                case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
+                case TransferReason.CriminalMove:       //outging (passive) from policestations, incoming(active) from prisons
                     return OFFER_MATCHMODE.OUTGOING_FIRST;
 
+                case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
+                case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
                 case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
-                case TransferReason.CriminalMove:       //TODO: unclear
-                case TransferReason.SickMove:           //TODO: unclear
                 case TransferReason.DeadMove:           //outgoing (active) from emptying, incoming (passive) from receiving
                 case TransferReason.SnowMove:           //outgoing (active) from emptying snowdumps, incoming (passive) from receiving
                 case TransferReason.IncomingMail:       //outside connections outgoing(active), incoming(passive) from postsortingfacilities
@@ -274,7 +273,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Fire:
                 case TransferReason.Fire2:
                 case TransferReason.ForestFire:
-                case TransferReason.Dead:
                 case TransferReason.Sick:
                 case TransferReason.Sick2:
                 case TransferReason.Collapsed:
@@ -285,6 +283,11 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Taxi:
                     break;
 
+                case TransferReason.Dead:     //special handling because people dont understand how to ensure enough service for a district when prefer local is on :(
+                case TransferReason.DeadMove:
+                    isLocal = true;           //always allow but continue logic to profit from reduced distancemodifier if within same district
+                    break;
+
                 // Goods subject to prefer local:
                 // -none-
 
@@ -292,8 +295,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.GarbageMove:
                 case TransferReason.GarbageTransfer:
                 case TransferReason.CriminalMove:
-                case TransferReason.SickMove:
-                case TransferReason.DeadMove:
+                //case TransferReason.SickMove: //removed,as using homebuilding for medcopter does not make sense. let it choose closest clinic for dropoff
                 case TransferReason.SnowMove:
                     isMoveTransfer = true;      //Move Transfers: incoming offer is passive, allow move/emptying to global district buildings
                     break;
@@ -364,41 +366,58 @@ namespace MoreEffectiveTransfer.CustomManager
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static bool WarehouseCanTransfer(ref TransferOffer incomingOffer, ref TransferOffer outgoingOffer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
         {
-            if (!MoreEffectiveTransfer.optionWarehouseReserveTrucks)
-                return true;
-
-            if (!(outgoingOffer.Exclude && outgoingOffer.Active))   //further checks only relevant if outgoing from warehouse and active
-                return true;
-
-            // is outgoing a warehouse with active delivery, and is couterpart incoming an outside connection?
-            if ((outgoingOffer.Exclude) && (outgoingOffer.Active) && (incomingOffer.Building != 0))
+            // Option: optionWarehouseReserveTrucks
+            if ((MoreEffectiveTransfer.optionWarehouseReserveTrucks) && (outgoingOffer.Exclude && outgoingOffer.Active)) //further checks only relevant if outgoing from warehouse and active
             {
-                // guards: there are warehouses that DO NOT derive from warehouseAI, notably BARGES by bloodypenguin. We ignore them here and just allow any transfer.
-                if (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is WarehouseAI)
+                // is outgoing a warehouse with active delivery, and is counterpart incoming an outside connection?
+                if ((incomingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is WarehouseAI))
                 {
-                    try
-                    {
-                        int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI).m_truckCount;
-                        int count = 0, cargo = 0, capacity = 0, outside = 0;
+                    // guards: there are warehouses that DO NOT derive from warehouseAI, notably BARGES by bloodypenguin. We ignore them here and just allow any transfer.
+                    int total = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI).m_truckCount;
+                    int count = 0, cargo = 0, capacity = 0, outside = 0;
+                    float maxExport = (total * 0.75f);
 
-                        //Building.Flags isEmptying = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & Building.Flags.Downgrading);
+                    CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI,
+                                            outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
 
-                        float maxExport = (total * 0.75f);
-
-                        CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI,
-                                               outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
-
-                        DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
-                        if ((float)(outside + 1f) > maxExport)
-                            return false;
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugLog.LogAll($"Exception: {ex.Message} -- BUILDING IS: {outgoingOffer.Building}, {_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building]}, AI: {_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI}");
-                    }
+                    DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
+                    if ((float)(outside + 1f) > maxExport)
+                        return false;   //dont need further checks, we would be over reserved truck limit
                 }
             }
 
+            // Option: optionWarehouseNewBalanced
+            if (MoreEffectiveTransfer.optionWarehouseNewBalanced && (outgoingOffer.Exclude || incomingOffer.Exclude))
+            {
+                // attempting to import?
+                if ((incomingOffer.Exclude) && (outgoingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is WarehouseAI))
+                {
+                    bool isBalanced = (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Downgrading)) == Building.Flags.None &&
+                                      (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
+
+                    float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
+                    DebugLog.DebugMsg($"       ** warehouse checking import restrictions: balanced={isBalanced}, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
+
+                    if (isBalanced && current_filllevel > 0.25f)
+                        return false;   //over 25% fill level: no more imports!
+                }
+
+                // attempting to export?
+                else if ((outgoingOffer.Exclude) && (incomingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is WarehouseAI))
+                {
+                    bool isBalanced = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & (Building.Flags.Downgrading)) == Building.Flags.None &&
+                                      (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
+
+                    float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
+                    DebugLog.DebugMsg($"       ** warehouse checking export restrictions: balanced={isBalanced}, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
+                    
+                    if (isBalanced && current_filllevel < 0.9f)
+                        return false;   //under 90% fill level: no more exports!
+                }
+
+            }
+
+            // all good -> allow transfer
             return true;
         }
 

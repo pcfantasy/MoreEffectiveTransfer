@@ -8,6 +8,8 @@ optionWarehouseFirst	Warehouse First
 optionWarehouseFirst_txt	Prefer to conduct all goods delivery (inbound and outbound) through warehouses, if available. Will increase warehouse traffic, so your warehouses better be situated strategically well.
 optionWarehouseReserveTrucks	Reserve warehouse cargo trucks for local transfers
 optionWarehouseReserveTrucks_txt	Recommended to enable with Warehouse First: reserve 25% of warehouse truck capacity for satisfying city demand, prevents all trucks being used for export.
+optionWarehouseNewBalanced	Warehouse improved locality
+optionWarehouseNewBalanced_txt	Improves the locality of all warehouses set to BALANCED mode: reduces the warehouses' desire to import/export, increasing focus on local supply/demand. Note that imports/exports will still happen. Does not change FILL/EMPTY mode behaviour.
 GROUP_EXPORTIMPORT_OPTIONS	Export/Import Options
 optionPreferExportShipPlaneTrain	Import/Export prefer to use ship/plane/train instead of highway
 optionPreferExportShipPlaneTrain_txt	Experimental function!
