@@ -273,7 +273,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Fire:
                 case TransferReason.Fire2:
                 case TransferReason.ForestFire:
-                //case TransferReason.Dead:     //disabled because people dont understand how to ensure enough service for a district when prefer local is on :(
                 case TransferReason.Sick:
                 case TransferReason.Sick2:
                 case TransferReason.Collapsed:
@@ -284,6 +283,11 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Taxi:
                     break;
 
+                case TransferReason.Dead:     //special handling because people dont understand how to ensure enough service for a district when prefer local is on :(
+                case TransferReason.DeadMove:
+                    isLocal = true;           //always allow but continue logic to profit from reduced distancemodifier if within same district
+                    break;
+
                 // Goods subject to prefer local:
                 // -none-
 
@@ -292,7 +296,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.GarbageTransfer:
                 case TransferReason.CriminalMove:
                 //case TransferReason.SickMove: //removed,as using homebuilding for medcopter does not make sense. let it choose closest clinic for dropoff
-                case TransferReason.DeadMove:
                 case TransferReason.SnowMove:
                     isMoveTransfer = true;      //Move Transfers: incoming offer is passive, allow move/emptying to global district buildings
                     break;
@@ -392,8 +395,8 @@ namespace MoreEffectiveTransfer.CustomManager
                     bool isBalanced = (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Downgrading)) == Building.Flags.None &&
                                       (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
 
-                    float current_filllevel = (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity * 1.0f);
-                    DebugLog.DebugMsg($"       ** warehouse wants to import, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
+                    float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
+                    DebugLog.DebugMsg($"       ** warehouse checking import restrictions: balanced={isBalanced}, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
 
                     if (isBalanced && current_filllevel > 0.25f)
                         return false;   //over 25% fill level: no more imports!
@@ -405,8 +408,8 @@ namespace MoreEffectiveTransfer.CustomManager
                     bool isBalanced = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & (Building.Flags.Downgrading)) == Building.Flags.None &&
                                       (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
 
-                    float current_filllevel = (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity * 1.0f);
-                    DebugLog.DebugMsg($"       ** warehouse wants to export, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
+                    float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
+                    DebugLog.DebugMsg($"       ** warehouse checking export restrictions: balanced={isBalanced}, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
                     
                     if (isBalanced && current_filllevel < 0.9f)
                         return false;   //under 90% fill level: no more exports!
