@@ -398,7 +398,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
                     DebugLog.DebugMsg($"       ** warehouse checking import restrictions: balanced={isBalanced}, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
 
-                    if (isBalanced && current_filllevel > 0.25f)
+                    if (isBalanced && current_filllevel >= 0.25f)
                         return false;   //over 25% fill level: no more imports!
                 }
 
@@ -411,7 +411,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
                     DebugLog.DebugMsg($"       ** warehouse checking export restrictions: balanced={isBalanced}, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
                     
-                    if (isBalanced && current_filllevel < 0.9f)
+                    if (isBalanced && current_filllevel <= 0.9f)
                         return false;   //under 90% fill level: no more exports!
                 }
 
