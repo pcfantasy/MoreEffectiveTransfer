@@ -9,7 +9,7 @@ optionWarehouseFirst_txt	如果有的话，最好通过仓库进行所有货物�
 optionWarehouseReserveTrucks	为本地转运预留仓库货运卡车
 optionWarehouseReserveTrucks_txt	仓库优先的建议启用：为城市需求预留 25% 的仓库卡车容量，防止所有卡车用于出口。
 optionWarehouseNewBalanced	仓库改善区域
-optionWarehouseNewBalanced_txt	BALANCED模式下的仓库将等待从本地仓库购买或出售到本地仓库，然后再决定分别进口/出口。 这应该会减少不必要的进出口，并使同城仓库转移更加可靠。 请注意，导入/导出仍然会发生。 不改变 FILL/EMPTY 模式行为。
+optionWarehouseNewBalanced_txt	BALANCED/FILL模式下的仓库将等待从本地仓库购买或出售到本地仓库，然后再决定分别进口/出口。 这应该会减少不必要的进出口，并使同城仓库转移更加可靠。 请注意，导入/导出仍然会发生。 不改变 EMPTY 模式行为。
 GROUP_EXPORTIMPORT_OPTIONS	导出/导入选项
 optionPreferExportShipPlaneTrain	进口/出口更喜欢使用轮船/飞机/火车而不是高速公路
 optionPreferExportShipPlaneTrain_txt	实验功能！

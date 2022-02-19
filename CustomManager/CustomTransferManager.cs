@@ -392,14 +392,18 @@ namespace MoreEffectiveTransfer.CustomManager
                 // attempting to import?
                 if ((incomingOffer.Exclude) && (outgoingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is WarehouseAI))
                 {
+                    bool isFilling  = (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Filling)) != Building.Flags.None;
                     bool isBalanced = (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Downgrading)) == Building.Flags.None &&
                                       (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
 
                     float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
-                    DebugLog.DebugMsg($"       ** warehouse checking import restrictions: balanced={isBalanced}, filllevel={current_filllevel} ({(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100)} / {(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity})");
+                    DebugLog.DebugMsg($"       ** warehouse checking import restrictions: balanced/filling={isBalanced}/{isFilling}, filllevel={current_filllevel}");
 
                     if (isBalanced && current_filllevel >= 0.25f)
-                        return false;   //over 25% fill level: no more imports!
+                        return false;   //balanced: over 25% fill level: no more imports!
+
+                    if (isFilling && current_filllevel >= 0.8f)
+                        return false;   //filling: over 80% fill level: no more imports!
                 }
 
                 // attempting to export?
@@ -634,7 +638,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     }
 
                     counterpartMatchesLeft = true;
-                    DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
+                    DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
                 }
             }
 
@@ -707,7 +711,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     }
 
                     counterpartMatchesLeft = true;
-                    DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local: {isLocalAllowed}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
+                    DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
                 }
             }
 

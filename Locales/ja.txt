@@ -9,7 +9,7 @@ optionWarehouseFirst_txt	使用可能な場合は、 倉庫経由で全ての商
 optionWarehouseReserveTrucks	都市内の配送用に倉庫のトラックを確保
 optionWarehouseReserveTrucks_txt	「倉庫を優先」機能と併用を推奨: 倉庫にあるトラックの台数 25％を都市内の配送用に確保して、 全てのトラックが輸出で使用される現象を防止します
 optionWarehouseNewBalanced	倉庫は地域性を改善しました
-optionWarehouseNewBalanced_txt	BALANCEDモードの倉庫は、ローカル倉庫からの購入またはローカル倉庫への販売を待ってから、それぞれインポート/エクスポートを決定します。 これにより、不要なインポート/エクスポートが削減され、都市内の倉庫転送の信頼性が向上します。 インポート/エクスポートは引き続き行われることに注意してください。 FILL / EMPTYモードの動作は変更されません。
+optionWarehouseNewBalanced_txt	BALANCED/FILLモードの倉庫は、ローカル倉庫からの購入またはローカル倉庫への販売を待ってから、それぞれインポート/エクスポートを決定します。 これにより、不要なインポート/エクスポートが削減され、都市内の倉庫転送の信頼性が向上します。 インポート/エクスポートは引き続き行われることに注意してください。 EMPTYモードの動作は変更されません。
 GROUP_EXPORTIMPORT_OPTIONS	輸出入のオプション
 optionPreferExportShipPlaneTrain	輸出入は高速道路経由よりも、船舶/飛行機/鉄道を優先
 optionPreferExportShipPlaneTrain_txt	これは実験的な機能です！
