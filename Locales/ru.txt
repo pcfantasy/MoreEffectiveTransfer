@@ -8,6 +8,8 @@ optionWarehouseFirst	Склад Один
 optionWarehouseFirst_txt	Все поставки товаров (входящие и исходящие) предпочтительно осуществлять через склады, если таковые имеются. Увеличьте трафик склада, чтобы ваши склады были лучше расположены стратегически.
 optionWarehouseReserveTrucks	Резерв грузовых автомобилей склада для местных перевозок
 optionWarehouseReserveTrucks_txt	Рекомендуется включить с Warehouse First: зарезервируйте 25% вместимости складских грузовиков для удовлетворения потребностей города, предотвращает использование всех грузовиков для экспорта.
+optionWarehouseNewBalanced	Warehouse improved locality
+optionWarehouseNewBalanced_txt	Warehouses on BALANCED mode will wait to buy from local warehouses or sell to local warehouse before deciding to import/export respectively. This should reduce unnecessary import/export and make intra-city warehouse transfers more reliable. Note that imports/exports will still happen. Does not change FILL/EMPTY mode behaviour.
 GROUP_EXPORTIMPORT_OPTIONS	Параметры экспорта/импорта
 optionPreferExportShipPlaneTrain	Импорт/экспорт предпочитают использовать корабль/самолет/поезд вместо шоссе
 optionPreferExportShipPlaneTrain_txt	Экспериментальная функция!
