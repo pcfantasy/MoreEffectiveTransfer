@@ -3,7 +3,7 @@
 -- PENDING RELEASE --
 
 
--- 2.0.5.220219 --
+-- 2.0.5.220220 --
 * some more match mode fine-tuning (fixes bug #7 with medcopters)
 * new feature: Warehouse improve locality to reduce imports/exports and improve inter-warehouse transfers, designed by Admiral Electron
 
