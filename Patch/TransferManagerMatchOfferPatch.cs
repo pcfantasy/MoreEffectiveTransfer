@@ -1,18 +1,14 @@
 ﻿using HarmonyLib;
 using System.Reflection;
 using MoreEffectiveTransfer.CustomManager;
+using MoreEffectiveTransfer.Util;
 
 namespace MoreEffectiveTransfer.Patch
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(TransferManager), "MatchOffers")]
     public class TransferManagerMatchOfferPatch
     {
-        
-        public static MethodBase TargetMethod()
-        {
-            return typeof(TransferManager).GetMethod("MatchOffers", BindingFlags.NonPublic | BindingFlags.Instance);
-        }
-
+        [HarmonyPrefix]
         public static bool Prefix(TransferManager.TransferReason material)
         {
 #if (PROFILE)
@@ -40,7 +36,9 @@ namespace MoreEffectiveTransfer.Patch
             }
         }
 
+
 #if (PROFILE)
+        [HarmonyPostfix]
         public static void Postfix()
         {
             // end profiling
@@ -48,6 +46,22 @@ namespace MoreEffectiveTransfer.Patch
             MoreEffectiveTransfer.timerVanilla.Stop();
         }
 #endif
-
     }
+
+
+#if (DEBUG)
+    [HarmonyPatch(typeof(TransferManager), "StartTransfer")]
+    public class TransferManagerStartTransferPatch
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(TransferManager __instance, TransferManager.TransferReason material, TransferManager.TransferOffer offerOut, TransferManager.TransferOffer offerIn, int delta)
+        {
+            if (material == TransferManager.TransferReason.Dead)
+                DebugLog.DebugMsg($"[VANILLA StartTransfer]: {material}, out: {offerOut.Priority},{offerOut.Active},{offerOut.Building}/{offerOut.Vehicle} -- in: {offerIn.Priority},{offerIn.Active},{offerIn.Building}/{offerIn.Vehicle} -- amt: {delta}");
+
+            return true;
+        }
+    }
+#endif
+
 }
