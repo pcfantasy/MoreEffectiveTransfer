@@ -210,19 +210,22 @@ namespace MoreEffectiveTransfer.CustomManager
                 //warehouse outgoing behaviour: empty=prio 2 ; balanced=prio 0-2; fill=prio 0;
                     return OFFER_MATCHMODE.BALANCED;
 
+                // Services which should be outgoing first, but also benefit from incoming match-making (vehicles in the field with capacity to spare)
                 case TransferReason.Garbage:            //Garbage: outgoing offer (passive) from buldings with garbage to be collected, incoming (active) from landfills
-                case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
                 case TransferReason.Crime:              //Crime: outgoing offer (passive) 
                 case TransferReason.ForestFire:         //like Fire2
                 case TransferReason.Fire2:              //Fire2: helicopter
                 case TransferReason.Fire:               //Fire: outgoing offer (passive) - always prio7
                 case TransferReason.Dead:               //Dead: outgoing offer (passive) 
-                case TransferReason.Sick:               //Sick: outgoing offer (passive) [special case: citizen with outgoing and active]
-                case TransferReason.Sick2:              //Sick2: helicopter
-                case TransferReason.SickMove:           //outgoing(active) from medcopter, incoming(passive) from hospitals -> moved to outgoing first so closest clinic is used
                 case TransferReason.Collapsed:          //Collapsed: outgoing (passive) from buildings
                 case TransferReason.Collapsed2:         //Collapsed2: helicopter
                 case TransferReason.Snow:               //outgoing (passive) from netsegements, incoming (active) from snowdumps
+                    return OFFER_MATCHMODE.BALANCED;
+
+                case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
+                case TransferReason.Sick:               //Sick: outgoing offer (passive) [special case: citizen with outgoing and active]
+                case TransferReason.Sick2:              //Sick2: helicopter
+                case TransferReason.SickMove:           //outgoing(active) from medcopter, incoming(passive) from hospitals -> moved to outgoing first so closest clinic is used
                 case TransferReason.Mail:               //outgoing (passive) from buidings, incoming(active) from postoffice
                 case TransferReason.OutgoingMail:       //outside connections incoming(passive)
                 case TransferReason.CriminalMove:       //outging (passive) from policestations, incoming(active) from prisons

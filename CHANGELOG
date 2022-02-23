@@ -3,10 +3,9 @@
 -- PENDING RELEASE --
 
 
-
--- 2.0.5.xxxxxx --
+-- 2.0.5.220220 --
 * some more match mode fine-tuning (fixes bug #7 with medcopters)
-* new feature: Warehouse improve locality ("new balanced mode"), designed by Admiral Electron
+* new feature: Warehouse improve locality to reduce imports/exports and improve inter-warehouse transfers, designed by Admiral Electron
 
 -- 2.0.4.220214 --
 * compatible with Barges mod by bloodypenguin (shouldnt crash anymore with builtin warehouse)
