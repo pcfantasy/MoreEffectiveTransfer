@@ -14,8 +14,11 @@ namespace MoreEffectiveTransfer
         public static bool HarmonyDetourFailed = true;
 
         public static bool isFirstTime = true;
-        public const int HarmonyPatchNumExpected = 1; //was: 8
-
+#if (DEBUG)
+        public const int HarmonyPatchNumExpected = 2;
+#else
+        public const int HarmonyPatchNumExpected = 1;
+#endif
 
         public override void OnCreated(ILoading loading)
         {
