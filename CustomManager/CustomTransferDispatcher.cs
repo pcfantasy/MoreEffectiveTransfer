@@ -9,6 +9,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Threading;
+
 
 namespace MoreEffectiveTransfer.CustomManager
 {
@@ -96,6 +98,7 @@ namespace MoreEffectiveTransfer.CustomManager
             lock (_poolLock)
             {
                 _usageCount--;
+                job.material = TransferManager.TransferReason.None; //flag as unused
                 pooledJobs.Push(job);
             }
         }
@@ -113,6 +116,18 @@ namespace MoreEffectiveTransfer.CustomManager
         public static readonly object _workQueueLock = new object();
 
 
+        // References to game functionalities:
+        private static TransferManager _TransferManager = null;
+
+        // Vanilla TransferManager internal fields and arrays
+        private TransferManager.TransferOffer[] m_outgoingOffers;
+        private TransferManager.TransferOffer[] m_incomingOffers;
+        private ushort[] m_outgoingCount;
+        private ushort[] m_incomingCount;
+        private int[] m_outgoingAmount;
+        private int[] m_incomingAmount;
+
+
         public static CustomTransferDispatcher Instance
         {
             get {
@@ -127,6 +142,29 @@ namespace MoreEffectiveTransfer.CustomManager
 
         public void Initialize()
         {
+            // bind vanilla transfermanager fields
+            _TransferManager = Singleton<TransferManager>.instance;
+            if (_TransferManager == null)
+            {
+                DebugLog.LogAll("ERROR: No instance of TransferManager found!",true);
+                return;
+            }
+
+            var incomingCount = typeof(TransferManager).GetField("m_incomingCount", BindingFlags.NonPublic | BindingFlags.Instance);
+            var incomingOffers = typeof(TransferManager).GetField("m_incomingOffers", BindingFlags.NonPublic | BindingFlags.Instance);
+            var incomingAmount = typeof(TransferManager).GetField("m_incomingAmount", BindingFlags.NonPublic | BindingFlags.Instance);
+            var outgoingCount = typeof(TransferManager).GetField("m_outgoingCount", BindingFlags.NonPublic | BindingFlags.Instance);
+            var outgoingOffers = typeof(TransferManager).GetField("m_outgoingOffers", BindingFlags.NonPublic | BindingFlags.Instance);
+            var outgoingAmount = typeof(TransferManager).GetField("m_outgoingAmount", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            m_incomingCount = incomingCount.GetValue(_TransferManager) as ushort[];
+            m_incomingOffers = incomingOffers.GetValue(_TransferManager) as TransferManager.TransferOffer[];
+            m_incomingAmount = incomingAmount.GetValue(_TransferManager) as int[];
+            m_outgoingCount = outgoingCount.GetValue(_TransferManager) as ushort[];
+            m_outgoingOffers = outgoingOffers.GetValue(_TransferManager) as TransferManager.TransferOffer[];
+            m_outgoingAmount = outgoingAmount.GetValue(_TransferManager) as int[];
+
+
             // allocate object pool of work packages
             workQueue = new Queue<TransferJob>(TransferManager.TRANSFER_REASON_COUNT);
 
@@ -167,8 +205,80 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
+        /// <summary>
+        /// to be called from MatchOffers Prefix Patch:
+        /// take requested material and submit all offers as TransferJob
+        /// </summary>
+        public void SubmitMatchOfferJob(TransferManager.TransferReason material)
+        {
+            TransferJob job = TransferJobPool.Instance.Lease();
+            
+            // set job header info
+            job.material = material;
+            job.m_incomingCount = 0;
+            job.m_outgoingCount = 0;
+            job.m_incomingAmount = m_incomingAmount[(int)material];
+            job.m_outgoingAmount = m_outgoingAmount[(int)material];
+
+            int offer_offset;
+
+            for (int priority = 7, jobInIdx=0, jobOutIdx=0; priority >= 0; --priority)
+            {
+                offer_offset = (int)material * 8 + priority;
+                job.m_incomingCount += m_incomingCount[offer_offset];
+                job.m_outgoingCount += m_outgoingCount[offer_offset];
+
+                // linear copy to job's offer arrays
+                //** TODO: evaluate sppedup via unsafe pointer memcpy **
+
+                for (int offerIndex = 0; offerIndex < m_incomingCount[offer_offset]; offerIndex++, jobInIdx++)
+                    job.m_incomingOffers[jobInIdx] = m_incomingOffers[offer_offset * 256 + offerIndex];
+
+                for (int offerIndex = 0; offerIndex < m_outgoingCount[offer_offset]; offerIndex++, jobOutIdx++)
+                    job.m_outgoingOffers[jobOutIdx] = m_outgoingOffers[offer_offset * 256 + offerIndex];
+
+            }
+
+            // DEBUG mode: print job summary
+            DebugJobSummarize(job);
+
+            // Enqueue in work queue for match-making thread
+            EnqueueWork(job);
+
+            // clear this material transfer:
+            ClearAllTransferOffers(material);
+
+        } //SubmitMatchOfferJob
 
 
+        /// <summary>
+        /// to be called from MatchOffers Postfix Patch:
+        /// receive match-maker results and start transfers
+        /// </summary>
+        public void StartTransfers()
+        {
+
+        }
+
+
+        private void ClearAllTransferOffers(TransferManager.TransferReason material)
+        {
+            for (int k = 0; k < 8; ++k)
+            {
+                int material_offset = (int)material * 8 + k;
+                m_incomingCount[material_offset] = 0;
+                m_outgoingCount[material_offset] = 0;
+            }
+            m_incomingAmount[(int)material] = 0;
+            m_outgoingAmount[(int)material] = 0;
+        }
+
+
+        [Conditional("DEBUG")]
+        private void DebugJobSummarize(TransferJob job)
+        {
+            DebugLog.DebugMsg($"-- TRANSFER JOB: {job.material.ToString()}, amount in/out: {job.m_incomingAmount}/{job.m_outgoingAmount}; total offer count in/out: {job.m_incomingCount}/{job.m_outgoingCount}");
+        }
 
     }
 

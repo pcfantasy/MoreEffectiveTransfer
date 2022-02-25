@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace MoreEffectiveTransfer.CustomManager
 {
-    public class CustomTransferManager : TransferManager
+    public sealed class CustomTransferManager : TransferManager
     {
         public static bool _init = false;
 
@@ -28,13 +28,13 @@ namespace MoreEffectiveTransfer.CustomManager
         private static DistrictManager _DistrictManager = null;
         private static CitizenManager _CitizenManager = null;
 
-        // TransferManager internal fields and arrays
-        public static TransferManager.TransferOffer[] m_outgoingOffers;
-        public static TransferManager.TransferOffer[] m_incomingOffers;
-        public static ushort[] m_outgoingCount;
-        public static ushort[] m_incomingCount;
-        public static int[] m_outgoingAmount;
-        public static int[] m_incomingAmount;
+        // Vanilla TransferManager internal fields and arrays
+        private static TransferManager.TransferOffer[] m_outgoingOffers;
+        private static TransferManager.TransferOffer[] m_incomingOffers;
+        private static ushort[] m_outgoingCount;
+        private static ushort[] m_incomingCount;
+        private static int[] m_outgoingAmount;
+        private static int[] m_incomingAmount;
 
 
         #region DELEGATES
