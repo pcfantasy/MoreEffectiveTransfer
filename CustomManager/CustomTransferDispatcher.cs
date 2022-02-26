@@ -220,8 +220,16 @@ namespace MoreEffectiveTransfer.CustomManager
         /// </summary>
         public void SubmitMatchOfferJob(TransferManager.TransferReason material)
         {
+            // dont submit jobs for None reason or with no amounts
             if (material == TransferManager.TransferReason.None) return;
+            if ((m_incomingAmount[(int)material] == 0) || (m_outgoingAmount[(int)material] == 0))
+            {
+                ClearAllTransferOffers(material);
+                return;
+            }
 
+
+            // lease new job from pool
             TransferJob job = TransferJobPool.Instance.Lease();
             if (job == null)
             {
@@ -235,7 +243,6 @@ namespace MoreEffectiveTransfer.CustomManager
             job.m_outgoingCount = 0;
             job.m_incomingAmount = m_incomingAmount[(int)material];
             job.m_outgoingAmount = m_outgoingAmount[(int)material];
-
             int offer_offset;
 
             for (int priority = 7, jobInIdx=0, jobOutIdx=0; priority >= 0; --priority)
