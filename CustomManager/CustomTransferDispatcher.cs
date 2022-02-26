@@ -1,13 +1,8 @@
 ﻿using ColossalFramework;
-using ColossalFramework.Plugins;
-using MoreEffectiveTransfer.CustomAI;
 using MoreEffectiveTransfer.Util;
-using System;
 using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using UnityEngine;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -55,7 +50,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 if (_instance == null)
                 {
                     _instance = new TransferJobPool();
-                    _instance.Initialize();
                 }
                 return _instance;
             }
@@ -103,6 +97,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
+        public int GetMaxUsage() => _maxUsageCount;
     }
 
 
@@ -114,6 +109,8 @@ namespace MoreEffectiveTransfer.CustomManager
         private static CustomTransferDispatcher _instance = null;
         public Queue<TransferJob> workQueue = null;
         public static readonly object _workQueueLock = new object();
+        public static EventWaitHandle _waitHandle = new AutoResetEvent(false);
+        public static Thread _transferThread = null;
 
 
         // References to game functionalities:
@@ -134,7 +131,6 @@ namespace MoreEffectiveTransfer.CustomManager
                     if (_instance == null)
                     {
                         _instance = new CustomTransferDispatcher();
-                        _instance.Initialize();
                     }
                     return _instance;
             }
@@ -189,6 +185,7 @@ namespace MoreEffectiveTransfer.CustomManager
             lock(_workQueueLock)
             {
                 workQueue.Enqueue(job);
+                _waitHandle.Set();
                 DebugLog.DebugMsg($"Enqueued job at position {workQueue.Count}.");
             }
         }
@@ -201,7 +198,10 @@ namespace MoreEffectiveTransfer.CustomManager
         {
             lock (_workQueueLock)
             {
-                return workQueue.Dequeue();
+                if (workQueue.Count > 0)
+                    return workQueue.Dequeue();
+                else
+                    return null;
             }
         }
 
@@ -258,6 +258,7 @@ namespace MoreEffectiveTransfer.CustomManager
         /// </summary>
         public void StartTransfers()
         {
+            //TODO
 
         }
 

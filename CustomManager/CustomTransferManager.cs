@@ -1,10 +1,7 @@
 ﻿using ColossalFramework;
-using ColossalFramework.Plugins;
-using MoreEffectiveTransfer.CustomAI;
 using MoreEffectiveTransfer.Util;
 using System;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -14,6 +11,8 @@ namespace MoreEffectiveTransfer.CustomManager
     public sealed class CustomTransferManager : TransferManager
     {
         private static bool _init = false;
+        public static volatile bool _runThread = true;
+
 
         // Matching logic
         private enum OFFER_MATCHMODE : int { INCOMING_FIRST = 1, OUTGOING_FIRST = 2, BALANCED = 3 };
@@ -36,12 +35,14 @@ namespace MoreEffectiveTransfer.CustomManager
         public static void InitDelegate()
         {
             TransferManagerStartTransferDG = FastDelegateFactory.Create<TransferManagerStartTransfer>(typeof(TransferManager), "StartTransfer", instanceMethod: true);
-
-            CustomCommonBuildingAI.InitDelegate();
+            CalculateOwnVehiclesDG = FastDelegateFactory.Create<CommonBuildingAICalculateOwnVehicles>(typeof(CommonBuildingAI), "CalculateOwnVehicles", instanceMethod: true);
         }
 
         public delegate void TransferManagerStartTransfer(TransferManager TransferManager, TransferReason material, TransferOffer offerOut, TransferOffer offerIn, int delta);
         public static TransferManagerStartTransfer TransferManagerStartTransferDG;
+
+        public delegate void CommonBuildingAICalculateOwnVehicles(CommonBuildingAI CommonBuildingAI, ushort buildingID, ref Building data, TransferManager.TransferReason material, ref int count, ref int cargo, ref int capacity, ref int outside);
+        public static CommonBuildingAICalculateOwnVehicles CalculateOwnVehiclesDG;
         #endregion
 
 
@@ -73,10 +74,10 @@ namespace MoreEffectiveTransfer.CustomManager
 
                 DebugLog.LogToFileOnly("Checking delegates...");
                 DebugLog.LogToFileOnly($"- TransferManagerStartTransferDG instance: {TransferManagerStartTransferDG}");
-                DebugLog.LogToFileOnly($"- CustomCommonBuildingAI.CalculateOwnVehicles instance: {CustomCommonBuildingAI.CalculateOwnVehicles}");
+                DebugLog.LogToFileOnly($"- CalculateOwnVehicles instance: {CalculateOwnVehiclesDG}");
 
                 if ((_TransferManager != null) && (_InstanceManager != null) && (_BuildingManager != null) && (_VehicleManager != null) && (_CitizenManager != null) &&
-                    (_DistrictManager != null) && (TransferManagerStartTransferDG != null) && (CustomCommonBuildingAI.CalculateOwnVehicles != null))
+                    (_DistrictManager != null) && (TransferManagerStartTransferDG != null) && (CalculateOwnVehiclesDG != null))
                     DebugLog.LogToFileOnly("ALL INIT CHECKS PASSED. This should work.");
                 else
                 {
@@ -291,7 +292,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     int count = 0, cargo = 0, capacity = 0, outside = 0;
                     float maxExport = (total * 0.75f);
 
-                    CustomCommonBuildingAI.CalculateOwnVehicles(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI,
+                    CalculateOwnVehiclesDG(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI,
                                             outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
 
                     DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
@@ -377,7 +378,32 @@ namespace MoreEffectiveTransfer.CustomManager
         /// </summary>
         public static void MatchOffersThread()
         {
+            DebugLog.LogToFileOnly($"MatchOffersThread: Thread started.");
 
+            while (_runThread)
+            {
+                // Dequeue work job
+                job = CustomTransferDispatcher.Instance.DequeueWork();
+
+                if (job != null)
+                {
+                    // match offers in job
+                    MatchOffers(job.material);
+
+                    // return to jobpool
+                    TransferJobPool.Instance.Return(job);
+                    job = null;
+                }
+                else
+                {
+                    // wait for signal
+                    DebugLog.DebugMsg($"MatchOffersThread: waiting for work signal...");
+                    CustomTransferDispatcher._waitHandle.WaitOne();
+                }
+
+            }
+
+            DebugLog.LogToFileOnly($"MatchOffersThread: Thread ended.");
         }
 
 
@@ -657,6 +683,7 @@ namespace MoreEffectiveTransfer.CustomManager
         /// </summary>
         private static void QueueStartTransferMatch(TransferReason material, ref TransferOffer outgoingOffer, ref TransferOffer incomingOffer, int deltaamount)
         {
+            //TODO
 
         }
 

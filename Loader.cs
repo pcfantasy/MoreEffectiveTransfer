@@ -3,6 +3,7 @@ using MoreEffectiveTransfer.Util;
 using CitiesHarmony.API;
 using ColossalFramework.UI;
 using HarmonyLib;
+using MoreEffectiveTransfer.CustomManager;
 
 namespace MoreEffectiveTransfer
 {
@@ -14,7 +15,7 @@ namespace MoreEffectiveTransfer
         public static bool HarmonyDetourFailed = true;
 
         public static bool isFirstTime = true;
-#if (DEBUG)
+#if (DEBUG_VANILLA)
         public const int HarmonyPatchNumExpected = 2;
 #else
         public const int HarmonyPatchNumExpected = 1;
@@ -29,6 +30,7 @@ namespace MoreEffectiveTransfer
         {
             base.OnLevelLoaded(mode);
             Loader.CurrentLoadMode = mode;
+
             if (MoreEffectiveTransfer.IsEnabled)
             {
                 if (mode == LoadMode.LoadGame || mode == LoadMode.NewGame)
@@ -40,10 +42,16 @@ namespace MoreEffectiveTransfer
                     CheckDetour();
 
                     MoreEffectiveTransfer.LoadSetting();
-                    if (mode == LoadMode.NewGame)
-                    {
-                        DebugLog.LogToFileOnly("New Game");
-                    }
+
+                    // Create TransferJobPool and initialize
+                    TransferJobPool.Instance.Initialize();
+
+                    // Create TransferDispatcher and initialize
+                    CustomTransferDispatcher.Instance.Initialize();
+
+                    // Create TransferManager background thread and start
+                    CustomTransferDispatcher._transferThread = new System.Threading.Thread(CustomTransferManager.MatchOffersThread);
+                    CustomTransferDispatcher._transferThread.Start();
 
                 }
             }
@@ -52,22 +60,28 @@ namespace MoreEffectiveTransfer
         public override void OnLevelUnloading()
         {
             base.OnLevelUnloading();
+
             if (CurrentLoadMode == LoadMode.LoadGame || CurrentLoadMode == LoadMode.NewGame)
             {
                 if (MoreEffectiveTransfer.IsEnabled)
                 {
-                    RevertDetour();
-                    HarmonyRevertDetour();
-
 #if (PROFILE)
                     DebugLog.LogToFileOnly("--- PROFILING STATISTICS ---");
                     float msPerInvVanilla = (1.0f * MoreEffectiveTransfer.timerVanilla.ElapsedMilliseconds / MoreEffectiveTransfer.timerCounterVanilla / 1.0f);
                     float msPerInvMETM = (1.0f * MoreEffectiveTransfer.timerMETM.ElapsedMilliseconds / MoreEffectiveTransfer.timerCounterMETM / 1.0f);
                     DebugLog.LogToFileOnly($"- VANILLA TRANSFER MANAGER: NUM INVOCATIONS: {MoreEffectiveTransfer.timerCounterVanilla}, TOTAL MS: {MoreEffectiveTransfer.timerVanilla.ElapsedMilliseconds}, AVG TIME/INVOCATION: {msPerInvVanilla}ms");
                     DebugLog.LogToFileOnly($"-     NEW TRANSFER MANAGER: NUM INVOCATIONS: {MoreEffectiveTransfer.timerCounterMETM}, TOTAL MS: {MoreEffectiveTransfer.timerMETM.ElapsedMilliseconds}, AVG TIME/INVOCATION: {msPerInvMETM}ms");
+                    DebugLog.LogToFileOnly($"-     NEW TRANSFER MANAGER: max queued transferjobs: {TransferJobPool.Instance.GetMaxUsage()}");
                     DebugLog.LogToFileOnly("--- END PROFILING STATISTICS ---");
 #endif
 
+                    // Stop thread & deinit dispatcher and jobpool
+                    CustomTransferManager._runThread = false;
+                    CustomTransferDispatcher.Instance.Delete();
+                    TransferJobPool.Instance.Delete();
+
+                    RevertDetour();
+                    HarmonyRevertDetour();
                 }
             }
         }

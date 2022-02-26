@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.Plugins;
-using ColossalFramework.UI;
 using HarmonyLib;
 using ICities;
-using UnityEngine;
 using static ColossalFramework.Plugins.PluginManager;
 
 namespace MoreEffectiveTransfer.Util

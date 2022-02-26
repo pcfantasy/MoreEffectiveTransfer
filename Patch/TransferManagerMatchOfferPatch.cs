@@ -25,31 +25,32 @@ namespace MoreEffectiveTransfer.Patch
             MoreEffectiveTransfer.timerMETM.Start();
 #endif
 
-            if (CustomTransferManager.CanUseNewMatchOffers(material))
-            {
-                CustomTransferManager.MatchOffers(material);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            // Dispatch to TransferDispatcher
+            CustomTransferDispatcher.Instance.SubmitMatchOfferJob(material);
+            return false;
         }
 
 
-#if (PROFILE)
+
         [HarmonyPostfix]
         public static void Postfix()
         {
+            if (MoreEffectiveTransfer.optionEnableNewTransferManager)
+            {
+                // Start queued transfers:
+                CustomTransferDispatcher.Instance.StartTransfers();
+            }
+#if (PROFILE)
             // end profiling
             MoreEffectiveTransfer.timerMETM.Stop();
             MoreEffectiveTransfer.timerVanilla.Stop();
-        }
 #endif
-    }
+        }
+
+    } //TransferManagerMatchOfferPatch
 
 
-#if (DEBUG)
+#if (DEBUG_VANILLA)
     [HarmonyPatch(typeof(TransferManager), "StartTransfer")]
     public class TransferManagerStartTransferPatch
     {
@@ -61,7 +62,7 @@ namespace MoreEffectiveTransfer.Patch
 
             return true;
         }
-    }
+    } //TransferManagerStartTransferPatch
 #endif
 
 }
