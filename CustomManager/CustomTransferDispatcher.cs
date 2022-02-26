@@ -189,6 +189,7 @@ namespace MoreEffectiveTransfer.CustomManager
             lock(_workQueueLock)
             {
                 workQueue.Enqueue(job);
+                DebugLog.DebugMsg($"Enqueued job at position {workQueue.Count}.");
             }
         }
 

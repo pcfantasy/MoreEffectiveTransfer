@@ -13,7 +13,7 @@ namespace MoreEffectiveTransfer.CustomManager
 {
     public sealed class CustomTransferManager : TransferManager
     {
-        public static bool _init = false;
+        private static bool _init = false;
 
         // Matching logic
         private enum OFFER_MATCHMODE : int { INCOMING_FIRST = 1, OUTGOING_FIRST = 2, BALANCED = 3 };
@@ -28,13 +28,8 @@ namespace MoreEffectiveTransfer.CustomManager
         private static DistrictManager _DistrictManager = null;
         private static CitizenManager _CitizenManager = null;
 
-        // Vanilla TransferManager internal fields and arrays
-        private static TransferManager.TransferOffer[] m_outgoingOffers;
-        private static TransferManager.TransferOffer[] m_incomingOffers;
-        private static ushort[] m_outgoingCount;
-        private static ushort[] m_incomingCount;
-        private static int[] m_outgoingAmount;
-        private static int[] m_incomingAmount;
+        // Current transfer job from workqueue
+        private static TransferJob job = null;
 
 
         #region DELEGATES
@@ -50,43 +45,21 @@ namespace MoreEffectiveTransfer.CustomManager
         #endregion
 
 
-        public static void Init()
+        private static void Init()
         {
-            _TransferManager = Singleton<TransferManager>.instance;
-            if (_TransferManager == null)
-            {
-                CODebugBase<LogChannel>.Error(LogChannel.Core, "No instance of TransferManager found!");
-                DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, "No instance of TransferManager found!");
-                return;
-            }
-
-            var incomingCount = typeof(TransferManager).GetField("m_incomingCount", BindingFlags.NonPublic | BindingFlags.Instance);
-            var incomingOffers = typeof(TransferManager).GetField("m_incomingOffers", BindingFlags.NonPublic | BindingFlags.Instance);
-            var incomingAmount = typeof(TransferManager).GetField("m_incomingAmount", BindingFlags.NonPublic | BindingFlags.Instance);
-            var outgoingCount = typeof(TransferManager).GetField("m_outgoingCount", BindingFlags.NonPublic | BindingFlags.Instance);
-            var outgoingOffers = typeof(TransferManager).GetField("m_outgoingOffers", BindingFlags.NonPublic | BindingFlags.Instance);
-            var outgoingAmount = typeof(TransferManager).GetField("m_outgoingAmount", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            m_incomingCount = incomingCount.GetValue(_TransferManager) as ushort[];
-            m_incomingOffers = incomingOffers.GetValue(_TransferManager) as TransferManager.TransferOffer[];
-            m_incomingAmount = incomingAmount.GetValue(_TransferManager) as int[];
-            m_outgoingCount = outgoingCount.GetValue(_TransferManager) as ushort[];
-            m_outgoingOffers = outgoingOffers.GetValue(_TransferManager) as TransferManager.TransferOffer[];
-            m_outgoingAmount = outgoingAmount.GetValue(_TransferManager) as int[];
-
-            InitDelegate();
-
             // get references to other managers:
+            CustomTransferManager._TransferManager = Singleton<TransferManager>.instance;
             CustomTransferManager._BuildingManager = Singleton<BuildingManager>.instance;
             CustomTransferManager._InstanceManager = Singleton<InstanceManager>.instance;
             CustomTransferManager._VehicleManager  = Singleton<VehicleManager>.instance;
             CustomTransferManager._DistrictManager = Singleton<DistrictManager>.instance;
             CustomTransferManager._CitizenManager  = Singleton<CitizenManager>.instance;
 
+            InitDelegate();
             _init = true;
         }
 
-        public static void CheckInit()
+        private static void CheckInit()
         {
             if (_init)
             {
@@ -115,68 +88,6 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-
-        public static bool CanUseNewMatchOffers(TransferReason material)
-        {
-            switch (material)
-            {
-                // Goods & Service for new transfer manager:
-
-                // Block 1: Services:
-                case TransferReason.Garbage:
-                case TransferReason.GarbageMove:
-                case TransferReason.GarbageTransfer:
-                case TransferReason.Crime:
-                case TransferReason.CriminalMove:
-                case TransferReason.Fire:
-                case TransferReason.Fire2:
-                case TransferReason.ForestFire:                
-                case TransferReason.Sick:
-                case TransferReason.Sick2:
-                case TransferReason.SickMove:
-                case TransferReason.Dead:
-                case TransferReason.DeadMove:               
-                case TransferReason.Collapsed:
-                case TransferReason.Collapsed2:
-                case TransferReason.Snow:
-                case TransferReason.SnowMove:
-                case TransferReason.RoadMaintenance:            
-                case TransferReason.ParkMaintenance:
-                case TransferReason.Mail:
-                case TransferReason.UnsortedMail:
-                case TransferReason.SortedMail:
-                case TransferReason.IncomingMail:
-                case TransferReason.OutgoingMail:
-                case TransferReason.Taxi:                      
-                
-                // Block 2: Goods                    
-                case TransferReason.Goods:
-                case TransferReason.Oil:
-                case TransferReason.Ore:
-                case TransferReason.Logs:
-                case TransferReason.Grain:
-                case TransferReason.Coal:
-                case TransferReason.Petrol:
-                case TransferReason.Food:
-                case TransferReason.Lumber:
-                case TransferReason.AnimalProducts:
-                case TransferReason.Flours:
-                case TransferReason.Paper:
-                case TransferReason.PlanedTimber:
-                case TransferReason.Petroleum:
-                case TransferReason.Plastics:
-                case TransferReason.Glass:
-                case TransferReason.Metals:
-                case TransferReason.LuxuryProducts:
-                case TransferReason.Fish:
-
-                    return true;
-                
-              // Default: use vanilla transfermanager (esp. citizens)
-              default: 
-                    return false;
-            }
-        }
 
 
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -367,7 +278,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
 
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private static bool WarehouseCanTransfer(ref TransferOffer incomingOffer, ref TransferOffer outgoingOffer, TransferReason material, WAREHOUSE_OFFERTYPE whInOut)
+        private static bool WarehouseCanTransfer(ref TransferOffer incomingOffer, ref TransferOffer outgoingOffer, TransferReason material)
         {
             // Option: optionWarehouseReserveTrucks
             if ((MoreEffectiveTransfer.optionWarehouseReserveTrucks) && (outgoingOffer.Exclude && outgoingOffer.Active)) //further checks only relevant if outgoing from warehouse and active
@@ -405,8 +316,8 @@ namespace MoreEffectiveTransfer.CustomManager
                     if (isBalanced && current_filllevel >= 0.25f)
                         return false;   //balanced: over 25% fill level: no more imports!
 
-                    if (isFilling && current_filllevel >= 0.8f)
-                        return false;   //filling: over 80% fill level: no more imports!
+                    if (isFilling && current_filllevel >= 0.75f)
+                        return false;   //filling: over 75% fill level: no more imports!
                 }
 
                 // attempting to export?
@@ -419,8 +330,8 @@ namespace MoreEffectiveTransfer.CustomManager
                     float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
                     DebugLog.DebugMsg($"       ** warehouse checking export restrictions: balanced/empyting={isBalanced}/{isEmptying}, filllevel={current_filllevel}");
                     
-                    if (isBalanced && current_filllevel <= 0.9f)
-                        return false;   //balanced: under 90% fill level: no more exports!
+                    if (isBalanced && current_filllevel <= 0.75f)
+                        return false;   //balanced: under 75% fill level: no more exports!
 
                     if (isEmptying && current_filllevel <= 0.2f)
                         return false;   //empyting: under 20% fill level: no more exports!
@@ -433,7 +344,7 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
-        public static String DebugInspectOffer(ref TransferOffer offer)
+        private static String DebugInspectOffer(ref TransferOffer offer)
         {
             var instB = default(InstanceID);
             instB.Building = offer.Building;
@@ -443,28 +354,36 @@ namespace MoreEffectiveTransfer.CustomManager
 
 
         [Conditional("DEBUG")]
-        public static void DebugPrintAllOffers(TransferReason material, int offset, int offerCountIncoming, int offerCountOutgoing)
+        private static void DebugPrintAllOffers(TransferReason material, int offerCountIncoming, int offerCountOutgoing)
         {
             for (int i=0; i< offerCountIncoming; i++)
             {
-                TransferOffer incomingOffer = m_incomingOffers[offset * 256 + i];
+                ref TransferOffer incomingOffer = ref job.m_incomingOffers[i];
                 String bname = DebugInspectOffer(ref incomingOffer);
-                DebugLog.DebugMsg($"   in #{i}: act {incomingOffer.Active}, excl {incomingOffer.Exclude}, amt {incomingOffer.Amount}, bvcnt {incomingOffer.Building}/{incomingOffer.Vehicle}/{incomingOffer.Citizen}/{incomingOffer.NetSegment}/{incomingOffer.TransportLine} name={bname}");
+                DebugLog.DebugMsg($"   in #{i}: prio: {incomingOffer.Priority}, act {incomingOffer.Active}, excl {incomingOffer.Exclude}, amt {incomingOffer.Amount}, bvcnt {incomingOffer.Building}/{incomingOffer.Vehicle}/{incomingOffer.Citizen}/{incomingOffer.NetSegment}/{incomingOffer.TransportLine} name={bname}");
             }
 
             for (int i = 0; i < offerCountOutgoing; i++)
             {
-                TransferOffer outgoingOffer = m_outgoingOffers[offset * 256 + i];
+                ref TransferOffer outgoingOffer = ref job.m_outgoingOffers[i];
                 String bname = DebugInspectOffer(ref outgoingOffer);
-                DebugLog.DebugMsg($"   out #{i}: act {outgoingOffer.Active}, excl {outgoingOffer.Exclude}, amt {outgoingOffer.Amount}, bvcnt {outgoingOffer.Building}/{outgoingOffer.Vehicle}/{outgoingOffer.Citizen}/{outgoingOffer.NetSegment}/{outgoingOffer.TransportLine} name={bname}");
+                DebugLog.DebugMsg($"   out #{i}: prio: {outgoingOffer.Priority}, act {outgoingOffer.Active}, excl {outgoingOffer.Exclude}, amt {outgoingOffer.Amount}, bvcnt {outgoingOffer.Building}/{outgoingOffer.Vehicle}/{outgoingOffer.Citizen}/{outgoingOffer.NetSegment}/{outgoingOffer.TransportLine} name={bname}");
             }
         }
 
 
-        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        unsafe public static void MatchOffers(TransferReason material)
+        /// <summary>
+        /// Thread loop: dequeue job from workqueue and perform offer matching
+        /// </summary>
+        public static void MatchOffersThread()
         {
-            const int ALL_PRIORITIES = 0;
+
+        }
+
+
+        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        private static void MatchOffers(TransferReason material)
+        {
             const int REJECT_LOW_PRIORITY = 1;  //reject priorities below
 
             // delayed initialization until first call
@@ -479,23 +398,12 @@ namespace MoreEffectiveTransfer.CustomManager
             if (material == TransferReason.None)
                 return;
 
-            // function scope variables
-            int offer_offset;
 
             // DEBUG LOGGING
-            DebugLog.DebugMsg($"-- TRANSFER REASON: {material.ToString()}, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}");
+            DebugLog.DebugMsg($"-- TRANSFER REASON: {material.ToString()}, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, count in {job.m_incomingCount}, count out {job.m_outgoingCount}");
 #if (DEBUG)
-            for (int priority = 7; priority >= 0; --priority)
-            {
-                offer_offset = (int)material * 8 + priority;
-                int offerCountIncoming = m_incomingCount[offer_offset];
-                int offerCountOutgoing = m_outgoingCount[offer_offset];
-
-                DebugLog.DebugMsg($"   #Offers@priority {priority} : {offerCountIncoming} in, {offerCountOutgoing} out");
-                DebugPrintAllOffers(material, offer_offset, offerCountIncoming, offerCountOutgoing);
-            }
+            DebugPrintAllOffers(material, job.m_incomingCount, job.m_outgoingCount);
 #endif
-
 
             // Select offer matching algorithm
             OFFER_MATCHMODE match_mode = GetMatchOffersMode(material);
@@ -509,22 +417,17 @@ namespace MoreEffectiveTransfer.CustomManager
                 bool has_counterpart_offers = true;
 
                 // 1st loop: all OUTGOING offers by descending priority
-                for (int priority = 7; priority >= ALL_PRIORITIES; --priority)
+                for (int offerIndex = 0; offerIndex < job.m_outgoingCount; offerIndex++)
                 {
-                    offer_offset = (int)material * 8 + priority;
-                    int prio_lower_limit = Math.Max(0, 2 - priority);
+                    int prio_lower_limit = Math.Max(0, 2 - job.m_outgoingOffers[offerIndex].Priority);
 
-                    // loop all offers within this priority
-                    for (int offerIndex = 0; offerIndex < m_outgoingCount[offer_offset]; offerIndex++)
+                    if (job.m_incomingAmount <= 0 || !has_counterpart_offers)
                     {
-                        if (m_incomingAmount[(int)material] <= 0 || !has_counterpart_offers)
-                        {
-                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}, has_counterparts {has_counterpart_offers} ###");
-                            goto END_OFFERMATCHING;
-                        }
-
-                        has_counterpart_offers = MatchOutgoingOffer(material, offer_offset, priority, prio_lower_limit, offerIndex);
+                        DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
+                        goto END_OFFERMATCHING;
                     }
+
+                    has_counterpart_offers = MatchOutgoingOffer(prio_lower_limit, offerIndex);
                 } //end loop priority
 
             } //end OFFER_MATCHMODE.OUTGOING_FIRST
@@ -538,22 +441,17 @@ namespace MoreEffectiveTransfer.CustomManager
                 bool has_counterpart_offers = true;
 
                 // 1st loop: all INCOMING offers by descending priority
-                for (int priority = 7; priority >= ALL_PRIORITIES; --priority)
+                for (int offerIndex = 0; offerIndex < job.m_incomingCount; offerIndex++)
                 {
-                    offer_offset = (int)material * 8 + priority;
-                    int prio_lower_limit = Math.Max(0, 2 - priority);
+                    int prio_lower_limit = Math.Max(0, 2 - job.m_incomingOffers[offerIndex].Priority);
 
-                    // loop all offers within this priority
-                    for (int offerIndex = 0; offerIndex < m_incomingCount[offer_offset]; offerIndex++)
+                    if (job.m_outgoingAmount <= 0 || !has_counterpart_offers)
                     {
-                        if (m_outgoingAmount[(int)material] <= 0 || !has_counterpart_offers)
-                        {
-                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}, has_counterparts {has_counterpart_offers} ###");
-                            goto END_OFFERMATCHING;
-                        }
-
-                        has_counterpart_offers = MatchIncomingOffer(material, offer_offset, priority, prio_lower_limit, offerIndex);
+                        DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
+                        goto END_OFFERMATCHING;
                     }
+
+                    has_counterpart_offers = MatchIncomingOffer(prio_lower_limit, offerIndex);
                 } //end loop priority
 
             } //end OFFER_MATCHMODE.INCOMING_FIRST
@@ -565,105 +463,116 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 DebugLog.DebugMsg($"   ###MatchMode BALANCED###");
                 bool has_counterpart_offers = true;
+                int maxoffers = job.m_incomingCount + job.m_outgoingCount;
 
-                // loop incoming offers by descending priority
-                for (int priority = 7; priority >= REJECT_LOW_PRIORITY; --priority)
+                // loop incoming+outgoing offers by descending priority
+                for (int offerIndex = 0, indexIn=0, indexOut=0; offerIndex < maxoffers; offerIndex++)
                 {
-                    offer_offset = (int)material * 8 + priority;
-                    int prio_lower_limit = Math.Max(0, 2 - priority);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1                    
-                    int maxoffers = Math.Max(m_incomingCount[offer_offset], m_outgoingCount[offer_offset]);
-                                                                        
-                    for (int offerIndex = 0, indexIn=0, indexOut=0; offerIndex < maxoffers; offerIndex++, indexIn++, indexOut++) // loop all incoming+outgoing offers within this priority
-                    {
-                        if (m_incomingAmount[(int)material] <= 0 || m_outgoingAmount[(int)material] <= 0 || !has_counterpart_offers)
-                        {
-                            DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {m_incomingAmount[(int)material]}, amt out {m_outgoingAmount[(int)material]}, has_counterparts {has_counterpart_offers} ###");
-                            goto END_OFFERMATCHING;
-                        }
+                    int current_prio = Math.Max(job.m_incomingOffers[indexIn].Priority, job.m_outgoingOffers[indexOut].Priority);
+                    if (current_prio < REJECT_LOW_PRIORITY)
+                        break;
+                    
+                    int prio_lower_limit = Math.Max(0, 2 - current_prio);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1
+                    has_counterpart_offers = false;
 
-                        has_counterpart_offers = false;
-                        if (indexIn  < m_incomingCount[offer_offset]) has_counterpart_offers |= MatchIncomingOffer(material, offer_offset, priority, prio_lower_limit, indexIn);
-                        if (indexOut < m_outgoingCount[offer_offset]) has_counterpart_offers |= MatchOutgoingOffer(material, offer_offset, priority, prio_lower_limit, indexOut);
+                    // match incoming if within curren priority
+                    if (indexIn < job.m_incomingCount && job.m_incomingOffers[indexIn].Priority == current_prio)
+                    {
+                        has_counterpart_offers |= MatchIncomingOffer(prio_lower_limit, indexIn);
+                        indexIn++;
                     }
 
-                } //end loop priority
+                    // match outgoing if within current priority
+                    if (indexOut < job.m_outgoingCount && job.m_outgoingOffers[indexOut].Priority == current_prio)
+                    {
+                        has_counterpart_offers |= MatchOutgoingOffer(prio_lower_limit, indexOut);
+                        indexOut++;
+                    }
+
+                    // no more matches possible?
+                    if (job.m_incomingAmount <= 0 || job.m_outgoingAmount <= 0 || !has_counterpart_offers)
+                    {
+                        DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
+                        goto END_OFFERMATCHING;
+                    }
+                }
 
             } //end OFFER_MATCHMODE.BALANCED
 
 
         END_OFFERMATCHING:
-            // finally: clear everything, including unmatched offers!
-            ClearAllTransferOffers(material);
+            // finally: match job finished
+            ;
         }
 
 
         /// <returns>counterpartmacthesleft?</returns>
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        unsafe private static bool MatchIncomingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
+        private static bool MatchIncomingOffer(int prio_lower_limit, int offerIndex)
         {
             // Get incoming offer reference:
-            ref TransferOffer incomingOffer = ref m_incomingOffers[offer_offset * 256 + offerIndex];
+            ref TransferOffer incomingOffer = ref job.m_incomingOffers[offerIndex];
 
             // guard: offer valid?
             if (incomingOffer.Amount <= 0) return true;
 
-            DebugLog.DebugMsg($"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}, priority: {priority}, remaining amount outgoing: {m_outgoingAmount[(int)material]}");
+            DebugLog.DebugMsg($"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}, priority: {incomingOffer.Priority}, remaining amount outgoing: {job.m_outgoingAmount}");
 
             int bestmatch_position = -1;
             float bestmatch_distance = float.MaxValue;
             bool counterpartMatchesLeft = false;
 
             // loop through all matching counterpart offers and find closest one
-            for (int counterpart_prio = 7; counterpart_prio >= prio_lower_limit; --counterpart_prio)
+            for (int counterpart_index = 0; counterpart_index < job.m_outgoingCount; counterpart_index++)
             {
-                int counterpart_offset = (int)material * 8 + counterpart_prio;
-                for (int counterpart_index = 0; counterpart_index < m_outgoingCount[counterpart_offset]; counterpart_index++)
+                ref TransferOffer outgoingOffer = ref job.m_outgoingOffers[counterpart_index];
+
+                //guard: below lower prio limit? ->end matching
+                if (outgoingOffer.Priority < prio_lower_limit) break;
+
+                // guards: out=in same? exclude offer (already used?)
+                if ((outgoingOffer.Amount <= 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
+
+                //guard: if both are warehouse, prevent low prio inter-warehouse transfers
+                if ((incomingOffer.Exclude) && (outgoingOffer.Exclude) && (outgoingOffer.Priority < (prio_lower_limit + 1))) continue;
+
+                // CHECK OPTION: preferlocalservice
+                float districtFactor = 1f;
+                bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, job.material, incomingOffer.Priority, out districtFactor);
+
+                // CHECK OPTION: WarehouseFirst
+                float distanceFactor = WarehouseFirst(ref outgoingOffer, job.material, WAREHOUSE_OFFERTYPE.OUTGOING);
+
+                // CHECK OPTION: WarehouseReserveTrucks
+                bool canTransfer = WarehouseCanTransfer(ref incomingOffer, ref outgoingOffer, job.material);
+
+                // EVAL final distance
+                float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor * districtFactor;
+                if ((isLocalAllowed && canTransfer) && (distance < bestmatch_distance))
                 {
-                    ref TransferOffer outgoingOffer = ref m_outgoingOffers[counterpart_offset * 256 + counterpart_index];
-
-                    // guards: out=in same? exclude offer (already used?)
-                    if ((outgoingOffer.Amount == 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
-
-                    //guard: if both are warehouse, prevent low prio inter-warehouse transfers
-                    if ((incomingOffer.Exclude) && (outgoingOffer.Exclude) && (counterpart_prio < (prio_lower_limit + 1))) continue;
-
-                    // CHECK OPTION: preferlocalservice
-                    float districtFactor = 1f;
-                    bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority, out districtFactor);
-
-                    // CHECK OPTION: WarehouseFirst
-                    float distanceFactor = WarehouseFirst(ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
-
-                    // CHECK OPTION: WarehouseReserveTrucks
-                    bool canTransfer = WarehouseCanTransfer(ref incomingOffer, ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
-
-                    float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor * districtFactor;
-                    if ((isLocalAllowed && canTransfer) && (distance < bestmatch_distance))
-                    {
-                        bestmatch_position = counterpart_offset * 256 + counterpart_index;
-                        bestmatch_distance = distance;
-                    }
-
-                    counterpartMatchesLeft = true;
-                    DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
+                    bestmatch_position = counterpart_index;
+                    bestmatch_distance = distance;
                 }
+
+                counterpartMatchesLeft = true;
+                DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");                
             }
 
             // Select bestmatch
             if (bestmatch_position != -1)
             {
-                DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(ref m_outgoingOffers[bestmatch_position])}");
+                DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(ref job.m_outgoingOffers[bestmatch_position])}");
                 // ATTENTION: last outgoingOffer is NOT necessarily the bestmatch!
 
                 // Start the transfer
-                int deltaamount = Math.Min(incomingOffer.Amount, m_outgoingOffers[bestmatch_position].Amount);
-                TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, m_outgoingOffers[bestmatch_position], incomingOffer, deltaamount);
+                int deltaamount = Math.Min(incomingOffer.Amount, job.m_outgoingOffers[bestmatch_position].Amount);
+                QueueStartTransferMatch(job.material, ref job.m_outgoingOffers[bestmatch_position], ref incomingOffer, deltaamount);
 
                 // reduce offer amount
                 incomingOffer.Amount -= deltaamount;
-                m_outgoingOffers[bestmatch_position].Amount -= deltaamount;
-                m_incomingAmount[(int)material] -= deltaamount;
-                m_outgoingAmount[(int)material] -= deltaamount;
+                job.m_outgoingOffers[bestmatch_position].Amount -= deltaamount;
+                job.m_incomingAmount -= deltaamount;
+                job.m_outgoingAmount -= deltaamount;
             }
 
             return counterpartMatchesLeft;
@@ -672,88 +581,83 @@ namespace MoreEffectiveTransfer.CustomManager
 
         /// <returns>counterpartmacthesleft?</returns>
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        unsafe private static bool MatchOutgoingOffer(TransferReason material, int offer_offset, int priority, int prio_lower_limit, int offerIndex)
+        private static bool MatchOutgoingOffer(int prio_lower_limit, int offerIndex)
         {
             // Get Outgoing offer reference:
-            ref TransferOffer outgoingOffer = ref m_outgoingOffers[offer_offset * 256 + offerIndex];
+            ref TransferOffer outgoingOffer = ref job.m_outgoingOffers[offerIndex];
 
             // guard: offer valid?
             if (outgoingOffer.Amount <= 0) return true;
 
-            DebugLog.DebugMsg($"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}, priority: {priority}, remaining amount incoming: {m_incomingAmount[(int)material]}");
+            DebugLog.DebugMsg($"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}, priority: {outgoingOffer.Priority}, remaining amount incoming: {job.m_incomingAmount}");
 
             int bestmatch_position = -1;
             float bestmatch_distance = float.MaxValue;
             bool counterpartMatchesLeft = false;
 
             // loop through all matching counterpart offers and find closest one
-            for (int counterpart_prio = 7; counterpart_prio >= prio_lower_limit; --counterpart_prio)
+            for (int counterpart_index = 0; counterpart_index < job.m_incomingCount; counterpart_index++)
             {
-                int counterpart_offset = (int)material * 8 + counterpart_prio;
-                for (int counterpart_index = 0; counterpart_index < m_incomingCount[counterpart_offset]; counterpart_index++)
+                ref TransferOffer incomingOffer = ref job.m_incomingOffers[counterpart_index];
+
+                //guard: below lower prio limit? ->end matching
+                if (incomingOffer.Priority < prio_lower_limit) break;
+
+                // guards: out=in same? exclude offer (already used?)
+                if ((incomingOffer.Amount <= 0) || (incomingOffer.m_object == outgoingOffer.m_object)) continue;
+
+                //guard: if both are warehouse, prevent low prio inter-warehouse transfers
+                if ((outgoingOffer.Exclude) && (incomingOffer.Exclude) && (incomingOffer.Priority < (prio_lower_limit + 1))) continue;
+
+                // CHECK OPTION: preferlocalservice
+                float districtFactor = 1f;
+                bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, job.material, outgoingOffer.Priority, out districtFactor);
+
+                // CHECK OPTION: WarehouseFirst
+                float distanceFactor = WarehouseFirst(ref incomingOffer, job.material, WAREHOUSE_OFFERTYPE.INCOMING);
+
+                // CHECK OPTION: WarehouseReserveTrucks
+                bool canTransfer = WarehouseCanTransfer(ref incomingOffer, ref outgoingOffer, job.material);
+
+                // EVAL final distance
+                float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor * districtFactor;
+                if ((isLocalAllowed && canTransfer) && (distance < bestmatch_distance))
                 {
-                    ref TransferOffer incomingOffer = ref m_incomingOffers[counterpart_offset * 256 + counterpart_index];
-
-                    // guards: out=in same? exclude offer (already used?)
-                    if ((incomingOffer.Amount == 0) || (outgoingOffer.m_object == incomingOffer.m_object)) continue;
-
-                    //guard: if both are warehouse, prevent low prio inter-warehouse transfers
-                    if ((outgoingOffer.Exclude) && (incomingOffer.Exclude) && (counterpart_prio < (prio_lower_limit + 1))) continue;
-
-                    // CHECK OPTION: preferlocalservice
-                    float districtFactor = 1f;
-                    bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, material, priority, out districtFactor);
-
-                    // CHECK OPTION: WarehouseFirst
-                    float distanceFactor = WarehouseFirst(ref incomingOffer, material, WAREHOUSE_OFFERTYPE.INCOMING);
-
-                    // CHECK OPTION: WarehouseReserveTrucks
-                    bool canTransfer = WarehouseCanTransfer(ref incomingOffer, ref outgoingOffer, material, WAREHOUSE_OFFERTYPE.OUTGOING);
-
-                    float distance = Vector3.SqrMagnitude(outgoingOffer.Position - incomingOffer.Position) * distanceFactor * districtFactor;
-                    if ((isLocalAllowed && canTransfer) && (distance < bestmatch_distance))
-                    {
-                        bestmatch_position = counterpart_offset * 256 + counterpart_index;
-                        bestmatch_distance = distance;
-                    }
-
-                    counterpartMatchesLeft = true;
-                    DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
+                    bestmatch_position = counterpart_index;
+                    bestmatch_distance = distance;
                 }
+
+                counterpartMatchesLeft = true;
+                DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
             }
 
             // Select bestmatch
             if (bestmatch_position != -1)
             {
-                DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(ref m_incomingOffers[bestmatch_position])}");
-                // ATTENTION: last incomingOffer is NOT necessarily bestmatch!
+                DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(ref job.m_incomingOffers[bestmatch_position])}");
+                // ATTENTION: last incomingOffer is NOT necessarily the bestmatch!
 
                 // Start the transfer
-                int deltaamount = Math.Min(outgoingOffer.Amount, m_incomingOffers[bestmatch_position].Amount);
-                TransferManagerStartTransferDG(Singleton<TransferManager>.instance, material, outgoingOffer, m_incomingOffers[bestmatch_position], deltaamount);
+                int deltaamount = Math.Min(outgoingOffer.Amount, job.m_incomingOffers[bestmatch_position].Amount);
+                QueueStartTransferMatch(job.material, ref outgoingOffer, ref job.m_incomingOffers[bestmatch_position], deltaamount);
 
                 // reduce offer amount
+                job.m_incomingOffers[bestmatch_position].Amount -= deltaamount;
                 outgoingOffer.Amount -= deltaamount;
-                m_incomingOffers[bestmatch_position].Amount -= deltaamount;
-                m_incomingAmount[(int)material] -= deltaamount;
-                m_outgoingAmount[(int)material] -= deltaamount;
+                job.m_incomingAmount -= deltaamount;
+                job.m_outgoingAmount -= deltaamount;
             }
 
             return counterpartMatchesLeft;
         }
 
 
-        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void ClearAllTransferOffers(TransferReason material)
+        /// <summary>
+        /// Enqueue a StartTransfer result package with the TransferDispatcher
+        /// </summary>
+        private static void QueueStartTransferMatch(TransferReason material, ref TransferOffer outgoingOffer, ref TransferOffer incomingOffer, int deltaamount)
         {
-            for (int k = 0; k < 8; ++k)
-            {
-                int material_offset = (int)material * 8 + k;
-                m_incomingCount[material_offset] = 0;
-                m_outgoingCount[material_offset] = 0;
-            }
-            m_incomingAmount[(int)material] = 0;
-            m_outgoingAmount[(int)material] = 0;
+
         }
 
 
