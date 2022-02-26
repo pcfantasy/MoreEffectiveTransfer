@@ -64,27 +64,27 @@ namespace MoreEffectiveTransfer.CustomManager
         {
             if (_init)
             {
-                DebugLog.LogToFileOnly("Checking initializations...");
-                DebugLog.LogToFileOnly($"- _TransferManager instance: {_TransferManager}");
-                DebugLog.LogToFileOnly($"- _InstanceManager instance: {_InstanceManager}");
-                DebugLog.LogToFileOnly($"- _BuildingManager instance: {_BuildingManager}");
-                DebugLog.LogToFileOnly($"- _VehicleManager instance: {_VehicleManager}");
-                DebugLog.LogToFileOnly($"- _CitizenManager instance: {_CitizenManager}");
-                DebugLog.LogToFileOnly($"- _DistrictManager instance: {_DistrictManager}");
+                DebugLog.LogInfo("Checking initializations...");
+                DebugLog.LogInfo($"- _TransferManager instance: {_TransferManager}");
+                DebugLog.LogInfo($"- _InstanceManager instance: {_InstanceManager}");
+                DebugLog.LogInfo($"- _BuildingManager instance: {_BuildingManager}");
+                DebugLog.LogInfo($"- _VehicleManager instance: {_VehicleManager}");
+                DebugLog.LogInfo($"- _CitizenManager instance: {_CitizenManager}");
+                DebugLog.LogInfo($"- _DistrictManager instance: {_DistrictManager}");
 
-                DebugLog.LogToFileOnly("Checking delegates...");
-                DebugLog.LogToFileOnly($"- TransferManagerStartTransferDG instance: {TransferManagerStartTransferDG}");
-                DebugLog.LogToFileOnly($"- CalculateOwnVehicles instance: {CalculateOwnVehiclesDG}");
+                DebugLog.LogInfo("Checking delegates...");
+                DebugLog.LogInfo($"- TransferManagerStartTransferDG instance: {TransferManagerStartTransferDG}");
+                DebugLog.LogInfo($"- CalculateOwnVehicles instance: {CalculateOwnVehiclesDG}");
 
                 if ((_TransferManager != null) && (_InstanceManager != null) && (_BuildingManager != null) && (_VehicleManager != null) && (_CitizenManager != null) &&
                     (_DistrictManager != null) && (TransferManagerStartTransferDG != null) && (CalculateOwnVehiclesDG != null))
-                    DebugLog.LogToFileOnly("ALL INIT CHECKS PASSED. This should work.");
+                    DebugLog.LogInfo("ALL INIT CHECKS PASSED. This should work.");
                 else
                 {
-                    DebugLog.LogAll("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Generating mod list and harmony report...");
+                    DebugLog.LogError("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Generating mod list and harmony report...");
                     DebugLog.ReportAllHarmonyPatches();
                     DebugLog.ReportAllMods();
-                    DebugLog.LogAll("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Please check log >MoreEffectiveTransfer.txt< in CSL directory!", true);
+                    DebugLog.LogError("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Please check log >MoreEffectiveTransfer.txt< in CSL directory!", true);
                 }
             }
         }
@@ -295,7 +295,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     CalculateOwnVehiclesDG(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI,
                                             outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
 
-                    DebugLog.DebugMsg($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
+                    DebugLog.LogDebug($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
                     if ((float)(outside + 1f) > maxExport)
                         return false;   //dont need further checks, we would be over reserved truck limit
                 }
@@ -312,7 +312,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                       (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
 
                     float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
-                    DebugLog.DebugMsg($"       ** warehouse checking import restrictions: balanced/filling={isBalanced}/{isFilling}, filllevel={current_filllevel}");
+                    DebugLog.LogDebug($"       ** warehouse checking import restrictions: balanced/filling={isBalanced}/{isFilling}, filllevel={current_filllevel}");
 
                     if (isBalanced && current_filllevel >= 0.25f)
                         return false;   //balanced: over 25% fill level: no more imports!
@@ -329,7 +329,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                       (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
 
                     float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
-                    DebugLog.DebugMsg($"       ** warehouse checking export restrictions: balanced/empyting={isBalanced}/{isEmptying}, filllevel={current_filllevel}");
+                    DebugLog.LogDebug($"       ** warehouse checking export restrictions: balanced/empyting={isBalanced}/{isEmptying}, filllevel={current_filllevel}");
                     
                     if (isBalanced && current_filllevel <= 0.75f)
                         return false;   //balanced: under 75% fill level: no more exports!
@@ -361,14 +361,14 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 ref TransferOffer incomingOffer = ref job.m_incomingOffers[i];
                 String bname = DebugInspectOffer(ref incomingOffer);
-                DebugLog.DebugMsg($"   in #{i}: prio: {incomingOffer.Priority}, act {incomingOffer.Active}, excl {incomingOffer.Exclude}, amt {incomingOffer.Amount}, bvcnt {incomingOffer.Building}/{incomingOffer.Vehicle}/{incomingOffer.Citizen}/{incomingOffer.NetSegment}/{incomingOffer.TransportLine} name={bname}");
+                DebugLog.LogDebug($"   in #{i}: prio: {incomingOffer.Priority}, act {incomingOffer.Active}, excl {incomingOffer.Exclude}, amt {incomingOffer.Amount}, bvcnt {incomingOffer.Building}/{incomingOffer.Vehicle}/{incomingOffer.Citizen}/{incomingOffer.NetSegment}/{incomingOffer.TransportLine} name={bname}");
             }
 
             for (int i = 0; i < offerCountOutgoing; i++)
             {
                 ref TransferOffer outgoingOffer = ref job.m_outgoingOffers[i];
                 String bname = DebugInspectOffer(ref outgoingOffer);
-                DebugLog.DebugMsg($"   out #{i}: prio: {outgoingOffer.Priority}, act {outgoingOffer.Active}, excl {outgoingOffer.Exclude}, amt {outgoingOffer.Amount}, bvcnt {outgoingOffer.Building}/{outgoingOffer.Vehicle}/{outgoingOffer.Citizen}/{outgoingOffer.NetSegment}/{outgoingOffer.TransportLine} name={bname}");
+                DebugLog.LogDebug($"   out #{i}: prio: {outgoingOffer.Priority}, act {outgoingOffer.Active}, excl {outgoingOffer.Exclude}, amt {outgoingOffer.Amount}, bvcnt {outgoingOffer.Building}/{outgoingOffer.Vehicle}/{outgoingOffer.Citizen}/{outgoingOffer.NetSegment}/{outgoingOffer.TransportLine} name={bname}");
             }
         }
 
@@ -378,7 +378,7 @@ namespace MoreEffectiveTransfer.CustomManager
         /// </summary>
         public static void MatchOffersThread()
         {
-            DebugLog.LogToFileOnly($"MatchOffersThread: Thread started.");
+            DebugLog.LogInfo($"MatchOffersThread: Thread started.");
 
             while (_runThread)
             {
@@ -397,13 +397,13 @@ namespace MoreEffectiveTransfer.CustomManager
                 else
                 {
                     // wait for signal
-                    DebugLog.DebugMsg($"MatchOffersThread: waiting for work signal...");
+                    DebugLog.LogDebug($"MatchOffersThread: waiting for work signal...");
                     CustomTransferDispatcher._waitHandle.WaitOne();
                 }
 
             }
 
-            DebugLog.LogToFileOnly($"MatchOffersThread: Thread ended.");
+            DebugLog.LogInfo($"MatchOffersThread: Thread ended.");
         }
 
 
@@ -426,7 +426,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
 
             // DEBUG LOGGING
-            DebugLog.DebugMsg($"-- TRANSFER REASON: {material.ToString()}, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, count in {job.m_incomingCount}, count out {job.m_outgoingCount}");
+            DebugLog.LogDebug($"-- TRANSFER REASON: {material.ToString()}, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, count in {job.m_incomingCount}, count out {job.m_outgoingCount}");
 #if (DEBUG)
             DebugPrintAllOffers(material, job.m_incomingCount, job.m_outgoingCount);
 #endif
@@ -439,7 +439,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // -------------------------------------------------------------------------------------------
             if (match_mode == OFFER_MATCHMODE.OUTGOING_FIRST)
             {
-                DebugLog.DebugMsg($"   ###MatchMode OUTGOING FIRST###");
+                DebugLog.LogDebug($"   ###MatchMode OUTGOING FIRST###");
                 bool has_counterpart_offers = true;
 
                 // 1st loop: all OUTGOING offers by descending priority
@@ -449,7 +449,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
                     if (job.m_incomingAmount <= 0 || !has_counterpart_offers)
                     {
-                        DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
+                        DebugLog.LogDebug($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
                         goto END_OFFERMATCHING;
                     }
 
@@ -463,7 +463,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // -------------------------------------------------------------------------------------------
             if (match_mode == OFFER_MATCHMODE.INCOMING_FIRST)
             {
-                DebugLog.DebugMsg($"   ###MatchMode INCOMING FIRST###");
+                DebugLog.LogDebug($"   ###MatchMode INCOMING FIRST###");
                 bool has_counterpart_offers = true;
 
                 // 1st loop: all INCOMING offers by descending priority
@@ -473,7 +473,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
                     if (job.m_outgoingAmount <= 0 || !has_counterpart_offers)
                     {
-                        DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
+                        DebugLog.LogDebug($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
                         goto END_OFFERMATCHING;
                     }
 
@@ -487,7 +487,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // -------------------------------------------------------------------------------------------
             if (match_mode == OFFER_MATCHMODE.BALANCED)
             {
-                DebugLog.DebugMsg($"   ###MatchMode BALANCED###");
+                DebugLog.LogDebug($"   ###MatchMode BALANCED###");
                 bool has_counterpart_offers = true;
                 int maxoffers = job.m_incomingCount + job.m_outgoingCount;
 
@@ -518,7 +518,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     // no more matches possible?
                     if (job.m_incomingAmount <= 0 || job.m_outgoingAmount <= 0 || !has_counterpart_offers)
                     {
-                        DebugLog.DebugMsg($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
+                        DebugLog.LogDebug($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
                         goto END_OFFERMATCHING;
                     }
                 }
@@ -542,7 +542,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // guard: offer valid?
             if (incomingOffer.Amount <= 0) return true;
 
-            DebugLog.DebugMsg($"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}, priority: {incomingOffer.Priority}, remaining amount outgoing: {job.m_outgoingAmount}");
+            DebugLog.LogDebug($"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}, priority: {incomingOffer.Priority}, remaining amount outgoing: {job.m_outgoingAmount}");
 
             int bestmatch_position = -1;
             float bestmatch_distance = float.MaxValue;
@@ -581,13 +581,13 @@ namespace MoreEffectiveTransfer.CustomManager
                 }
 
                 counterpartMatchesLeft = true;
-                DebugLog.DebugMsg($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");                
+                DebugLog.LogDebug($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");                
             }
 
             // Select bestmatch
             if (bestmatch_position != -1)
             {
-                DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(ref job.m_outgoingOffers[bestmatch_position])}");
+                DebugLog.LogDebug($"       -> Selecting bestmatch: {DebugInspectOffer(ref job.m_outgoingOffers[bestmatch_position])}");
                 // ATTENTION: last outgoingOffer is NOT necessarily the bestmatch!
 
                 // Start the transfer
@@ -615,7 +615,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // guard: offer valid?
             if (outgoingOffer.Amount <= 0) return true;
 
-            DebugLog.DebugMsg($"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}, priority: {outgoingOffer.Priority}, remaining amount incoming: {job.m_incomingAmount}");
+            DebugLog.LogDebug($"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}, priority: {outgoingOffer.Priority}, remaining amount incoming: {job.m_incomingAmount}");
 
             int bestmatch_position = -1;
             float bestmatch_distance = float.MaxValue;
@@ -654,13 +654,13 @@ namespace MoreEffectiveTransfer.CustomManager
                 }
 
                 counterpartMatchesLeft = true;
-                DebugLog.DebugMsg($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
+                DebugLog.LogDebug($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
             }
 
             // Select bestmatch
             if (bestmatch_position != -1)
             {
-                DebugLog.DebugMsg($"       -> Selecting bestmatch: {DebugInspectOffer(ref job.m_incomingOffers[bestmatch_position])}");
+                DebugLog.LogDebug($"       -> Selecting bestmatch: {DebugInspectOffer(ref job.m_incomingOffers[bestmatch_position])}");
                 // ATTENTION: last incomingOffer is NOT necessarily the bestmatch!
 
                 // Start the transfer

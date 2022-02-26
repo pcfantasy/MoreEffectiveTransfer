@@ -68,7 +68,7 @@ namespace MoreEffectiveTransfer
             fs.Close();
 
             HarmonyHelper.EnsureHarmonyInstalled();
-            DebugLog.LogToFileOnly(Name + ": VERSION: " + MOD_VERSION + ", BUILD TYPE: " + BUILD_TYPE);
+            DebugLog.LogInfo(Name + ": VERSION: " + MOD_VERSION + ", BUILD TYPE: " + BUILD_TYPE);
         }
 
         public void OnDisabled()
@@ -103,7 +103,7 @@ namespace MoreEffectiveTransfer
                 string strLine = sr.ReadLine();
                 if (strLine != SETTINGS_VERSION)
                 {
-                    DebugLog.LogToFileOnly($"Loading Settings - version mismatch detected. Found version: {strLine}, expected version: {SETTINGS_VERSION}. A new settings file will be generated.");
+                    DebugLog.LogInfo($"Loading Settings - version mismatch detected. Found version: {strLine}, expected version: {SETTINGS_VERSION}. A new settings file will be generated.");
                     sr.Close();
                     fs.Close();
                     return;
@@ -190,7 +190,7 @@ namespace MoreEffectiveTransfer
         {
             optionEnableNewTransferManager = index;
             SaveSetting();
-            DebugLog.DebugMsg($"** OPTION ENABLE/DISABLE: {optionEnableNewTransferManager} **");
+            DebugLog.LogDebug($"** OPTION ENABLE/DISABLE: {optionEnableNewTransferManager} **");
         }
 
         public void setOptionPreferLocalService(bool index)

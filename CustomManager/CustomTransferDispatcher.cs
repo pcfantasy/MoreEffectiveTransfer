@@ -65,12 +65,12 @@ namespace MoreEffectiveTransfer.CustomManager
                 pooledJobs.Push(new TransferJob());
             }
 
-            DebugLog.DebugMsg($"TransferJobPool initialized, pool count is {pooledJobs.Count}");
+            DebugLog.LogDebug($"TransferJobPool initialized, pool stack size is {pooledJobs.Count}");
         }
 
         public void Delete()
         {
-            DebugLog.DebugMsg($"Deleting instance: {_instance}");
+            DebugLog.LogDebug($"Deleting instance: {_instance}");
             // unallocate object pool of work packages
             pooledJobs.Clear();
             pooledJobs = null;
@@ -81,9 +81,17 @@ namespace MoreEffectiveTransfer.CustomManager
         {
             lock (_poolLock)
             {
-                _usageCount++;
-                _maxUsageCount = (_usageCount > _maxUsageCount) ? _usageCount : _maxUsageCount;
-                return pooledJobs.Pop();
+                if (pooledJobs.Count > 0)
+                {
+                    _usageCount++;
+                    _maxUsageCount = (_usageCount > _maxUsageCount) ? _usageCount : _maxUsageCount;
+                    return pooledJobs.Pop();
+                }
+                else
+                {
+                    DebugLog.LogError("TransferJobPool: pooled jobs exhausted!");
+                    return null;
+                }
             }
         }
 
@@ -107,8 +115,8 @@ namespace MoreEffectiveTransfer.CustomManager
     public sealed class CustomTransferDispatcher
     {
         private static CustomTransferDispatcher _instance = null;
-        public Queue<TransferJob> workQueue = null;
-        public static readonly object _workQueueLock = new object();
+        private Queue<TransferJob> workQueue = null;
+        private static readonly object _workQueueLock = new object();
         public static EventWaitHandle _waitHandle = new AutoResetEvent(false);
         public static Thread _transferThread = null;
 
@@ -142,7 +150,7 @@ namespace MoreEffectiveTransfer.CustomManager
             _TransferManager = Singleton<TransferManager>.instance;
             if (_TransferManager == null)
             {
-                DebugLog.LogAll("ERROR: No instance of TransferManager found!",true);
+                DebugLog.LogError("ERROR: No instance of TransferManager found!",true);
                 return;
             }
 
@@ -164,12 +172,12 @@ namespace MoreEffectiveTransfer.CustomManager
             // allocate object pool of work packages
             workQueue = new Queue<TransferJob>(TransferManager.TRANSFER_REASON_COUNT);
 
-            DebugLog.DebugMsg($"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}");
+            DebugLog.LogDebug($"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}");
         }
 
         public void Delete()
         {
-            DebugLog.DebugMsg($"Deleting instance: {_instance}");
+            DebugLog.LogDebug($"Deleting instance: {_instance}");
             // unallocate object pool of work packages
             workQueue.Clear();
             workQueue = null;
@@ -186,7 +194,7 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 workQueue.Enqueue(job);
                 _waitHandle.Set();
-                DebugLog.DebugMsg($"Enqueued job at position {workQueue.Count}.");
+                DebugLog.LogDebug($"Enqueued job at position {workQueue.Count}.");
             }
         }
 
@@ -212,8 +220,15 @@ namespace MoreEffectiveTransfer.CustomManager
         /// </summary>
         public void SubmitMatchOfferJob(TransferManager.TransferReason material)
         {
+            if (material == TransferManager.TransferReason.None) return;
+
             TransferJob job = TransferJobPool.Instance.Lease();
-            
+            if (job == null)
+            {
+                DebugLog.LogError("NO MORE TRANSFER JOBS AVAILABLE, DROPPING TRANSFER REQUESTS!");
+                return;
+            }
+
             // set job header info
             job.material = material;
             job.m_incomingCount = 0;
@@ -230,7 +245,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 job.m_outgoingCount += m_outgoingCount[offer_offset];
 
                 // linear copy to job's offer arrays
-                //** TODO: evaluate sppedup via unsafe pointer memcpy **
+                //** TODO: evaluate speedup via unsafe pointer memcpy **
 
                 for (int offerIndex = 0; offerIndex < m_incomingCount[offer_offset]; offerIndex++, jobInIdx++)
                     job.m_incomingOffers[jobInIdx] = m_incomingOffers[offer_offset * 256 + offerIndex];
@@ -279,7 +294,7 @@ namespace MoreEffectiveTransfer.CustomManager
         [Conditional("DEBUG")]
         private void DebugJobSummarize(TransferJob job)
         {
-            DebugLog.DebugMsg($"-- TRANSFER JOB: {job.material.ToString()}, amount in/out: {job.m_incomingAmount}/{job.m_outgoingAmount}; total offer count in/out: {job.m_incomingCount}/{job.m_outgoingCount}");
+            DebugLog.LogDebug($"TRANSFER JOB: {job.material.ToString()}, amount in/out: {job.m_incomingAmount}/{job.m_outgoingAmount}; total offer count in/out: {job.m_incomingCount}/{job.m_outgoingCount}");
         }
 
     }
