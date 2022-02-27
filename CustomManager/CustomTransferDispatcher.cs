@@ -5,8 +5,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Threading;
-using System;
 using System.Runtime.CompilerServices;
+
 
 namespace MoreEffectiveTransfer.CustomManager
 {
@@ -79,7 +79,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 pooledJobs.Push(new TransferJob());
             }
 
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TransferJobPool initialized, pool stack size is {pooledJobs.Count}");
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TransferJobPool initialized, pool stack size is {pooledJobs.Count}, memsize: {Marshal.SizeOf(pooledJobs)} x {Marshal.SizeOf(typeof(TransferJob))}");
         }
 
         public void Delete()
@@ -200,7 +200,8 @@ namespace MoreEffectiveTransfer.CustomManager
             for (int i = 0; i < RINGBUF_SIZE; i++)
                 _transferResultRingBuffer[i].material = TransferManager.TransferReason.None;
 
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}, results ringbuffer size is {_transferResultRingBuffer.Length}");
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}, results ringbuffer size is {_transferResultRingBuffer.Length}, memsize {Marshal.SizeOf(_transferResultRingBuffer)}");
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TransferOffer memsize: {Marshal.SizeOf(typeof(TransferManager.TransferOffer))}");
         }
 
         public void Delete()
@@ -346,18 +347,16 @@ namespace MoreEffectiveTransfer.CustomManager
 
                 // call delegate on vanilla transfer manager
                 if (_transferResultRingBuffer[_ringbufReadPosition].material != TransferManager.TransferReason.None)
-                    CustomTransferManager.TransferManagerStartTransferDG(_TransferManager, _transferResultRingBuffer[_ringbufReadPosition].material,
-                        _transferResultRingBuffer[_ringbufReadPosition].outgoingOffer, _transferResultRingBuffer[_ringbufReadPosition].incomingOffer, _transferResultRingBuffer[_ringbufReadPosition].deltaamount);
+                    CustomTransferManager.TransferManagerStartTransferDG(_TransferManager, _transferResultRingBuffer[_ringbufReadPosition].material, _transferResultRingBuffer[_ringbufReadPosition].outgoingOffer, _transferResultRingBuffer[_ringbufReadPosition].incomingOffer, _transferResultRingBuffer[_ringbufReadPosition].deltaamount);
 
                 newReadPos = _ringbufReadPosition + 1;
-                if (newReadPos >= RINGBUF_SIZE) newReadPos = 0;
                 num_transfers_initiated++;
+                if (newReadPos >= RINGBUF_SIZE) newReadPos = 0;                
             }
 
             _ringBufMaxUsageCount = num_transfers_initiated > _ringBufMaxUsageCount ? num_transfers_initiated : _ringBufMaxUsageCount;
             DebugLog.LogDebug(DebugLog.LogReason.ALL, $"StartTransfers: initiated {num_transfers_initiated} transfers.");
         }
-
 
         private void ClearAllTransferOffers(TransferManager.TransferReason material)
         {

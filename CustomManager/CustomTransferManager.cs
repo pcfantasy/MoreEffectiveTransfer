@@ -20,12 +20,12 @@ namespace MoreEffectiveTransfer.CustomManager
 
 
         // References to game functionalities:
-        private static TransferManager _TransferManager = null;
-        private static BuildingManager _BuildingManager = null;
-        private static VehicleManager _VehicleManager = null;
-        private static InstanceManager _InstanceManager = null;
-        private static DistrictManager _DistrictManager = null;
-        private static CitizenManager _CitizenManager = null;
+        public static TransferManager _TransferManager = null;
+        public static BuildingManager _BuildingManager = null;
+        public static VehicleManager _VehicleManager = null;
+        public static InstanceManager _InstanceManager = null;
+        public static DistrictManager _DistrictManager = null;
+        public static CitizenManager _CitizenManager = null;
 
         // Current transfer job from workqueue
         private static TransferJob job = null;
@@ -688,7 +688,8 @@ namespace MoreEffectiveTransfer.CustomManager
         [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void QueueStartTransferMatch(TransferReason material, ref TransferOffer outgoingOffer, ref TransferOffer incomingOffer, int deltaamount)
         {
-            CustomTransferDispatcher.Instance.EnqueueTransferResult(material, ref outgoingOffer, ref incomingOffer, deltaamount);
+            //CustomTransferDispatcher.Instance.EnqueueTransferResult(material, ref outgoingOffer, ref incomingOffer, deltaamount);
+            TransferManagerStartTransferDG(_TransferManager, material, outgoingOffer, incomingOffer, deltaamount);
         }
 
 
