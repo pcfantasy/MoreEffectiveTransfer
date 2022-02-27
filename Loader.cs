@@ -54,6 +54,7 @@ namespace MoreEffectiveTransfer
                     CustomTransferDispatcher._transferThread.IsBackground = true;
                     CustomTransferDispatcher._transferThread.Start();
 
+                    DebugLog.FlushImmediate();
                 }
             }
         }

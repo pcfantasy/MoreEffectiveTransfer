@@ -15,10 +15,13 @@ namespace MoreEffectiveTransfer.Util
 {
     public static class DebugLog
     {
-        public enum LogReason : int { ALL = 255 };
+        public enum LogReason : int { 
+            //DEAD = TransferManager.TransferReason.Dead, 
+            ALL = 255 
+        };
 
         private const string LOG_FILE_NAME = "MoreEffectiveTransfer.log";
-        private const double LOG_FLUSH_INTERVALL = 1000 * 10; //10sec
+        private const double LOG_FLUSH_INTERVALL = 1000 * 2; //2sec
 
         private static TraceListener _listener = null;
         private static bool _init = false;
@@ -71,6 +74,12 @@ namespace MoreEffectiveTransfer.Util
             }
 
         }
+
+        public static void FlushImmediate()
+        {
+            Trace.Flush();
+        }
+
 
         [Conditional("DEBUG")]
         public static void LogDebug(LogReason reason, string msg)
