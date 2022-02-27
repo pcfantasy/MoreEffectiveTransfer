@@ -159,7 +159,7 @@ namespace MoreEffectiveTransfer
                     DebugLog.LogInfo("LoadingExtension: Checking detours.");
                     if (Loader.HarmonyDetourFailed)
                     {
-                        string error = "HarmonyDetourInit is failed, Send MoreEffectiveTransfer.txt to Author.";
+                        string error = "HarmonyDetourInit is failed, Send MoreEffectiveTransfer.log to Author.";
                         DebugLog.LogError(error);
                         UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("METM Incompatibility Issue", error, true);
                     }
@@ -188,7 +188,7 @@ namespace MoreEffectiveTransfer
 
                         if (i != HarmonyPatchNumExpected)
                         {
-                            string error = $"MoreEffectiveTransfer HarmonyDetour Patch Num is {i}, expected: {HarmonyPatchNumExpected}. Send MoreEffectiveTransfer.txt to Author.";
+                            string error = $"MoreEffectiveTransfer HarmonyDetour Patch Num is {i}, expected: {HarmonyPatchNumExpected}. Send MoreEffectiveTransfer.log to Author.";
                             DebugLog.LogError(error);
                             UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", error, true);
                         }

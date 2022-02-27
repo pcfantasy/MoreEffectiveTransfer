@@ -84,7 +84,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     DebugLog.LogError("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Generating mod list and harmony report...");
                     DebugLog.ReportAllHarmonyPatches();
                     DebugLog.ReportAllMods();
-                    DebugLog.LogError("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Please check log >MoreEffectiveTransfer.txt< in CSL directory!", true);
+                    DebugLog.LogError("PROBLEM DETECTED! SOME MODS ARE CAUSING INCOMPATIBILITIES! Please check log >MoreEffectiveTransfer.log< in CSL directory!", true);
                 }
             }
         }

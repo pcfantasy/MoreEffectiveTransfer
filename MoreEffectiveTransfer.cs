@@ -64,8 +64,6 @@ namespace MoreEffectiveTransfer
         public void OnEnabled()
         {
             IsEnabled = true;
-            FileStream fs = File.Create("MoreEffectiveTransfer.txt");
-            fs.Close();
 
             HarmonyHelper.EnsureHarmonyInstalled();
             DebugLog.LogInfo(Name + ": VERSION: " + MOD_VERSION + ", BUILD TYPE: " + BUILD_TYPE);

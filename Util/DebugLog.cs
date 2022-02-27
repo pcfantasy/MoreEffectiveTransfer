@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define TRACE
+
+using System;
 using System.Diagnostics;
 using System.IO;
 using ColossalFramework;
@@ -7,11 +9,28 @@ using HarmonyLib;
 using ICities;
 using static ColossalFramework.Plugins.PluginManager;
 
+
 namespace MoreEffectiveTransfer.Util
 {
     public static class DebugLog
     {
-        private static readonly Object _loglock = new object();
+        private const string LOG_FILE_NAME = "MoreEffectiveTransfer.log";
+        private static TraceListener _listener = new TextWriterTraceListener(LOG_FILE_NAME);
+        private static bool _init = false;
+
+        private static void InitLogging()
+        {
+            if (!_init)
+            {
+                FileStream fs = File.Create(LOG_FILE_NAME);
+                fs.Close();
+
+                Trace.Listeners.Add(_listener);
+                Trace.AutoFlush = true;
+                _init = true;
+            }
+        }
+
 
         public static void LogError(string msg, bool popup = false)
         {
@@ -23,18 +42,12 @@ namespace MoreEffectiveTransfer.Util
 
         public static void LogInfo(string msg, bool outputlog = true)
         {
-            lock (_loglock)
-            {
-                if (outputlog)
-                    UnityEngine.Debug.Log($"[METM] {msg}");
+            if (!_init) InitLogging();
 
-                using (FileStream fileStream = new FileStream("MoreEffectiveTransfer.txt", FileMode.Append))
-                {
-                    StreamWriter streamWriter = new StreamWriter(fileStream);
-                    streamWriter.WriteLine(msg);
-                    streamWriter.Flush();
-                }
-            }
+            Trace.WriteLine(msg);
+
+            if (outputlog)
+                UnityEngine.Debug.Log($"[METM] {msg}");
         }
 
         [Conditional("DEBUG")]
