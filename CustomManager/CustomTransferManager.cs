@@ -685,10 +685,10 @@ namespace MoreEffectiveTransfer.CustomManager
         /// <summary>
         /// Enqueue a StartTransfer result package with the TransferDispatcher
         /// </summary>
+        [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void QueueStartTransferMatch(TransferReason material, ref TransferOffer outgoingOffer, ref TransferOffer incomingOffer, int deltaamount)
         {
-            //TODO
-
+            CustomTransferDispatcher.Instance.EnqueueTransferResult(material, ref outgoingOffer, ref incomingOffer, deltaamount);
         }
 
 

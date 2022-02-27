@@ -33,6 +33,19 @@ namespace MoreEffectiveTransfer.CustomManager
 
 
     /// <summary>
+    /// TransferResult: individual work package for StartTransfers
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TransferResult
+    {
+        public TransferManager.TransferReason material;
+        public TransferManager.TransferOffer outgoingOffer;
+        public TransferManager.TransferOffer incomingOffer;        
+        public int deltaamount;
+    }
+
+
+    /// <summary>
     /// TransferJobPool: pool of TransferJobs
     /// </summary>
     public sealed class TransferJobPool
@@ -120,6 +133,11 @@ namespace MoreEffectiveTransfer.CustomManager
         public static EventWaitHandle _waitHandle = new AutoResetEvent(false);
         public static Thread _transferThread = null;
 
+        // TransferResults ring buffer:
+        private TransferResult[] _transferResultRingBuffer;
+        private const int RINGBUF_SIZE = 256 * 8;
+        private volatile int _ringbufReadPosition;
+        private volatile int _ringbufWritePosition;
 
         // References to game functionalities:
         private static TransferManager _TransferManager = null;
@@ -172,7 +190,14 @@ namespace MoreEffectiveTransfer.CustomManager
             // allocate object pool of work packages
             workQueue = new Queue<TransferJob>(TransferManager.TRANSFER_REASON_COUNT);
 
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}");
+            // results ring buffer array
+            _transferResultRingBuffer = new TransferResult[RINGBUF_SIZE];
+            _ringbufReadPosition = 0;
+            _ringbufWritePosition = 1;
+            for (int i = 0; i < RINGBUF_SIZE; i++)
+                _transferResultRingBuffer[i].material = TransferManager.TransferReason.None;
+
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}, results ringbuffer size is {_transferResultRingBuffer.Length}");
         }
 
         public void Delete()
@@ -181,6 +206,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // unallocate object pool of work packages
             workQueue.Clear();
             workQueue = null;
+            _transferResultRingBuffer = null;
             CustomTransferDispatcher._instance = null;
         }
 
@@ -210,6 +236,29 @@ namespace MoreEffectiveTransfer.CustomManager
                     return workQueue.Dequeue();
                 else
                     return null;
+            }
+        }
+
+
+        /// <summary>
+        /// Enqueue transferresult from match-maker thread to results ring buffer for StartTransfers
+        /// </summary>
+        public void EnqueueTransferResult(TransferManager.TransferReason material, ref TransferManager.TransferOffer outgoingOffer, ref TransferManager.TransferOffer incomingOffer, int deltaamount)
+        {
+            if (_ringbufWritePosition == _ringbufReadPosition)
+            {
+                DebugLog.LogError($"RESULTS RINGBUFFER: NO MORE OPEN WRITE POSITIONS! readPos={_ringbufReadPosition}, writePos={_ringbufWritePosition}");
+            }
+            else
+            {
+                _transferResultRingBuffer[_ringbufWritePosition].material = material;
+                _transferResultRingBuffer[_ringbufWritePosition].outgoingOffer = outgoingOffer;
+                _transferResultRingBuffer[_ringbufWritePosition].incomingOffer = incomingOffer;
+                _transferResultRingBuffer[_ringbufWritePosition].deltaamount = deltaamount;
+
+                _ringbufWritePosition++;
+                if (_ringbufWritePosition >= RINGBUF_SIZE)
+                    _ringbufWritePosition = 0;
             }
         }
 
@@ -276,12 +325,29 @@ namespace MoreEffectiveTransfer.CustomManager
 
         /// <summary>
         /// to be called from MatchOffers Postfix Patch:
-        /// receive match-maker results and start transfers
+        /// receive match-maker results from ring buffer and start transfers
         /// </summary>
         public void StartTransfers()
         {
-            //TODO
+            int num_transfers_initiated = 0;
+            int newReadPos = _ringbufReadPosition + 1;
+            if (newReadPos >= RINGBUF_SIZE) newReadPos = 0;
 
+            while (newReadPos != _ringbufWritePosition)
+            {
+                _ringbufReadPosition = newReadPos;
+
+                // call delegate on vanilla transfer manager
+                if (_transferResultRingBuffer[_ringbufReadPosition].material != TransferManager.TransferReason.None)
+                    CustomTransferManager.TransferManagerStartTransferDG(_TransferManager, _transferResultRingBuffer[_ringbufReadPosition].material,
+                        _transferResultRingBuffer[_ringbufReadPosition].outgoingOffer, _transferResultRingBuffer[_ringbufReadPosition].incomingOffer, _transferResultRingBuffer[_ringbufReadPosition].deltaamount);
+
+                newReadPos = _ringbufReadPosition + 1;
+                if (newReadPos >= RINGBUF_SIZE) newReadPos = 0;
+                num_transfers_initiated++;
+            }
+
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"StartTransfers: initiated {num_transfers_initiated} transfers.");
         }
 
 
