@@ -27,13 +27,6 @@ namespace MoreEffectiveTransfer
         // MAIN switch, mainly for debugging/profiling
         public static bool optionEnableNewTransferManager = true;
 
-#if (PROFILE)
-        public static System.Diagnostics.Stopwatch timerVanilla = new System.Diagnostics.Stopwatch();
-        public static System.Diagnostics.Stopwatch timerMETM = new System.Diagnostics.Stopwatch();
-        public static long timerCounterVanilla = 0;
-        public static long timerCounterMETM = 0;
-#endif
-
         // SERVICE options
         public static bool optionPreferLocalService = false;
         

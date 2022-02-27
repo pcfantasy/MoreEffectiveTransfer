@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Threading;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace MoreEffectiveTransfer.CustomManager
 {
@@ -332,6 +333,7 @@ namespace MoreEffectiveTransfer.CustomManager
         /// to be called from MatchOffers Postfix Patch:
         /// receive match-maker results from ring buffer and start transfers
         /// </summary>
+        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void StartTransfers()
         {
             int num_transfers_initiated = 0;

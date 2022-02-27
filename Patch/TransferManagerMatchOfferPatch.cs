@@ -15,14 +15,13 @@ namespace MoreEffectiveTransfer.Patch
             // disabled in settings? ->use stock transfer manager
             if (!MoreEffectiveTransfer.optionEnableNewTransferManager)
             {
-                // begin Profiling
-                MoreEffectiveTransfer.timerCounterVanilla++;
-                MoreEffectiveTransfer.timerVanilla.Start();
+                Profiling.timerCounterVanilla++;
+                Profiling.timerVanilla.Start();
                 return true;
             }
 
-            MoreEffectiveTransfer.timerCounterMETM++;
-            MoreEffectiveTransfer.timerMETM.Start();
+            Profiling.timerCounterMETM++;
+            Profiling.timerMETM.Start();
 #endif
 
             // Dispatch to TransferDispatcher
@@ -37,13 +36,14 @@ namespace MoreEffectiveTransfer.Patch
         {
             if (MoreEffectiveTransfer.optionEnableNewTransferManager)
             {
+                Profiling.timerMETM_StartTransfers.Start();
                 // Start queued transfers:
                 CustomTransferDispatcher.Instance.StartTransfers();
+                Profiling.timerMETM_StartTransfers.Stop();
             }
 #if (PROFILE)
-            // end profiling
-            MoreEffectiveTransfer.timerMETM.Stop();
-            MoreEffectiveTransfer.timerVanilla.Stop();
+            Profiling.timerMETM.Stop();
+            Profiling.timerVanilla.Stop();
 #endif
         }
 
