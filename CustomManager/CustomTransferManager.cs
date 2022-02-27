@@ -295,7 +295,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     CalculateOwnVehiclesDG(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI as WarehouseAI,
                                             outgoingOffer.Building, ref _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building], material, ref count, ref cargo, ref capacity, ref outside);
 
-                    DebugLog.LogDebug($"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
+                    DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"       ** checking canTransfer: total: {total}, ccco: {count}/{cargo}/{capacity}/{outside} => {((float)(outside + 1f) > maxExport)}");
                     if ((float)(outside + 1f) > maxExport)
                         return false;   //dont need further checks, we would be over reserved truck limit
                 }
@@ -312,7 +312,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                       (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
 
                     float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
-                    DebugLog.LogDebug($"       ** warehouse checking import restrictions: balanced/filling={isBalanced}/{isFilling}, filllevel={current_filllevel}");
+                    DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"       ** warehouse checking import restrictions: balanced/filling={isBalanced}/{isFilling}, filllevel={current_filllevel}");
 
                     if (isBalanced && current_filllevel >= 0.25f)
                         return false;   //balanced: over 25% fill level: no more imports!
@@ -329,7 +329,7 @@ namespace MoreEffectiveTransfer.CustomManager
                                       (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_flags & (Building.Flags.Filling)) == Building.Flags.None;
 
                     float current_filllevel = (float)(_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].m_customBuffer1 * 100) / ((_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info.m_buildingAI as WarehouseAI).m_storageCapacity);
-                    DebugLog.LogDebug($"       ** warehouse checking export restrictions: balanced/empyting={isBalanced}/{isEmptying}, filllevel={current_filllevel}");
+                    DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"       ** warehouse checking export restrictions: balanced/empyting={isBalanced}/{isEmptying}, filllevel={current_filllevel}");
                     
                     if (isBalanced && current_filllevel <= 0.75f)
                         return false;   //balanced: under 75% fill level: no more exports!
@@ -350,7 +350,11 @@ namespace MoreEffectiveTransfer.CustomManager
             var instB = default(InstanceID);
             instB.Building = offer.Building;
             return (offer.Building > 0 && offer.Building < _BuildingManager.m_buildings.m_size) ? _BuildingManager.m_buildings.m_buffer[offer.Building].Info?.name + "(" + _InstanceManager.GetName(instB) + ")"
-                    : (offer.Vehicle > 0 && offer.Vehicle < _VehicleManager.m_vehicles.m_size)  ? _VehicleManager.m_vehicles.m_buffer[offer.Vehicle].Info?.name : "";
+                    : (offer.Vehicle > 0 && offer.Vehicle < _VehicleManager.m_vehicles.m_size)  ? _VehicleManager.m_vehicles.m_buffer[offer.Vehicle].Info?.name 
+                    : (offer.Citizen > 0) ? $"Citizen={offer.Citizen}"
+                    : (offer.NetSegment > 0) ? $"NetSegment={offer.NetSegment}"
+                    : (offer.TransportLine > 0) ? $"TransportLine={offer.TransportLine}"
+                    : "unknown";
         }
 
 
@@ -361,14 +365,14 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 ref TransferOffer incomingOffer = ref job.m_incomingOffers[i];
                 String bname = DebugInspectOffer(ref incomingOffer);
-                DebugLog.LogDebug($"   in #{i}: prio: {incomingOffer.Priority}, act {incomingOffer.Active}, excl {incomingOffer.Exclude}, amt {incomingOffer.Amount}, bvcnt {incomingOffer.Building}/{incomingOffer.Vehicle}/{incomingOffer.Citizen}/{incomingOffer.NetSegment}/{incomingOffer.TransportLine} name={bname}");
+                DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"   in #{i}: prio: {incomingOffer.Priority}, act {incomingOffer.Active}, excl {incomingOffer.Exclude}, amt {incomingOffer.Amount}, bvcnt {incomingOffer.Building}/{incomingOffer.Vehicle}/{incomingOffer.Citizen}/{incomingOffer.NetSegment}/{incomingOffer.TransportLine} name={bname}");
             }
 
             for (int i = 0; i < offerCountOutgoing; i++)
             {
                 ref TransferOffer outgoingOffer = ref job.m_outgoingOffers[i];
                 String bname = DebugInspectOffer(ref outgoingOffer);
-                DebugLog.LogDebug($"   out #{i}: prio: {outgoingOffer.Priority}, act {outgoingOffer.Active}, excl {outgoingOffer.Exclude}, amt {outgoingOffer.Amount}, bvcnt {outgoingOffer.Building}/{outgoingOffer.Vehicle}/{outgoingOffer.Citizen}/{outgoingOffer.NetSegment}/{outgoingOffer.TransportLine} name={bname}");
+                DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"   out #{i}: prio: {outgoingOffer.Priority}, act {outgoingOffer.Active}, excl {outgoingOffer.Exclude}, amt {outgoingOffer.Amount}, bvcnt {outgoingOffer.Building}/{outgoingOffer.Vehicle}/{outgoingOffer.Citizen}/{outgoingOffer.NetSegment}/{outgoingOffer.TransportLine} name={bname}");
             }
         }
 
@@ -397,7 +401,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 else
                 {
                     // wait for signal
-                    DebugLog.LogDebug($"MatchOffersThread: waiting for work signal...");
+                    DebugLog.LogDebug(DebugLog.LogReason.ALL, $"MatchOffersThread: waiting for work signal...");
                     CustomTransferDispatcher._waitHandle.WaitOne();
                 }
 
@@ -426,7 +430,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
 
             // DEBUG LOGGING
-            DebugLog.LogDebug($"-- TRANSFER REASON: {material.ToString()}, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, count in {job.m_incomingCount}, count out {job.m_outgoingCount}");
+            DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"-- TRANSFER REASON: {material.ToString()}, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, count in {job.m_incomingCount}, count out {job.m_outgoingCount}");
 #if (DEBUG)
             DebugPrintAllOffers(material, job.m_incomingCount, job.m_outgoingCount);
 #endif
@@ -439,7 +443,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // -------------------------------------------------------------------------------------------
             if (match_mode == OFFER_MATCHMODE.OUTGOING_FIRST)
             {
-                DebugLog.LogDebug($"   ###MatchMode OUTGOING FIRST###");
+                DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"   ###MatchMode OUTGOING FIRST###");
                 bool has_counterpart_offers = true;
 
                 // 1st loop: all OUTGOING offers by descending priority
@@ -449,7 +453,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
                     if (job.m_incomingAmount <= 0 || !has_counterpart_offers)
                     {
-                        DebugLog.LogDebug($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
+                        DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
                         goto END_OFFERMATCHING;
                     }
 
@@ -463,7 +467,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // -------------------------------------------------------------------------------------------
             if (match_mode == OFFER_MATCHMODE.INCOMING_FIRST)
             {
-                DebugLog.LogDebug($"   ###MatchMode INCOMING FIRST###");
+                DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"   ###MatchMode INCOMING FIRST###");
                 bool has_counterpart_offers = true;
 
                 // 1st loop: all INCOMING offers by descending priority
@@ -473,7 +477,7 @@ namespace MoreEffectiveTransfer.CustomManager
 
                     if (job.m_outgoingAmount <= 0 || !has_counterpart_offers)
                     {
-                        DebugLog.LogDebug($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
+                        DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
                         goto END_OFFERMATCHING;
                     }
 
@@ -487,7 +491,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // -------------------------------------------------------------------------------------------
             if (match_mode == OFFER_MATCHMODE.BALANCED)
             {
-                DebugLog.LogDebug($"   ###MatchMode BALANCED###");
+                DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"   ###MatchMode BALANCED###");
                 bool has_counterpart_offers = true;
                 int maxoffers = job.m_incomingCount + job.m_outgoingCount;
 
@@ -518,7 +522,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     // no more matches possible?
                     if (job.m_incomingAmount <= 0 || job.m_outgoingAmount <= 0 || !has_counterpart_offers)
                     {
-                        DebugLog.LogDebug($"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
+                        DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"   ### MATCHMODE EXIT, amt in {job.m_incomingAmount}, amt out {job.m_outgoingAmount}, has_counterparts {has_counterpart_offers} ###");
                         goto END_OFFERMATCHING;
                     }
                 }
@@ -542,7 +546,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // guard: offer valid?
             if (incomingOffer.Amount <= 0) return true;
 
-            DebugLog.LogDebug($"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}, priority: {incomingOffer.Priority}, remaining amount outgoing: {job.m_outgoingAmount}");
+            DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"   ###Matching INCOMING offer: {DebugInspectOffer(ref incomingOffer)}, priority: {incomingOffer.Priority}, remaining amount outgoing: {job.m_outgoingAmount}");
 
             int bestmatch_position = -1;
             float bestmatch_distance = float.MaxValue;
@@ -581,13 +585,13 @@ namespace MoreEffectiveTransfer.CustomManager
                 }
 
                 counterpartMatchesLeft = true;
-                DebugLog.LogDebug($"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");                
+                DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"       -> Matching outgoing offer: {DebugInspectOffer(ref outgoingOffer)}, amt {outgoingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");                
             }
 
             // Select bestmatch
             if (bestmatch_position != -1)
             {
-                DebugLog.LogDebug($"       -> Selecting bestmatch: {DebugInspectOffer(ref job.m_outgoingOffers[bestmatch_position])}");
+                DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"       -> Selecting bestmatch: {DebugInspectOffer(ref job.m_outgoingOffers[bestmatch_position])}");
                 // ATTENTION: last outgoingOffer is NOT necessarily the bestmatch!
 
                 // Start the transfer
@@ -615,7 +619,7 @@ namespace MoreEffectiveTransfer.CustomManager
             // guard: offer valid?
             if (outgoingOffer.Amount <= 0) return true;
 
-            DebugLog.LogDebug($"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}, priority: {outgoingOffer.Priority}, remaining amount incoming: {job.m_incomingAmount}");
+            DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"   ###Matching OUTGOING offer: {DebugInspectOffer(ref outgoingOffer)}, priority: {outgoingOffer.Priority}, remaining amount incoming: {job.m_incomingAmount}");
 
             int bestmatch_position = -1;
             float bestmatch_distance = float.MaxValue;
@@ -654,13 +658,13 @@ namespace MoreEffectiveTransfer.CustomManager
                 }
 
                 counterpartMatchesLeft = true;
-                DebugLog.LogDebug($"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
+                DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"       -> Matching incoming offer: {DebugInspectOffer(ref incomingOffer)}, amt {incomingOffer.Amount}, local:{isLocalAllowed}, canTransfer:{canTransfer}, distance: {distance}@{districtFactor}/{distanceFactor}, bestmatch: {bestmatch_distance}");
             }
 
             // Select bestmatch
             if (bestmatch_position != -1)
             {
-                DebugLog.LogDebug($"       -> Selecting bestmatch: {DebugInspectOffer(ref job.m_incomingOffers[bestmatch_position])}");
+                DebugLog.LogDebug((DebugLog.LogReason)(job.material), $"       -> Selecting bestmatch: {DebugInspectOffer(ref job.m_incomingOffers[bestmatch_position])}");
                 // ATTENTION: last incomingOffer is NOT necessarily the bestmatch!
 
                 // Start the transfer

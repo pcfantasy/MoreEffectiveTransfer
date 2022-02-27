@@ -85,6 +85,8 @@ namespace MoreEffectiveTransfer
 
                     RevertDetour();
                     HarmonyRevertDetour();
+
+                    DebugLog.StopLogging();
                 }
             }
         }

@@ -65,12 +65,12 @@ namespace MoreEffectiveTransfer.CustomManager
                 pooledJobs.Push(new TransferJob());
             }
 
-            DebugLog.LogDebug($"TransferJobPool initialized, pool stack size is {pooledJobs.Count}");
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TransferJobPool initialized, pool stack size is {pooledJobs.Count}");
         }
 
         public void Delete()
         {
-            DebugLog.LogDebug($"Deleting instance: {_instance}");
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"Deleting instance: {_instance}");
             // unallocate object pool of work packages
             pooledJobs.Clear();
             pooledJobs = null;
@@ -172,12 +172,12 @@ namespace MoreEffectiveTransfer.CustomManager
             // allocate object pool of work packages
             workQueue = new Queue<TransferJob>(TransferManager.TRANSFER_REASON_COUNT);
 
-            DebugLog.LogDebug($"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}");
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}");
         }
 
         public void Delete()
         {
-            DebugLog.LogDebug($"Deleting instance: {_instance}");
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"Deleting instance: {_instance}");
             // unallocate object pool of work packages
             workQueue.Clear();
             workQueue = null;
@@ -194,7 +194,7 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 workQueue.Enqueue(job);
                 _waitHandle.Set();
-                DebugLog.LogDebug($"Enqueued job at position {workQueue.Count}.");
+                DebugLog.LogDebug(DebugLog.LogReason.ALL, $"Enqueued job at position {workQueue.Count}.");
             }
         }
 
@@ -301,7 +301,7 @@ namespace MoreEffectiveTransfer.CustomManager
         [Conditional("DEBUG")]
         private void DebugJobSummarize(TransferJob job)
         {
-            DebugLog.LogDebug($"TRANSFER JOB: {job.material.ToString()}, amount in/out: {job.m_incomingAmount}/{job.m_outgoingAmount}; total offer count in/out: {job.m_incomingCount}/{job.m_outgoingCount}");
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TRANSFER JOB: {job.material.ToString()}, amount in/out: {job.m_incomingAmount}/{job.m_outgoingAmount}; total offer count in/out: {job.m_incomingCount}/{job.m_outgoingCount}");
         }
 
     }

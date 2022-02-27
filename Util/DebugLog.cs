@@ -8,12 +8,15 @@ using ColossalFramework.Plugins;
 using HarmonyLib;
 using ICities;
 using static ColossalFramework.Plugins.PluginManager;
+using static TransferManager.TransferReason;
 
 
 namespace MoreEffectiveTransfer.Util
 {
     public static class DebugLog
     {
+        public enum LogReason : int { ALL = 255 };
+
         private const string LOG_FILE_NAME = "MoreEffectiveTransfer.log";
         private const double LOG_FLUSH_INTERVALL = 1000 * 10; //10sec
 
@@ -32,6 +35,15 @@ namespace MoreEffectiveTransfer.Util
                 Trace.Listeners.Add(_listener);
                 Trace.AutoFlush = false;
                 _init = true;
+            }
+        }
+
+        public static void StopLogging()
+        {
+            if (_init)
+            {
+                Trace.Flush();
+                Trace.Listeners.Remove(_listener);
             }
         }
 
@@ -61,9 +73,10 @@ namespace MoreEffectiveTransfer.Util
         }
 
         [Conditional("DEBUG")]
-        public static void LogDebug(string msg)
+        public static void LogDebug(LogReason reason, string msg)
         {
-            LogInfo(msg, false);
+            if (Enum.IsDefined(typeof(LogReason), reason))
+                LogInfo(msg, false);
         }
 
 

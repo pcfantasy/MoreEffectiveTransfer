@@ -188,7 +188,7 @@ namespace MoreEffectiveTransfer
         {
             optionEnableNewTransferManager = index;
             SaveSetting();
-            DebugLog.LogDebug($"** OPTION ENABLE/DISABLE: {optionEnableNewTransferManager} **");
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"** OPTION ENABLE/DISABLE: {optionEnableNewTransferManager} **");
         }
 
         public void setOptionPreferLocalService(bool index)
