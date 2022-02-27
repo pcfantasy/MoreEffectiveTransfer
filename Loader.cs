@@ -73,6 +73,7 @@ namespace MoreEffectiveTransfer
                     DebugLog.LogInfo($"- VANILLA TRANSFER MANAGER: NUM INVOCATIONS: {MoreEffectiveTransfer.timerCounterVanilla}, TOTAL MS: {MoreEffectiveTransfer.timerVanilla.ElapsedMilliseconds}, AVG TIME/INVOCATION: {msPerInvVanilla}ms");
                     DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: NUM INVOCATIONS: {MoreEffectiveTransfer.timerCounterMETM}, TOTAL MS: {MoreEffectiveTransfer.timerMETM.ElapsedMilliseconds}, AVG TIME/INVOCATION: {msPerInvMETM}ms");
                     DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: max queued transferjobs: {TransferJobPool.Instance.GetMaxUsage()}");
+                    DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: max transfer ringbuffer usage: {CustomTransferDispatcher.Instance.GetMaxUsage()}");
                     DebugLog.LogInfo("--- END PROFILING STATISTICS ---");
 #endif
 

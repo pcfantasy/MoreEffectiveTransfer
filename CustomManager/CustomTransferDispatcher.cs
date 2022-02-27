@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Threading;
-
+using System;
 
 namespace MoreEffectiveTransfer.CustomManager
 {
@@ -138,6 +138,7 @@ namespace MoreEffectiveTransfer.CustomManager
         private const int RINGBUF_SIZE = 256 * 8;
         private volatile int _ringbufReadPosition;
         private volatile int _ringbufWritePosition;
+        private int _ringBufMaxUsageCount;
 
         // References to game functionalities:
         private static TransferManager _TransferManager = null;
@@ -194,6 +195,7 @@ namespace MoreEffectiveTransfer.CustomManager
             _transferResultRingBuffer = new TransferResult[RINGBUF_SIZE];
             _ringbufReadPosition = 0;
             _ringbufWritePosition = 1;
+            _ringBufMaxUsageCount = 0;
             for (int i = 0; i < RINGBUF_SIZE; i++)
                 _transferResultRingBuffer[i].material = TransferManager.TransferReason.None;
 
@@ -209,6 +211,9 @@ namespace MoreEffectiveTransfer.CustomManager
             _transferResultRingBuffer = null;
             CustomTransferDispatcher._instance = null;
         }
+
+        public int GetMaxUsage() => _ringBufMaxUsageCount;
+
 
         /// <summary>
         /// Thread-safe Enqueue
@@ -347,6 +352,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 num_transfers_initiated++;
             }
 
+            _ringBufMaxUsageCount = num_transfers_initiated > _ringBufMaxUsageCount ? num_transfers_initiated : _ringBufMaxUsageCount;
             DebugLog.LogDebug(DebugLog.LogReason.ALL, $"StartTransfers: initiated {num_transfers_initiated} transfers.");
         }
 
