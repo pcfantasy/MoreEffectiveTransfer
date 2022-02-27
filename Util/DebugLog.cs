@@ -15,8 +15,11 @@ namespace MoreEffectiveTransfer.Util
     public static class DebugLog
     {
         private const string LOG_FILE_NAME = "MoreEffectiveTransfer.log";
+        private const double LOG_FLUSH_INTERVALL = 1000 * 10; //10sec
+
         private static TraceListener _listener = null;
         private static bool _init = false;
+        private static DateTime _lastFlush;
 
         private static void InitLogging()
         {
@@ -27,7 +30,7 @@ namespace MoreEffectiveTransfer.Util
 
                 _listener = new TextWriterTraceListener(LOG_FILE_NAME);
                 Trace.Listeners.Add(_listener);
-                Trace.AutoFlush = true;
+                Trace.AutoFlush = false;
                 _init = true;
             }
         }
@@ -45,10 +48,16 @@ namespace MoreEffectiveTransfer.Util
         {
             if (!_init) InitLogging();
 
-            Trace.WriteLine(msg);
-
             if (outputlog)
                 UnityEngine.Debug.Log($"[METM] {msg}");
+
+            Trace.WriteLine(msg);
+            if ((DateTime.Now - _lastFlush).TotalMilliseconds > LOG_FLUSH_INTERVALL)
+            {
+                _lastFlush = DateTime.Now;
+                Trace.Flush();
+            }
+
         }
 
         [Conditional("DEBUG")]
