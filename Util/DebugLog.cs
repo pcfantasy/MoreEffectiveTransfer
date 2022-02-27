@@ -15,7 +15,7 @@ namespace MoreEffectiveTransfer.Util
     public static class DebugLog
     {
         private const string LOG_FILE_NAME = "MoreEffectiveTransfer.log";
-        private static TraceListener _listener = new TextWriterTraceListener(LOG_FILE_NAME);
+        private static TraceListener _listener = null;
         private static bool _init = false;
 
         private static void InitLogging()
@@ -25,6 +25,7 @@ namespace MoreEffectiveTransfer.Util
                 FileStream fs = File.Create(LOG_FILE_NAME);
                 fs.Close();
 
+                _listener = new TextWriterTraceListener(LOG_FILE_NAME);
                 Trace.Listeners.Add(_listener);
                 Trace.AutoFlush = true;
                 _init = true;
