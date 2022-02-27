@@ -79,7 +79,10 @@ namespace MoreEffectiveTransfer.CustomManager
                 pooledJobs.Push(new TransferJob());
             }
 
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TransferJobPool initialized, pool stack size is {pooledJobs.Count}, memsize: {Marshal.SizeOf(pooledJobs)} x {Marshal.SizeOf(typeof(TransferJob))}");
+            unsafe
+            {
+                DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TransferJobPool initialized, pool stack size is {pooledJobs.Count}");
+            }
         }
 
         public void Delete()
@@ -200,8 +203,13 @@ namespace MoreEffectiveTransfer.CustomManager
             for (int i = 0; i < RINGBUF_SIZE; i++)
                 _transferResultRingBuffer[i].material = TransferManager.TransferReason.None;
 
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}, results ringbuffer size is {_transferResultRingBuffer.Length}, memsize {Marshal.SizeOf(_transferResultRingBuffer)}");
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TransferOffer memsize: {Marshal.SizeOf(typeof(TransferManager.TransferOffer))}");
+            unsafe
+            {
+                DebugLog.LogDebug(DebugLog.LogReason.ALL, $"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}, results ringbuffer size is {_transferResultRingBuffer.Length}");
+                DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TransferOffer memsize: {sizeof(TransferManager.TransferOffer)}");
+                long memsize = (long)sizeof(TransferManager.TransferOffer) * ((2 * 256 * 8 * 128) + (2*256*8));
+                DebugLog.LogDebug(DebugLog.LogReason.ALL, $"Total memory size is: (2x256x8x128 + 2x256x8) x TransferOffer MemSize = {memsize} bytes, = {memsize>>20} MB");
+            }
         }
 
         public void Delete()
@@ -250,7 +258,7 @@ namespace MoreEffectiveTransfer.CustomManager
         /// <summary>
         /// Enqueue transferresult from match-maker thread to results ring buffer for StartTransfers
         /// </summary>
-        public void EnqueueTransferResult(TransferManager.TransferReason material, ref TransferManager.TransferOffer outgoingOffer, ref TransferManager.TransferOffer incomingOffer, int deltaamount)
+        public void EnqueueTransferResult(TransferManager.TransferReason material, TransferManager.TransferOffer outgoingOffer, TransferManager.TransferOffer incomingOffer, int deltaamount)
         {
             if (_ringbufWritePosition == _ringbufReadPosition)
             {
@@ -357,6 +365,7 @@ namespace MoreEffectiveTransfer.CustomManager
             _ringBufMaxUsageCount = num_transfers_initiated > _ringBufMaxUsageCount ? num_transfers_initiated : _ringBufMaxUsageCount;
             DebugLog.LogDebug(DebugLog.LogReason.ALL, $"StartTransfers: initiated {num_transfers_initiated} transfers.");
         }
+
 
         private void ClearAllTransferOffers(TransferManager.TransferReason material)
         {

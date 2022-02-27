@@ -688,8 +688,9 @@ namespace MoreEffectiveTransfer.CustomManager
         [MethodImpl(256)] //=[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void QueueStartTransferMatch(TransferReason material, ref TransferOffer outgoingOffer, ref TransferOffer incomingOffer, int deltaamount)
         {
-            //CustomTransferDispatcher.Instance.EnqueueTransferResult(material, ref outgoingOffer, ref incomingOffer, deltaamount);
-            TransferManagerStartTransferDG(_TransferManager, material, outgoingOffer, incomingOffer, deltaamount);
+            //TransferManagerStartTransferDG(_TransferManager, material, outgoingOffer, incomingOffer, deltaamount);    //THREAD-SAFE??
+
+            CustomTransferDispatcher.Instance.EnqueueTransferResult(material, outgoingOffer, incomingOffer, deltaamount);
         }
 
 
