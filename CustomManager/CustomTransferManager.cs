@@ -132,6 +132,8 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Collapsed:          //Collapsed: outgoing (passive) from buildings
                 case TransferReason.Collapsed2:         //Collapsed2: helicopter
                 case TransferReason.Snow:               //outgoing (passive) from netsegements, incoming (active) from snowdumps
+                case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
+                case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
                     return OFFER_MATCHMODE.BALANCED;
 
                 case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
@@ -143,8 +145,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.CriminalMove:       //outging (passive) from policestations, incoming(active) from prisons
                     return OFFER_MATCHMODE.OUTGOING_FIRST;
 
-                case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
-                case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
                 case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
                 case TransferReason.DeadMove:           //outgoing (active) from emptying, incoming (passive) from receiving
                 case TransferReason.SnowMove:           //outgoing (active) from emptying snowdumps, incoming (passive) from receiving
@@ -173,7 +173,8 @@ namespace MoreEffectiveTransfer.CustomManager
             if (!MoreEffectiveTransfer.optionPreferLocalService)
                 return true;
 
-            // priority above threshold -> any service is OK!
+            // priority of passive side above threshold -> any service is OK!
+            priority = offerIn.Active ? offerOut.Priority : offerIn.Priority;
             if (priority >= PRIORITY_THRESHOLD_LOCAL)
             { 
                 isLocal = true;
@@ -198,9 +199,8 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Taxi:
                     break;
 
-                case TransferReason.Dead:     //special handling because people dont understand how to ensure enough service for a district when prefer local is on :(
-                case TransferReason.DeadMove:
-                    isLocal = true;           //always allow but continue logic to profit from reduced distancemodifier if within same district
+                case TransferReason.Dead:                     
+                    //isLocal = true;           //always allow but continue logic to profit from reduced distancemodifier if within same district
                     break;
 
                 // Goods subject to prefer local:
@@ -212,6 +212,7 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.CriminalMove:
                 //case TransferReason.SickMove: //removed,as using homebuilding for medcopter does not make sense. let it choose closest clinic for dropoff
                 case TransferReason.SnowMove:
+                case TransferReason.DeadMove:
                     isMoveTransfer = true;      //Move Transfers: incoming offer is passive, allow move/emptying to global district buildings
                     break;
 
@@ -505,7 +506,7 @@ namespace MoreEffectiveTransfer.CustomManager
                     int prio_lower_limit = Math.Max(0, 2 - current_prio);   //2 and higher: match all couterparts, 0: match only 7 down to 2, 1: match 7..1
                     has_counterpart_offers = false;
 
-                    // match incoming if within curren priority
+                    // match incoming if within current priority
                     if (indexIn < job.m_incomingCount && job.m_incomingOffers[indexIn].Priority == current_prio)
                     {
                         has_counterpart_offers |= MatchIncomingOffer(prio_lower_limit, indexIn);
@@ -689,7 +690,7 @@ namespace MoreEffectiveTransfer.CustomManager
         private static void QueueStartTransferMatch(TransferReason material, ref TransferOffer outgoingOffer, ref TransferOffer incomingOffer, int deltaamount)
         {
             //TransferManagerStartTransferDG(_TransferManager, material, outgoingOffer, incomingOffer, deltaamount);    //THREAD-SAFE??
-
+            // alternative:
             CustomTransferDispatcher.Instance.EnqueueTransferResult(material, outgoingOffer, incomingOffer, deltaamount);
         }
 

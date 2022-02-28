@@ -16,7 +16,7 @@ namespace MoreEffectiveTransfer.Util
     public static class DebugLog
     {
         public enum LogReason : int { 
-            //DEAD = TransferManager.TransferReason.Dead, 
+            DEAD = TransferManager.TransferReason.Dead, 
             ALL = 255 
         };
 
