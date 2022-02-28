@@ -163,8 +163,8 @@ namespace MoreEffectiveTransfer.CustomManager
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority, out float distanceModifier)
         {
-            const int PRIORITY_THRESHOLD_LOCAL = 3;     //upper prios also get non-local fulfillment
-            const float LOCAL_DISTRICT_MODIFIER = 0.25f;   //modifier for distance within same district
+            const int PRIORITY_THRESHOLD_LOCAL = 2;     //upper prios also get non-local fulfillment
+            const float LOCAL_DISTRICT_MODIFIER = 0.1f;   //modifier for distance within same district
             bool isMoveTransfer = false;
             bool isLocal = false;
             distanceModifier = 1.0f;
@@ -173,8 +173,7 @@ namespace MoreEffectiveTransfer.CustomManager
             if (!MoreEffectiveTransfer.optionPreferLocalService)
                 return true;
 
-            // priority of passive side above threshold -> any service is OK!
-            priority = offerIn.Active ? offerOut.Priority : offerIn.Priority;
+            // priority above threshold -> any service is OK!
             if (priority >= PRIORITY_THRESHOLD_LOCAL)
             { 
                 isLocal = true;
