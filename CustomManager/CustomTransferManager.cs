@@ -122,36 +122,39 @@ namespace MoreEffectiveTransfer.CustomManager
                 //warehouse outgoing behaviour: empty=prio 2 ; balanced=prio 0-2; fill=prio 0;
                     return OFFER_MATCHMODE.BALANCED;
 
+                // all mail services like goods transfers:
+                case TransferReason.Mail:               //outgoing (passive) from buidings, incoming(active) from postoffice
+                case TransferReason.SortedMail:         //outside connections outgoing(active), incoming(passive) from postoffice
+                case TransferReason.UnsortedMail:       //outgoing(active) from ???, incoming(passive) from postsortingfacilities
+                case TransferReason.IncomingMail:       //outside connections outgoing(active), incoming(passive) from postsortingfacilities
+                case TransferReason.OutgoingMail:       //outside connections incoming(passive)
+                    return OFFER_MATCHMODE.BALANCED;
+
                 // Services which should be outgoing first, but also benefit from incoming match-making (vehicles in the field with capacity to spare)
                 case TransferReason.Garbage:            //Garbage: outgoing offer (passive) from buldings with garbage to be collected, incoming (active) from landfills
                 case TransferReason.Crime:              //Crime: outgoing offer (passive) 
-                case TransferReason.ForestFire:         //like Fire2
-                case TransferReason.Fire2:              //Fire2: helicopter
-                case TransferReason.Fire:               //Fire: outgoing offer (passive) - always prio7
                 case TransferReason.Dead:               //Dead: outgoing offer (passive) 
                 case TransferReason.Collapsed:          //Collapsed: outgoing (passive) from buildings
                 case TransferReason.Collapsed2:         //Collapsed2: helicopter
                 case TransferReason.Snow:               //outgoing (passive) from netsegements, incoming (active) from snowdumps
                 case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
                 case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
-                    return OFFER_MATCHMODE.BALANCED;
+                    return OFFER_MATCHMODE.BALANCED;                        
 
-                case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
+                case TransferReason.ForestFire:         //like Fire2
+                case TransferReason.Fire2:              //Fire2: helicopter
+                case TransferReason.Fire:               //Fire: outgoing offer (passive) - always prio7
                 case TransferReason.Sick:               //Sick: outgoing offer (passive) [special case: citizen with outgoing and active]
                 case TransferReason.Sick2:              //Sick2: helicopter
                 case TransferReason.SickMove:           //outgoing(active) from medcopter, incoming(passive) from hospitals -> moved to outgoing first so closest clinic is used
-                case TransferReason.Mail:               //outgoing (passive) from buidings, incoming(active) from postoffice
-                case TransferReason.OutgoingMail:       //outside connections incoming(passive)
-                case TransferReason.CriminalMove:       //outging (passive) from policestations, incoming(active) from prisons
+                case TransferReason.CriminalMove:       //outging (passive) from policestations, incoming(active) from prisons (REVERSED ACTIVE/PASSIVE COMPARED TO OTHER MOVE TRANSFERS!)
+                case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
                     return OFFER_MATCHMODE.OUTGOING_FIRST;
 
                 case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
                 case TransferReason.DeadMove:           //outgoing (active) from emptying, incoming (passive) from receiving
                 case TransferReason.SnowMove:           //outgoing (active) from emptying snowdumps, incoming (passive) from receiving
-                case TransferReason.IncomingMail:       //outside connections outgoing(active), incoming(passive) from postsortingfacilities
-                case TransferReason.SortedMail:         //outside connections outgoing(active), incoming(passive) from postoffice
-                case TransferReason.UnsortedMail:       //outgoing(active) from ???, incoming(passive) from postsortingfacilities
-                case TransferReason.Taxi:               //incoming(passive) from citizens and taxistands, outgoing(active) from depots/taxis
+                case TransferReason.Taxi:               //outgoing(active) from depots/taxis, incoming(passive) from citizens and taxistands
                     return OFFER_MATCHMODE.INCOMING_FIRST;
 
                 default: 
@@ -163,7 +166,7 @@ namespace MoreEffectiveTransfer.CustomManager
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static bool IsLocalUse(ref TransferOffer offerIn, ref TransferOffer offerOut, TransferReason material, int priority, out float distanceModifier)
         {
-            const int PRIORITY_THRESHOLD_LOCAL = 2;     //upper prios also get non-local fulfillment
+            const int PRIORITY_THRESHOLD_LOCAL = 3;     //upper prios also get non-local fulfillment
             const float LOCAL_DISTRICT_MODIFIER = 0.1f;   //modifier for distance within same district
             bool isMoveTransfer = false;
             bool isLocal = false;
@@ -173,7 +176,8 @@ namespace MoreEffectiveTransfer.CustomManager
             if (!MoreEffectiveTransfer.optionPreferLocalService)
                 return true;
 
-            // priority above threshold -> any service is OK!
+            // priority of passive side above threshold -> any service is OK!
+            priority = offerIn.Active ? offerOut.Priority : offerIn.Priority;
             if (priority >= PRIORITY_THRESHOLD_LOCAL)
             { 
                 isLocal = true;
@@ -194,7 +198,6 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Collapsed2:
                 case TransferReason.ParkMaintenance:
                 case TransferReason.Mail:
-                case TransferReason.SortedMail:
                 case TransferReason.Taxi:
                     break;
 
