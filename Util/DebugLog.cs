@@ -1,63 +1,115 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#define TRACE
+
+using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.Plugins;
-using ColossalFramework.UI;
 using HarmonyLib;
 using ICities;
-using UnityEngine;
 using static ColossalFramework.Plugins.PluginManager;
+using static TransferManager.TransferReason;
+
 
 namespace MoreEffectiveTransfer.Util
 {
     public static class DebugLog
     {
+        public enum LogReason : int { 
+            //ANALYSE1 = TransferManager.TransferReason.DeadMove,
+            //ANALYSE2 = TransferManager.TransferReason.GarbageMove,
+            //ANALYSE3 = TransferManager.TransferReason.GarbageTransfer,
+            ALL = 255 
+        };
 
-        public static void LogAll(string msg, bool popup = false)
+        private const string LOG_FILE_NAME = "MoreEffectiveTransfer.log";
+        private const double LOG_FLUSH_INTERVALL = 1000 * 2; //2sec
+
+        private static TraceListener _listener = null;
+        private static bool _init = false;
+        private static DateTime _lastFlush;
+
+        private static void InitLogging()
         {
-            LogToFileOnly($"[METM] ERROR: {msg}");
+            if (!_init)
+            {
+                //remove legacy log file if exists
+                File.Delete("MoreEffectiveTransfer.txt");
+
+                // truncate new log
+                FileStream fs = File.Create(LOG_FILE_NAME);
+                fs.Close();
+
+                _listener = new TextWriterTraceListener(LOG_FILE_NAME);
+                Trace.Listeners.Add(_listener);
+                Trace.AutoFlush = false;
+                _init = true;
+
+                Trace.WriteLine(DateTime.Now);
+            }
+        }
+
+        public static void StopLogging()
+        {
+            if (_init)
+            {
+                Trace.Flush();
+                Trace.Listeners.Remove(_listener);
+            }
+        }
+
+
+        public static void LogError(string msg, bool popup = false)
+        {
+            LogInfo($"[METM] ERROR: {msg}");
             UnityEngine.Debug.LogError($"[METM] ERROR: {msg}");
             if (popup)
                 DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, $"[METM] ERROR: {msg}");
         }
 
-        public static void LogToFileOnly(string msg, bool outputlog = true)
+        public static void LogInfo(string msg, bool outputlog = true)
         {
-            if (outputlog)
-                UnityEngine.Debug.LogError($"[METM] {msg}");
+            if (!_init) InitLogging();
 
-            using (FileStream fileStream = new FileStream("MoreEffectiveTransfer.txt", FileMode.Append))
+            if (outputlog)
+                UnityEngine.Debug.Log($"[METM] {msg}");
+
+            Trace.WriteLine(msg);
+            if ((DateTime.Now - _lastFlush).TotalMilliseconds > LOG_FLUSH_INTERVALL)
             {
-                StreamWriter streamWriter = new StreamWriter(fileStream);
-                streamWriter.WriteLine(msg);
-                streamWriter.Flush();
+                _lastFlush = DateTime.Now;
+                Trace.Flush();
             }
+
+        }
+
+        public static void FlushImmediate()
+        {
+            Trace.Flush();
         }
 
 
         [Conditional("DEBUG")]
-        public static void DebugMsg(string msg)
+        public static void LogDebug(LogReason reason, string msg)
         {
-            LogToFileOnly(msg, false);
+            if (Enum.IsDefined(typeof(LogReason), reason))
+                LogInfo(msg, false);
         }
+
 
         public static void ReportAllHarmonyPatches()
         {
-            DebugLog.LogToFileOnly($"-- HARMONY PATCH REPORT --");
+            DebugLog.LogInfo($"-- HARMONY PATCH REPORT --");
             var harmony = new Harmony(HarmonyDetours.ID);
             var methods = harmony.GetPatchedMethods();
             foreach (var method in methods)
             {
                 var info = Harmony.GetPatchInfo(method);
 
-                DebugLog.LogToFileOnly($"- Harmony patched method = {method.FullDescription()} - #patchers: {info.Owners.Count} - Prefixes:{info.Prefixes.Count}, Postfixes:{info.Postfixes.Count}");
+                DebugLog.LogInfo($"- Harmony patched method = {method.FullDescription()} - #patchers: {info.Owners.Count} - Prefixes:{info.Prefixes.Count}, Postfixes:{info.Postfixes.Count}");
                 foreach (var owner in info.Owners)
                 {
-                    DebugLog.LogToFileOnly($"   ->Patched by: {owner.ToString()}");
+                    DebugLog.LogInfo($"   ->Patched by: {owner.ToString()}");
                 }
             }
         }
@@ -67,7 +119,7 @@ namespace MoreEffectiveTransfer.Util
 
         public static void ReportAllMods()
         {
-            DebugLog.LogToFileOnly($"-- INSTALLED MOD REPORT --");
+            DebugLog.LogInfo($"-- INSTALLED MOD REPORT --");
             foreach (PluginInfo mod in Singleton<PluginManager>.instance.GetPluginsInfo())
             {
                 if (!mod.isCameraScript)
@@ -76,7 +128,7 @@ namespace MoreEffectiveTransfer.Util
                     ulong workshopID = mod.publishedFileID.AsUInt64;
                     bool isLocal = workshopID == ulong.MaxValue;
 
-                    DebugLog.LogToFileOnly($"Installed Mod: {strModName}, Id: {workshopID}, local={isLocal}, enabled={mod.isEnabled}, assemblies: {mod.assembliesString}");
+                    DebugLog.LogInfo($"Installed Mod: {strModName}, Id: {workshopID}, local={isLocal}, enabled={mod.isEnabled}, assemblies: {mod.assembliesString}");
                 }
             }
         }

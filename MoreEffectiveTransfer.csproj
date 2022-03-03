@@ -80,9 +80,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomAI\CustomCommonBuildingAI.cs" />
+    <Compile Include="CustomManager\CustomTransferDispatcher.cs" />
     <Compile Include="CustomManager\CustomTransferManager.cs" />
     <Compile Include="Patch\TransferManagerMatchOfferPatch.cs" />
+    <Compile Include="Util\Profiling.cs" />
     <Compile Include="Util\FastList.cs" />
     <Compile Include="Util\FastDelegateFactory.cs" />
     <Compile Include="Util\DebugLog.cs" />
@@ -101,6 +102,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="CustomAI\" />
     <Folder Include="UI\" />
   </ItemGroup>
   <ItemGroup>
