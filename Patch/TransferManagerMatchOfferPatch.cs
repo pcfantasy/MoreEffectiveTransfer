@@ -15,41 +15,42 @@ namespace MoreEffectiveTransfer.Patch
             // disabled in settings? ->use stock transfer manager
             if (!MoreEffectiveTransfer.optionEnableNewTransferManager)
             {
-                // begin Profiling
-                MoreEffectiveTransfer.timerCounterVanilla++;
-                MoreEffectiveTransfer.timerVanilla.Start();
+                Profiling.timerCounterVanilla++;
+                Profiling.timerVanilla.Start();
                 return true;
             }
 
-            MoreEffectiveTransfer.timerCounterMETM++;
-            MoreEffectiveTransfer.timerMETM.Start();
+            Profiling.timerCounterMETM++;
+            Profiling.timerMETM.Start();
 #endif
 
-            if (CustomTransferManager.CanUseNewMatchOffers(material))
-            {
-                CustomTransferManager.MatchOffers(material);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            // Dispatch to TransferDispatcher
+            CustomTransferDispatcher.Instance.SubmitMatchOfferJob(material);
+            return false;
         }
 
 
-#if (PROFILE)
+
         [HarmonyPostfix]
         public static void Postfix()
         {
-            // end profiling
-            MoreEffectiveTransfer.timerMETM.Stop();
-            MoreEffectiveTransfer.timerVanilla.Stop();
-        }
+            if (MoreEffectiveTransfer.optionEnableNewTransferManager)
+            {
+                Profiling.timerMETM_StartTransfers.Start();
+                // Start queued transfers:
+                CustomTransferDispatcher.Instance.StartTransfers();
+                Profiling.timerMETM_StartTransfers.Stop();
+            }
+#if (PROFILE)
+            Profiling.timerMETM.Stop();
+            Profiling.timerVanilla.Stop();
 #endif
-    }
+        }
+
+    } //TransferManagerMatchOfferPatch
 
 
-#if (DEBUG)
+#if (DEBUG_VANILLA)
     [HarmonyPatch(typeof(TransferManager), "StartTransfer")]
     public class TransferManagerStartTransferPatch
     {
@@ -61,7 +62,7 @@ namespace MoreEffectiveTransfer.Patch
 
             return true;
         }
-    }
+    } //TransferManagerStartTransferPatch
 #endif
 
 }

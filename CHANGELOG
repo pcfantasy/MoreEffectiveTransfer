@@ -1,7 +1,10 @@
 -- CHANGELOG --
 
--- PENDING RELEASE --
-
+-- 2.1.0.220303
+* added portuguese (brazilian) localization, provided by Tchelow
+* services match mode strategy changed. This resolved all issues with service, including and in particular death care. Thanks to chibi for providing a suitable test scenario.
+* transfer manager is working on a background thread now, improving simulation performance
+* various under-the-hood improvements (especially cleanup of logging code). Log file renamed to "MorEffectiveTransfer.log".
 
 -- 2.0.5.220220 --
 * some more match mode fine-tuning (fixes bug #7 with medcopters)

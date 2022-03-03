@@ -11,7 +11,7 @@ namespace MoreEffectiveTransfer
     {
         public static bool IsEnabled = false;
 
-        public const string MOD_VERSION = "2.0.5.220220";
+        public const string MOD_VERSION = "2.1.0.220303";
 #if (DEBUG)
         public const string BUILD_TYPE = "DEBUG";
 #elif (PROFILE)
@@ -26,13 +26,6 @@ namespace MoreEffectiveTransfer
 
         // MAIN switch, mainly for debugging/profiling
         public static bool optionEnableNewTransferManager = true;
-
-#if (PROFILE)
-        public static System.Diagnostics.Stopwatch timerVanilla = new System.Diagnostics.Stopwatch();
-        public static System.Diagnostics.Stopwatch timerMETM = new System.Diagnostics.Stopwatch();
-        public static long timerCounterVanilla = 0;
-        public static long timerCounterMETM = 0;
-#endif
 
         // SERVICE options
         public static bool optionPreferLocalService = false;
@@ -64,11 +57,9 @@ namespace MoreEffectiveTransfer
         public void OnEnabled()
         {
             IsEnabled = true;
-            FileStream fs = File.Create("MoreEffectiveTransfer.txt");
-            fs.Close();
 
             HarmonyHelper.EnsureHarmonyInstalled();
-            DebugLog.LogToFileOnly(Name + ": VERSION: " + MOD_VERSION + ", BUILD TYPE: " + BUILD_TYPE);
+            DebugLog.LogInfo(Name + ": VERSION: " + MOD_VERSION + ", BUILD TYPE: " + BUILD_TYPE);
         }
 
         public void OnDisabled()
@@ -103,7 +94,7 @@ namespace MoreEffectiveTransfer
                 string strLine = sr.ReadLine();
                 if (strLine != SETTINGS_VERSION)
                 {
-                    DebugLog.LogToFileOnly($"Loading Settings - version mismatch detected. Found version: {strLine}, expected version: {SETTINGS_VERSION}. A new settings file will be generated.");
+                    DebugLog.LogInfo($"Loading Settings - version mismatch detected. Found version: {strLine}, expected version: {SETTINGS_VERSION}. A new settings file will be generated.");
                     sr.Close();
                     fs.Close();
                     return;
@@ -190,7 +181,7 @@ namespace MoreEffectiveTransfer
         {
             optionEnableNewTransferManager = index;
             SaveSetting();
-            DebugLog.DebugMsg($"** OPTION ENABLE/DISABLE: {optionEnableNewTransferManager} **");
+            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"** OPTION ENABLE/DISABLE: {optionEnableNewTransferManager} **");
         }
 
         public void setOptionPreferLocalService(bool index)
