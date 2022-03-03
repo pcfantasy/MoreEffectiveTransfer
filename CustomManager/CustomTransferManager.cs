@@ -139,6 +139,11 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Snow:               //outgoing (passive) from netsegements, incoming (active) from snowdumps
                 case TransferReason.RoadMaintenance:    //incoming (passive) from netsegments, outgoing (active) from maintenance depot
                 case TransferReason.ParkMaintenance:    //incoming (passive) from park main gate building, 
+                case TransferReason.CriminalMove:       //outging (passive) from policestations, incoming(active) from prisons (REVERSED ACTIVE/PASSIVE COMPARED TO OTHER MOVE TRANSFERS!)
+                case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
+                case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
+                case TransferReason.DeadMove:           //outgoing (active) from emptying, incoming (passive) from receiving
+                case TransferReason.SnowMove:           //outgoing (active) from emptying snowdumps, incoming (passive) from receiving
                     return OFFER_MATCHMODE.BALANCED;                        
 
                 case TransferReason.ForestFire:         //like Fire2
@@ -147,13 +152,8 @@ namespace MoreEffectiveTransfer.CustomManager
                 case TransferReason.Sick:               //Sick: outgoing offer (passive) [special case: citizen with outgoing and active]
                 case TransferReason.Sick2:              //Sick2: helicopter
                 case TransferReason.SickMove:           //outgoing(active) from medcopter, incoming(passive) from hospitals -> moved to outgoing first so closest clinic is used
-                case TransferReason.CriminalMove:       //outging (passive) from policestations, incoming(active) from prisons (REVERSED ACTIVE/PASSIVE COMPARED TO OTHER MOVE TRANSFERS!)
-                case TransferReason.GarbageTransfer:    //GarbageTransfer: outgoing (passive) from landfills/wtf, incoming (active) from wasteprocessingcomplex
                     return OFFER_MATCHMODE.OUTGOING_FIRST;
 
-                case TransferReason.GarbageMove:        //GarbageMove: outgoing (active) from emptying landfills, incoming (passive) from receiving landfills/wastetransferfacilities/wasteprocessingcomplex
-                case TransferReason.DeadMove:           //outgoing (active) from emptying, incoming (passive) from receiving
-                case TransferReason.SnowMove:           //outgoing (active) from emptying snowdumps, incoming (passive) from receiving
                 case TransferReason.Taxi:               //outgoing(active) from depots/taxis, incoming(passive) from citizens and taxistands
                     return OFFER_MATCHMODE.INCOMING_FIRST;
 
