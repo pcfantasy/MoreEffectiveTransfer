@@ -33,6 +33,10 @@ namespace MoreEffectiveTransfer.Util
         {
             if (!_init)
             {
+                //remove legacy log file if exists
+                File.Delete("MoreEffectiveTransfer.txt");
+
+                // truncate new log
                 FileStream fs = File.Create(LOG_FILE_NAME);
                 fs.Close();
 
@@ -40,6 +44,8 @@ namespace MoreEffectiveTransfer.Util
                 Trace.Listeners.Add(_listener);
                 Trace.AutoFlush = false;
                 _init = true;
+
+                Trace.WriteLine(DateTime.Now);
             }
         }
 
