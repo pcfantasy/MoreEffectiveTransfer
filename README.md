@@ -60,7 +60,7 @@ The setting's effect is: <br />
 <br /><br />
 
   
-## Problems
+## Limits
 There is obviously a conflict between the "higher priority first" approach and the "closed distance preferred" approach.
 In particular, preferring matchmaking by closest distance cannot fully prevent that buildings get serviced by service buildings from far away.
 That is because a more suitable, closer service offer might have already been matched to a higher priority request, so now the closer building has no choice but be matched with an offer from a service further away.
