@@ -82,7 +82,9 @@
   <ItemGroup>
     <Compile Include="CustomManager\CustomTransferDispatcher.cs" />
     <Compile Include="CustomManager\CustomTransferManager.cs" />
+    <Compile Include="Patch\CarAIPathfindFailurePatch.cs" />
     <Compile Include="Patch\TransferManagerMatchOfferPatch.cs" />
+    <Compile Include="Util\PathFindFailure.cs" />
     <Compile Include="Util\Profiling.cs" />
     <Compile Include="Util\FastList.cs" />
     <Compile Include="Util\FastDelegateFactory.cs" />

@@ -92,7 +92,6 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
-
         [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static OFFER_MATCHMODE GetMatchOffersMode(TransferReason material)
         {
@@ -350,6 +349,29 @@ namespace MoreEffectiveTransfer.CustomManager
         }
 
 
+        [MethodImpl(512)] //=[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        private static bool PathfindExclusion(ref TransferOffer incomingOffer, ref TransferOffer outgoingOffer)
+        {
+            if ((incomingOffer.Building != 0) && (outgoingOffer.Building != 0))
+            {
+                bool result = false;
+                if (incomingOffer.Active)
+                    result = PathFindFailure.Find(incomingOffer.Building, outgoingOffer.Building);
+                else if (outgoingOffer.Active)
+                    result = PathFindFailure.Find(outgoingOffer.Building, incomingOffer.Building);
+
+                if (result)
+                {
+                    DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"       ** Pathfindfailure: Excluded in:{DebugInspectOffer(ref incomingOffer)} and out:{DebugInspectOffer(ref outgoingOffer)}");
+                }
+
+                return result;
+            }
+
+            return false;
+        }
+
+
         private static String DebugInspectOffer(ref TransferOffer offer)
         {
             var instB = default(InstanceID);
@@ -405,8 +427,14 @@ namespace MoreEffectiveTransfer.CustomManager
                 }
                 else
                 {
+                    // chirp about pathfinding issues
+                    PathFindFailure.SendPathFindChirp();
+
+                    // clean pathfind LRU
+                    PathFindFailure.RemoveOldEntries();
+
                     // wait for signal
-                    DebugLog.LogDebug(DebugLog.LogReason.ALL, $"MatchOffersThread: waiting for work signal...");
+                    DebugLog.LogDebug(DebugLog.REASON_ALL, $"MatchOffersThread: waiting for work signal...");
                     CustomTransferDispatcher._waitHandle.WaitOne();
                 }
 
@@ -571,6 +599,10 @@ namespace MoreEffectiveTransfer.CustomManager
                 //guard: if both are warehouse, prevent low prio inter-warehouse transfers
                 if ((incomingOffer.Exclude) && (outgoingOffer.Exclude) && (outgoingOffer.Priority < (prio_lower_limit + 1))) continue;
 
+                //temporary exclusion due to pathfinding issues?
+                if (PathfindExclusion(ref incomingOffer, ref outgoingOffer)) continue;
+
+
                 // CHECK OPTION: preferlocalservice
                 float districtFactor = 1f;
                 bool isLocalAllowed = IsLocalUse(ref incomingOffer, ref outgoingOffer, job.material, incomingOffer.Priority, out districtFactor);
@@ -643,6 +675,10 @@ namespace MoreEffectiveTransfer.CustomManager
 
                 //guard: if both are warehouse, prevent low prio inter-warehouse transfers
                 if ((outgoingOffer.Exclude) && (incomingOffer.Exclude) && (incomingOffer.Priority < (prio_lower_limit + 1))) continue;
+
+                //temporary exclusion due to pathfinding issues?
+                if (PathfindExclusion(ref incomingOffer, ref outgoingOffer)) continue;
+
 
                 // CHECK OPTION: preferlocalservice
                 float districtFactor = 1f;

@@ -11,7 +11,7 @@ namespace MoreEffectiveTransfer
     {
         public static bool IsEnabled = false;
 
-        public const string MOD_VERSION = "2.1.0.220303";
+        public const string MOD_VERSION = "2.1.1.DEVEL";
 #if (DEBUG)
         public const string BUILD_TYPE = "DEBUG";
 #elif (PROFILE)
@@ -37,6 +37,10 @@ namespace MoreEffectiveTransfer
         
         // EXPORT options
         public static bool optionPreferExportShipPlaneTrain = false;
+
+        // PATHFINDING
+        public static bool optionPathfindChirper = true;
+
 
         // RUNTIME settings:
         public static float shipStationDistanceRandom = 1f;
@@ -181,7 +185,7 @@ namespace MoreEffectiveTransfer
         {
             optionEnableNewTransferManager = index;
             SaveSetting();
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"** OPTION ENABLE/DISABLE: {optionEnableNewTransferManager} **");
+            DebugLog.LogDebug(DebugLog.REASON_ALL, $"** OPTION ENABLE/DISABLE: {optionEnableNewTransferManager} **");
         }
 
         public void setOptionPreferLocalService(bool index)

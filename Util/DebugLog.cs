@@ -15,10 +15,14 @@ namespace MoreEffectiveTransfer.Util
 {
     public static class DebugLog
     {
+        public const LogReason REASON_PATHFIND = (LogReason)254;
+        public const LogReason REASON_ALL = (LogReason)255;
+
         public enum LogReason : int { 
             //ANALYSE1 = TransferManager.TransferReason.DeadMove,
             //ANALYSE2 = TransferManager.TransferReason.GarbageMove,
             //ANALYSE3 = TransferManager.TransferReason.GarbageTransfer,
+            //PATHFIND = 254,
             ALL = 255 
         };
 
