@@ -27,6 +27,7 @@ namespace MoreEffectiveTransfer
             DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: ./. MS StartTransfers: {Profiling.timerMETM_StartTransfers.ElapsedMilliseconds}, AVG TIME/INVOCATION: {msPerInvMETM_ST}ms");
             DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: max queued transferjobs: {TransferJobPool.Instance.GetMaxUsage()}");
             DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: max transfer ringbuffer usage: {CustomTransferDispatcher.Instance.GetMaxUsage()}");
+            DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: total chirps about routing issues: {PathFindFailure.GetTotalChirps()}");
             DebugLog.LogInfo("--- END PROFILING STATISTICS ---");
         }
     }

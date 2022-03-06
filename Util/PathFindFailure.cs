@@ -40,8 +40,12 @@ namespace MoreEffectiveTransfer.Util
         static readonly object _dictionaryLock = new object();
         static long lru_lastCleaned;
         static long last_chirp;
+        static int total_chirps_sent;
         const long  LRU_INTERVALL = TimeSpan.TicksPerMillisecond * 1000 * 10; //10 sec
         const long  CHIRP_INTERVALL = TimeSpan.TicksPerMillisecond * 1000 * 60; //1 min
+
+
+        public static int GetTotalChirps() => total_chirps_sent;
 
 
         /// <summary>
@@ -172,7 +176,7 @@ namespace MoreEffectiveTransfer.Util
             {
                 last_chirp = DateTime.Now.Ticks;
 
-                if ((MoreEffectiveTransfer.optionPathfindChirper) && (_pathfindBuildingsCounter.Count > 0))
+                if ((ModSettings.optionPathfindChirper) && (_pathfindBuildingsCounter.Count > 0))
                 {
                     // get top failed building
                     var pair = _pathfindBuildingsCounter.OrderByDescending(x => x.Value).First();
@@ -189,6 +193,7 @@ namespace MoreEffectiveTransfer.Util
                         uint sender = FindCitizenOfBuilding(senderBuilding);
                         Singleton<MessageManager>.instance.QueueMessage(new CustomCitizenMessage(sender, $"@mayor: FIX YOUR ROAD NETWORK!\n{_pathfindBuildingsCounter.Count} unrouted transfers recenty! Top one:\n{buildingName}({senderBuilding.Info?.name}) -- #ROUTING #{buildingFailedCount} FAILS! #iworkthere!", null));
                         DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"@mayor: FIX YOUR ROAD NETWORK!\n{_pathfindBuildingsCounter.Count} unrouted transfers recenty! Top one:\n{buildingName}({senderBuilding.Info?.name}) -- #ROUTING #{buildingFailedCount} FAILS! #iworkthere!");
+                        total_chirps_sent++;
                     }
                 }
 
@@ -206,7 +211,8 @@ namespace MoreEffectiveTransfer.Util
             while (mCitizenUnits != 0)
             {
                 uint mNextUnit = citizenManager.m_units.m_buffer[mCitizenUnits].m_nextUnit;
-                if ((ushort)(citizenManager.m_units.m_buffer[mCitizenUnits].m_flags & CitizenUnit.Flags.Work) != 0)
+                CitizenUnit.Flags flags = CitizenUnit.Flags.Work | CitizenUnit.Flags.Home;
+                if ((ushort)(citizenManager.m_units.m_buffer[mCitizenUnits].m_flags & flags) != 0)
                 {
                     return citizenManager.m_units.m_buffer[mCitizenUnits].m_citizen0 != 0 ? citizenManager.m_units.m_buffer[mCitizenUnits].m_citizen0 :
                             citizenManager.m_units.m_buffer[mCitizenUnits].m_citizen1 != 0 ? citizenManager.m_units.m_buffer[mCitizenUnits].m_citizen1 :

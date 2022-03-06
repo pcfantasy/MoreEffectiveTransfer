@@ -41,7 +41,7 @@ namespace MoreEffectiveTransfer
                     HarmonyInitDetour();
                     CheckDetour();
 
-                    MoreEffectiveTransfer.LoadSetting();
+                    ModSettings.LoadSetting();
 
                     // Create TransferJobPool and initialize
                     TransferJobPool.Instance.Initialize();

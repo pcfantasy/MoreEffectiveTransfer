@@ -13,7 +13,7 @@ namespace MoreEffectiveTransfer.Patch
         {
 #if (PROFILE)
             // disabled in settings? ->use stock transfer manager
-            if (!MoreEffectiveTransfer.optionEnableNewTransferManager)
+            if (!ModSettings.optionEnableNewTransferManager)
             {
                 Profiling.timerCounterVanilla++;
                 Profiling.timerVanilla.Start();
@@ -34,7 +34,7 @@ namespace MoreEffectiveTransfer.Patch
         [HarmonyPostfix]
         public static void Postfix()
         {
-            if (MoreEffectiveTransfer.optionEnableNewTransferManager)
+            if (ModSettings.optionEnableNewTransferManager)
             {
                 Profiling.timerMETM_StartTransfers.Start();
                 // Start queued transfers:

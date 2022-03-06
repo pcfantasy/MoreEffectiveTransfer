@@ -174,7 +174,7 @@ namespace MoreEffectiveTransfer.CustomManager
             distanceModifier = 1.0f;
 
             // guard: current option setting?
-            if (!MoreEffectiveTransfer.optionPreferLocalService)
+            if (!ModSettings.optionPreferLocalService)
                 return true;
 
             // priority of passive side above threshold -> any service is OK!
@@ -261,7 +261,7 @@ namespace MoreEffectiveTransfer.CustomManager
         {
             const float WAREHOUSE_MODIFIER = 0.1f;   //modifier for distance for warehouse
 
-            if (!MoreEffectiveTransfer.optionWarehouseFirst)
+            if (!ModSettings.optionWarehouseFirst)
                 return 1f;
 
             if (offer.Exclude)  //TransferOffer.Exclude is only ever set by WarehouseAI!
@@ -286,7 +286,7 @@ namespace MoreEffectiveTransfer.CustomManager
         private static bool WarehouseCanTransfer(ref TransferOffer incomingOffer, ref TransferOffer outgoingOffer, TransferReason material)
         {
             // Option: optionWarehouseReserveTrucks
-            if ((MoreEffectiveTransfer.optionWarehouseReserveTrucks) && (outgoingOffer.Exclude && outgoingOffer.Active)) //further checks only relevant if outgoing from warehouse and active
+            if ((ModSettings.optionWarehouseReserveTrucks) && (outgoingOffer.Exclude && outgoingOffer.Active)) //further checks only relevant if outgoing from warehouse and active
             {
                 // is outgoing a warehouse with active delivery, and is counterpart incoming an outside connection?
                 if ((incomingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is WarehouseAI))
@@ -306,7 +306,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
 
             // Option: optionWarehouseNewBalanced
-            if (MoreEffectiveTransfer.optionWarehouseNewBalanced && (outgoingOffer.Exclude || incomingOffer.Exclude))
+            if (ModSettings.optionWarehouseNewBalanced && (outgoingOffer.Exclude || incomingOffer.Exclude))
             {
                 // attempting to import?
                 if ((incomingOffer.Exclude) && (outgoingOffer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI && _BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is WarehouseAI))
