@@ -81,13 +81,13 @@ namespace MoreEffectiveTransfer.CustomManager
 
             unsafe
             {
-                DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TransferJobPool initialized, pool stack size is {pooledJobs.Count}");
+                DebugLog.LogDebug(DebugLog.REASON_ALL, $"TransferJobPool initialized, pool stack size is {pooledJobs.Count}");
             }
         }
 
         public void Delete()
         {
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"Deleting instance: {_instance}");
+            DebugLog.LogDebug(DebugLog.REASON_ALL, $"Deleting instance: {_instance}");
             // unallocate object pool of work packages
             pooledJobs.Clear();
             pooledJobs = null;
@@ -205,16 +205,16 @@ namespace MoreEffectiveTransfer.CustomManager
 
             unsafe
             {
-                DebugLog.LogDebug(DebugLog.LogReason.ALL, $"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}, results ringbuffer size is {_transferResultRingBuffer.Length}");
-                DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TransferOffer memsize: {sizeof(TransferManager.TransferOffer)}");
+                DebugLog.LogDebug(DebugLog.REASON_ALL, $"CustomTransferDispatcher initialized, workqueue count is {workQueue.Count}, results ringbuffer size is {_transferResultRingBuffer.Length}");
+                DebugLog.LogDebug(DebugLog.REASON_ALL, $"TransferOffer memsize: {sizeof(TransferManager.TransferOffer)}");
                 long memsize = (long)sizeof(TransferManager.TransferOffer) * ((2 * 256 * 8 * 128) + (2*256*8));
-                DebugLog.LogDebug(DebugLog.LogReason.ALL, $"Total memory size is: (2x256x8x128 + 2x256x8) x TransferOffer MemSize = {memsize} bytes, = {memsize>>20} MB");
+                DebugLog.LogDebug(DebugLog.REASON_ALL, $"Total memory size is: (2x256x8x128 + 2x256x8) x TransferOffer MemSize = {memsize} bytes, = {memsize>>20} MB");
             }
         }
 
         public void Delete()
         {
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"Deleting instance: {_instance}");
+            DebugLog.LogDebug(DebugLog.REASON_ALL, $"Deleting instance: {_instance}");
             // unallocate object pool of work packages
             workQueue.Clear();
             workQueue = null;
@@ -235,7 +235,7 @@ namespace MoreEffectiveTransfer.CustomManager
             {
                 workQueue.Enqueue(job);
                 _waitHandle.Set();
-                DebugLog.LogDebug(DebugLog.LogReason.ALL, $"Enqueued job at position {workQueue.Count}.");
+                DebugLog.LogDebug(DebugLog.REASON_ALL, $"Enqueued job at position {workQueue.Count}.");
             }
         }
 
@@ -363,7 +363,7 @@ namespace MoreEffectiveTransfer.CustomManager
             }
 
             _ringBufMaxUsageCount = num_transfers_initiated > _ringBufMaxUsageCount ? num_transfers_initiated : _ringBufMaxUsageCount;
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"StartTransfers: initiated {num_transfers_initiated} transfers.");
+            DebugLog.LogDebug(DebugLog.REASON_ALL, $"StartTransfers: initiated {num_transfers_initiated} transfers.");
         }
 
 
@@ -383,7 +383,7 @@ namespace MoreEffectiveTransfer.CustomManager
         [Conditional("DEBUG")]
         private void DebugJobSummarize(TransferJob job)
         {
-            DebugLog.LogDebug(DebugLog.LogReason.ALL, $"TRANSFER JOB: {job.material.ToString()}, amount in/out: {job.m_incomingAmount}/{job.m_outgoingAmount}; total offer count in/out: {job.m_incomingCount}/{job.m_outgoingCount}");
+            DebugLog.LogDebug(DebugLog.REASON_ALL, $"TRANSFER JOB: {job.material.ToString()}, amount in/out: {job.m_incomingAmount}/{job.m_outgoingAmount}; total offer count in/out: {job.m_incomingCount}/{job.m_outgoingCount}");
         }
 
     }

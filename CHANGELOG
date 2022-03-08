@@ -1,5 +1,9 @@
 -- CHANGELOG --
 
+
+-- 2.1.1.220308
+* Option to chirp about pathfinding issues (transfers not routable due to road network issues)
+
 -- 2.1.0.220303
 * added portuguese (brazilian) localization, provided by Tchelow
 * services match mode strategy changed. This resolved all issues with service, including and in particular death care. Thanks to chibi for providing a suitable test scenario.

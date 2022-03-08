@@ -1,5 +1,8 @@
 ﻿DEBUGPROFILE	DEBUGGING / PROFILING ONLY
 optionEnableNewTransferManager	ENABLE/DISABLE TRANSFER MANAGER
+GROUP_GENERAL	Opções gerais
+optionPathfindChirper	Chirp sobre problemas de roteamento/pathfind
+optionPathfindChirper_txt	Avisará regularmente sobre problemas quando as transferências não puderem atingir seu destino devido a problemas de roteamento com sua rede rodoviária. Clique no Cim que piou para descobrir em qual prédio ele trabalha ou mora. Também exibirá o nome do prédio personalizado se estiver presente (caso contrário, o nome do modelo interno). O PÁSSARO SÓ NOTIFICA - VOCÊ TEM QUE CORRIGIR OS PROBLEMAS! 
 GROUP_SERVICE_OPTIONS	Opções de Serviço
 optionPreferLocalService	Preferir serviços no distrito local
 optionPreferLocalService_txt	Melhora ainda mais os serviços locais, conectando requisições de prioridade baixa somente com serviços dentro do mesmo distrito (ou fora de qualquer distrito). Se uma requisição se tornar de alta prioridade, ela será atendida por qualquer serviço, independente do distrito que está. Afeta: lixo, polícia, saúde, manutenção, email e taxi.

@@ -1,5 +1,8 @@
 ﻿DEBUGPROFILE	DEBUGGING / PROFILING ONLY
 optionEnableNewTransferManager	ENABLE/DISABLE TRANSFER MANAGER
+GROUP_GENERAL	一般选项
+optionPathfindChirper	关于路由/路径查找问题的鸣叫
+optionPathfindChirper_txt	当由于你的道路网络的路由问题而导致转移无法到达目标时，会定期鸣叫问题。点击发出鸣叫的Cim，可以知道他在哪座大楼工作或居住。如果有的话，也会显示自定义的建筑名称（否则就是内部模型名称）。这只鸟只是通知--你必须解决这些问题
 GROUP_SERVICE_OPTIONS	服务选项
 optionPreferLocalService	首选本地服务
 optionPreferLocalService_txt	通过仅将低优先级请求与同一区域内（或任何区域外）的服务建筑进行匹配，进一步提高服务的局部性。 一旦未完成的请求成为高优先级，它将由附近的任何服务提供服务。 影响：垃圾、警察、医疗保健、维修、邮件、出租车。

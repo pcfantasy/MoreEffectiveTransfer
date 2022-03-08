@@ -16,9 +16,9 @@ namespace MoreEffectiveTransfer
 
         public static bool isFirstTime = true;
 #if (DEBUG_VANILLA)
-        public const int HarmonyPatchNumExpected = 2;
+        public const int HarmonyPatchNumExpected = 3;
 #else
-        public const int HarmonyPatchNumExpected = 1;
+        public const int HarmonyPatchNumExpected = 2;
 #endif
 
         public override void OnCreated(ILoading loading)
@@ -41,7 +41,7 @@ namespace MoreEffectiveTransfer
                     HarmonyInitDetour();
                     CheckDetour();
 
-                    MoreEffectiveTransfer.LoadSetting();
+                    ModSettings.LoadSetting();
 
                     // Create TransferJobPool and initialize
                     TransferJobPool.Instance.Initialize();

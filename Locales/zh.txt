@@ -1,5 +1,8 @@
 ﻿DEBUGPROFILE	DEBUGGING / PROFILING ONLY
 optionEnableNewTransferManager	ENABLE/DISABLE TRANSFER MANAGER
+GROUP_GENERAL	General Options
+optionPathfindChirper	Chirp about routing/pathfind issues
+optionPathfindChirper_txt	Will regularly chirp about issues when transfers cannot reach their target due to routing issue with your road network. Click the Cim who chirped to find out which building he works in or lives in. Will also display the custom building name if present (internal model name otherwise). THE BIRD ONLY NOTIFIES - YOU HAVE TO FIX THE PROBLEMS!
 GROUP_SERVICE_OPTIONS	服务选项
 optionPreferLocalService	首选本地服务
 optionPreferLocalService_txt	通过仅将低优先级请求与同一区域内（或任何区域外）的服务建筑进行匹配，进一步提高服务的局部性。 一旦未完成的请求成为高优先级，它将由附近的任何服务提供服务。 影响：垃圾、警察、医疗保健、维修、邮件、出租车。

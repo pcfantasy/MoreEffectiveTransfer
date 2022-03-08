@@ -1,5 +1,8 @@
 ﻿DEBUGPROFILE	DEBUGGING / PROFILING ONLY
 optionEnableNewTransferManager	ENABLE/DISABLE TRANSFER MANAGER
+GROUP_GENERAL	일반 옵션
+optionPathfindChirper	라우팅/경로 찾기 문제에 대한 짹짹
+optionPathfindChirper_txt	도로 네트워크의 라우팅 문제로 인해 환승이 목표에 도달할 수 없는 경우 문제에 대해 정기적으로 짹짹 소리를 냅니다. 짹짹 소리를 낸 Cim을 클릭하여 그가 일하거나 거주하는 건물을 찾으십시오. 존재하는 경우 사용자 지정 건물 이름도 표시됩니다(그렇지 않은 경우 내부 모델 이름). 새만 알립니다 - 문제를 해결해야 합니다!
 GROUP_SERVICE_OPTIONS	서비스 옵션
 optionPreferLocalService	지역 서비스를 선호
 optionPreferLocalService_txt	동일한 구역(또는 구역 외부) 내 서비스 건물에만 낮은 우선순위 요청을 일치시켜 서비스의 지역성을 더욱 향상시킵니다. 충족되지 않은 요청이 우선 순위가 높은 경우 가까운 서비스 제안에서 제공됩니다. 영향: 쓰레기, 경찰, 의료, 유지 보수, 우편, 택시
