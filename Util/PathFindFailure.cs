@@ -191,8 +191,9 @@ namespace MoreEffectiveTransfer.Util
                     if (buildingFailedCount > 1)
                     {
                         uint sender = FindCitizenOfBuilding(senderBuilding);
-                        Singleton<MessageManager>.instance.QueueMessage(new CustomCitizenMessage(sender, $"@mayor: FIX YOUR ROAD NETWORK!\n{_pathfindBuildingsCounter.Count} unrouted transfers recenty! Top one:\n{buildingName}({senderBuilding.Info?.name}) -- #ROUTING #{buildingFailedCount} FAILS! #iworkthere!", null));
-                        DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"@mayor: FIX YOUR ROAD NETWORK!\n{_pathfindBuildingsCounter.Count} unrouted transfers recenty! Top one:\n{buildingName}({senderBuilding.Info?.name}) -- #ROUTING #{buildingFailedCount} FAILS! #iworkthere!");
+                        string hashtag = ((senderBuilding.Info.m_class.GetZone() == ItemClass.Zone.ResidentialLow) || (senderBuilding.Info.m_class.GetZone() == ItemClass.Zone.ResidentialHigh)) ? "#ilivethere" : "#iworkthere";
+                        Singleton<MessageManager>.instance.QueueMessage(new CustomCitizenMessage(sender, $"@mayor: FIX YOUR ROAD NETWORK!\n{_pathfindBuildingsCounter.Count} unrouted transfers recenty! Most common:\n{buildingName}({senderBuilding.Info?.name}) -- #ROUTING #{buildingFailedCount} FAILS! {hashtag}!", null));
+                        DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"@mayor: FIX YOUR ROAD NETWORK!\n{_pathfindBuildingsCounter.Count} unrouted transfers recenty! Most common:\n{buildingName}({senderBuilding.Info?.name}) -- #ROUTING #{buildingFailedCount} FAILS! {hashtag}!");
                         total_chirps_sent++;
                     }
                 }
