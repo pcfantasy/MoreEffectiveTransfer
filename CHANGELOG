@@ -1,5 +1,8 @@
 -- CHANGELOG --
 
+-- UPCOMING RELEASE --
+* fix japanese locale. updated translation thanks to adon
+
 
 -- 2.1.1.220308
 * Option to chirp about pathfinding issues (transfers not routable due to road network issues)
