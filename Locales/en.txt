@@ -15,4 +15,4 @@ optionWarehouseNewBalanced	Warehouse improved locality
 optionWarehouseNewBalanced_txt	Warehouses will wait to buy from local warehouses or sell to local warehouse before deciding to import/export respectively. This should reduce unnecessary import/export and make intra-city warehouse transfers more reliable. Note that imports/exports will still happen.
 GROUP_EXPORTIMPORT_OPTIONS	Export/Import Options
 optionPreferExportShipPlaneTrain	Import/Export prefer to use ship/plane/train instead of highway
-optionPreferExportShipPlaneTrain_txt	Experimental function!
+optionPreferExportShipPlaneTrain_txt	All import/exports attempt to prioritize usage of available ship, train or plane connections instead of roads, even if a road connection is closer.

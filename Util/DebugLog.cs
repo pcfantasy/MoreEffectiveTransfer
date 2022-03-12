@@ -22,8 +22,9 @@ namespace MoreEffectiveTransfer.Util
             //ANALYSE1 = TransferManager.TransferReason.DeadMove,
             //ANALYSE2 = TransferManager.TransferReason.GarbageMove,
             //ANALYSE3 = TransferManager.TransferReason.GarbageTransfer,
-            //PATHFIND = 254,
-            ALL = 255 
+            //ANALYSE4 = TransferManager.TransferReason.Goods,
+            PATHFIND = 254
+            //ALL = 255 
         };
 
         private const string LOG_FILE_NAME = "MoreEffectiveTransfer.log";
