@@ -33,12 +33,14 @@ namespace MoreEffectiveTransfer.Util
 
     public sealed class PathFindFailure
     {
+        // building-to-building
         const int MAX_PATHFIND = 128;
         static Dictionary<PATHFINDPAIR, long> _pathfindFails = new Dictionary<PATHFINDPAIR, long>(MAX_PATHFIND);
         static Dictionary<ushort, int> _pathfindBuildingsCounter = new Dictionary<ushort, int>(MAX_PATHFIND);
 
-        const int MAX_OUTSIDECONNECTIONS = 16;
-        static Dictionary<ushort, long> _outsideConnectionFails = new System.Collections.Generic.Dictionary<ushort, long>(MAX_OUTSIDECONNECTIONS);
+        // building-to-outsideconnection
+        const int MAX_OUTSIDECONNECTIONS = 256;
+        static Dictionary<PATHFINDPAIR, long> _outsideConnectionFails = new Dictionary<PATHFINDPAIR, long>(MAX_OUTSIDECONNECTIONS);
 
 
         static readonly object _dictionaryLock = new object();
@@ -89,18 +91,31 @@ namespace MoreEffectiveTransfer.Util
         /// <summary>
         /// Add or update outside connection fail
         /// </summary>
-        private static void AddOutsideConnectionFail(ushort buildingID)
+        private static void AddOutsideConnectionFail(ushort source, ushort target)
         {
             long _info;
-            if (_outsideConnectionFails.TryGetValue(buildingID, out _info))
+            PATHFINDPAIR _pair = new PATHFINDPAIR(source, target);
+
+            if (_outsideConnectionFails.TryGetValue(_pair, out _info))
             {
                 _info = DateTime.Now.Ticks;
-                _outsideConnectionFails[buildingID] = _info;
+                _outsideConnectionFails[_pair] = _info;
             }
             else
-                _outsideConnectionFails.Add(buildingID, DateTime.Now.Ticks);
+            {
+                if (_outsideConnectionFails.Count >= MAX_OUTSIDECONNECTIONS)
+                {
+                    DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"Pathfindfailure: outsideconnection fail count is {_outsideConnectionFails.Count}, Removing key {_outsideConnectionFails.OrderBy(x => x.Value).First().Key.PrintKey()}");
+                    lock (_dictionaryLock)
+                    {
+                        _outsideConnectionFails.Remove(_outsideConnectionFails.OrderBy(x => x.Value).First().Key);
+                    }
+                }
 
-            DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"Pathfindfailure: Added outsideconnection fail, connection: {buildingID} ({Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info.name})");
+                _outsideConnectionFails.Add(_pair, DateTime.Now.Ticks);
+                DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"Pathfindfailure: Added outsideconnection fail {_pair.PrintKey()}, Count is {_outsideConnectionFails.Count}");
+            }
+
         }
 
 
@@ -156,7 +171,7 @@ namespace MoreEffectiveTransfer.Util
         /// <summary>
         /// Returns true when pair exists in exclusion list
         /// </summary>
-        public static bool Find(ushort source, ushort target)
+        public static bool FindBuildingPair(ushort source, ushort target)
         {
             long _info;
             PATHFINDPAIR _pair = new PATHFINDPAIR(source, target);
@@ -172,10 +187,11 @@ namespace MoreEffectiveTransfer.Util
         /// <summary>
         /// Returns true when buildingID in outsideconnection fail list
         /// </summary>
-        public static bool CheckOutsideConnectionFail(ushort buildingID)
+        public static bool FindOutsideConnectionPair(ushort source, ushort target)
         {
             long _info;
-            if (_outsideConnectionFails.TryGetValue(buildingID, out _info))
+            PATHFINDPAIR _pair = new PATHFINDPAIR(source, target);
+            if (_outsideConnectionFails.TryGetValue(_pair, out _info))
             {
                 return true;
             }
@@ -203,18 +219,16 @@ namespace MoreEffectiveTransfer.Util
 #endif
 
             if (((data.m_targetBuilding != 0) && !(targetBuilding.Info?.m_buildingAI is OutsideConnectionAI)) &&
-                    ((data.m_sourceBuilding != 0) && !(sourceBuilding.Info?.m_buildingAI is OutsideConnectionAI)))
+                ((data.m_sourceBuilding != 0) && !(sourceBuilding.Info?.m_buildingAI is OutsideConnectionAI)))
             {
                 AddFailPair(data.m_sourceBuilding, data.m_targetBuilding);
             }
-            else if ((data.m_targetBuilding != 0) && (targetBuilding.Info?.m_buildingAI is OutsideConnectionAI))
+            else if (((data.m_targetBuilding != 0) && (targetBuilding.Info?.m_buildingAI is OutsideConnectionAI)) ||
+                     ((data.m_sourceBuilding != 0) && (sourceBuilding.Info?.m_buildingAI is OutsideConnectionAI)))
             {
-                AddOutsideConnectionFail(data.m_targetBuilding);
+                AddOutsideConnectionFail(data.m_sourceBuilding, data.m_targetBuilding);
             }
-            else if ((data.m_sourceBuilding != 0) && (sourceBuilding.Info?.m_buildingAI is OutsideConnectionAI))
-            {
-                AddOutsideConnectionFail(data.m_sourceBuilding);
-            }
+
         }
 
 

@@ -266,7 +266,8 @@ namespace MoreEffectiveTransfer.CustomManager
 
             if ((offer.Building != 0) && (_BuildingManager.m_buildings.m_buffer[offer.Building].Info?.m_buildingAI is OutsideConnectionAI))
             {
-                DebugLog.LogDebug((DebugLog.LogReason)material, $"       ** Outside Offer: {DebugInspectOffer(ref offer)}, SubService class is: {_BuildingManager.m_buildings.m_buffer[offer.Building].Info?.m_class.m_subService}");
+                DebugLog.LogDebug((DebugLog.LogReason)material, $"       ** Outside Offer: material: {material}, {DebugInspectOffer(ref offer)}, SubService class is: {_BuildingManager.m_buildings.m_buffer[offer.Building].Info?.m_class.m_subService}");
+
                 if ((_BuildingManager.m_buildings.m_buffer[offer.Building].Info?.m_class.m_subService == ItemClass.SubService.PublicTransportTrain) ||
                     (_BuildingManager.m_buildings.m_buffer[offer.Building].Info?.m_class.m_subService == ItemClass.SubService.PublicTransportShip) ||
                     (_BuildingManager.m_buildings.m_buffer[offer.Building].Info?.m_class.m_subService == ItemClass.SubService.PublicTransportPlane))
@@ -379,61 +380,39 @@ namespace MoreEffectiveTransfer.CustomManager
             if ((incomingOffer.Building != 0) && (outgoingOffer.Building != 0))
             {
                 if (incomingOffer.Active)
-                    result = PathFindFailure.Find(incomingOffer.Building, outgoingOffer.Building);
+                    result = PathFindFailure.FindBuildingPair(incomingOffer.Building, outgoingOffer.Building);
                 else if (outgoingOffer.Active)
-                    result = PathFindFailure.Find(outgoingOffer.Building, incomingOffer.Building);
+                    result = PathFindFailure.FindBuildingPair(outgoingOffer.Building, incomingOffer.Building);
 
                 if (result)
                 {
-                    DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"       ** Pathfindfailure: Excluded in:{incomingOffer.Building}({DebugInspectOffer(ref incomingOffer)}) and out:{outgoingOffer.Building}({DebugInspectOffer(ref outgoingOffer)})");
+                    DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"       ** Pathfindfailure: Excluded: material:{job.material}, in:{incomingOffer.Building}({DebugInspectOffer(ref incomingOffer)}) and out:{outgoingOffer.Building}({DebugInspectOffer(ref outgoingOffer)})");
                 }
-
-                return result;
             }
 
-            //check outsideconnection for goods transfers only:
-            switch (job.material)
-            {
-                case TransferReason.Oil:
-                case TransferReason.Ore:
-                case TransferReason.Coal:
-                case TransferReason.Petrol:
-                case TransferReason.Food:
-                case TransferReason.Grain:
-                case TransferReason.Lumber:
-                case TransferReason.Logs:
-                case TransferReason.Goods:
-                case TransferReason.LuxuryProducts:
-                case TransferReason.AnimalProducts:
-                case TransferReason.Flours:
-                case TransferReason.Petroleum:
-                case TransferReason.Plastics:
-                case TransferReason.Metals:
-                case TransferReason.Glass:
-                case TransferReason.PlanedTimber:
-                case TransferReason.Paper:
-                case TransferReason.Fish:
-                    break;
-                    //and continue evluation of outsideconnectionai
-
-                default:
-                    return false;
-            }
-
+            //check failed outside connection pair
             if ((incomingOffer.Building != 0) && _BuildingManager.m_buildings.m_buffer[incomingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI)
             {
-                result = PathFindFailure.CheckOutsideConnectionFail(incomingOffer.Building);
+                if (incomingOffer.Active)
+                    result = PathFindFailure.FindOutsideConnectionPair(incomingOffer.Building, outgoingOffer.Building);
+                else if (outgoingOffer.Active)
+                    result = PathFindFailure.FindOutsideConnectionPair(outgoingOffer.Building, incomingOffer.Building);
+
                 if (result)
                 {
-                    DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"       ** Pathfindfailure: Excluded incoming outsideconnection:{incomingOffer.Building}({DebugInspectOffer(ref incomingOffer)})");
+                    DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"       ** Pathfindfailure: Excluded incoming outsideconnection: material:{job.material}, {incomingOffer.Building}({DebugInspectOffer(ref incomingOffer)})");
                 }
             }
             else if ((outgoingOffer.Building != 0) && _BuildingManager.m_buildings.m_buffer[outgoingOffer.Building].Info?.m_buildingAI is OutsideConnectionAI)
             {
-                result = PathFindFailure.CheckOutsideConnectionFail(outgoingOffer.Building);
+                if (incomingOffer.Active)
+                    result = PathFindFailure.FindOutsideConnectionPair(incomingOffer.Building, outgoingOffer.Building);
+                else if (outgoingOffer.Active)
+                    result = PathFindFailure.FindOutsideConnectionPair(outgoingOffer.Building, incomingOffer.Building);
+
                 if (result)
                 {
-                    DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"       ** Pathfindfailure: Excluded outgoing outsideconnection:{outgoingOffer.Building}({DebugInspectOffer(ref outgoingOffer)})");
+                    DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"       ** Pathfindfailure: Excluded ougoing outsideconnection: material:{job.material}, {outgoingOffer.Building}({DebugInspectOffer(ref outgoingOffer)})");
                 }
             }
 
