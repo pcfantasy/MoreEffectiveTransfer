@@ -10,14 +10,14 @@ namespace MoreEffectiveTransfer.Util
             var harmony = new Harmony(ID);
             harmony.PatchAll();
             Loader.HarmonyDetourFailed = false;
-            DebugLog.LogToFileOnly("Harmony patches applied");
+            DebugLog.LogInfo("Harmony patches applied");
         }
 
         public static void DeApply()
         {
             var harmony = new Harmony(ID);
             harmony.UnpatchAll(ID);
-            DebugLog.LogToFileOnly("Harmony patches DeApplied");
+            DebugLog.LogInfo("Harmony patches DeApplied");
         }
     }
 }

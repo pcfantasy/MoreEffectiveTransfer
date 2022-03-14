@@ -1,22 +1,28 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreEffectiveTransfer", "MoreEffectiveTransfer.csproj", "{C7A1E749-47ED-449C-9579-E94ED850B079}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Profile|Any CPU = Profile|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C7A1E749-47ED-449C-9579-E94ED850B079}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C7A1E749-47ED-449C-9579-E94ED850B079}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7A1E749-47ED-449C-9579-E94ED850B079}.Profile|Any CPU.ActiveCfg = Profile|Any CPU
+		{C7A1E749-47ED-449C-9579-E94ED850B079}.Profile|Any CPU.Build.0 = Profile|Any CPU
 		{C7A1E749-47ED-449C-9579-E94ED850B079}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7A1E749-47ED-449C-9579-E94ED850B079}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CD04CF1B-D829-4ABB-B35D-A06F59927115}
 	EndGlobalSection
 EndGlobal

@@ -1,0 +1,38 @@
+-- CHANGELOG --
+
+-- 2.1.2.xxxx --
+* fix japanese locale. updated translation thanks to adon
+* option export/import prefer train/ship/train over road re-implemented.
+* this mod is now feature complete and working exactly as envisioned.
+
+-- 2.1.1.220308
+* Option to chirp about pathfinding issues (transfers not routable due to road network issues)
+
+-- 2.1.0.220303
+* added portuguese (brazilian) localization, provided by Tchelow
+* services match mode strategy changed. This resolved all issues with service, including and in particular death care. Thanks to chibi for providing a suitable test scenario.
+* transfer manager is working on a background thread now, improving simulation performance
+* various under-the-hood improvements (especially cleanup of logging code). Log file renamed to "MorEffectiveTransfer.log".
+
+-- 2.0.5.220220 --
+* some more match mode fine-tuning (fixes bug #7 with medcopters)
+* new feature: Warehouse improve locality to reduce imports/exports and improve inter-warehouse transfers, designed by Admiral Electron
+
+-- 2.0.4.220214 --
+* compatible with Barges mod by bloodypenguin (shouldnt crash anymore with builtin warehouse)
+* move road and park maintenance from incoming to outgoing match mode
+
+-- 2.0.3.220213 --
+* update to latest citiesharmony package
+* code reorg
+* (hopefully) fixes service disptaching (eg deathcare)
+
+-- 2.0.2.220211 --
+* adding init checks & better logging for incompatible mods
+
+-- 2.0.1.220210 --
+* added Japanese translation, provided by shg166
+* make compatible with building spawn points mod
+
+-- 2.0.0.220208 --
+* Initial release
