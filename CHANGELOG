@@ -1,9 +1,9 @@
 -- CHANGELOG --
 
--- 2.1.2.xxxx --
+-- 2.1.2.20220318 --
 * fix japanese locale. updated translation thanks to adon
 * option export/import prefer train/ship/train over road re-implemented.
-* this mod is now feature complete and working exactly as envisioned.
+* this mod is now feature complete and working as intended.
 
 -- 2.1.1.220308
 * Option to chirp about pathfinding issues (transfers not routable due to road network issues)
