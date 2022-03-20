@@ -33,15 +33,21 @@ namespace MoreEffectiveTransfer.Util
 
     public sealed class PathFindFailure
     {
+        // building-to-building
         const int MAX_PATHFIND = 128;
         static Dictionary<PATHFINDPAIR, long> _pathfindFails = new Dictionary<PATHFINDPAIR, long>(MAX_PATHFIND);
         static Dictionary<ushort, int> _pathfindBuildingsCounter = new Dictionary<ushort, int>(MAX_PATHFIND);
+
+        // building-to-outsideconnection
+        const int MAX_OUTSIDECONNECTIONS = 256;
+        static Dictionary<PATHFINDPAIR, long> _outsideConnectionFails = new Dictionary<PATHFINDPAIR, long>(MAX_OUTSIDECONNECTIONS);
+
 
         static readonly object _dictionaryLock = new object();
         static long lru_lastCleaned;
         static long last_chirp;
         static int total_chirps_sent;
-        const long  LRU_INTERVALL = TimeSpan.TicksPerMillisecond * 1000 * 10; //10 sec
+        const long  LRU_INTERVALL = TimeSpan.TicksPerMillisecond * 1000 * 15; //15 sec
         const long  CHIRP_INTERVALL = TimeSpan.TicksPerMillisecond * 1000 * 60; //1 min
 
 
@@ -83,6 +89,37 @@ namespace MoreEffectiveTransfer.Util
 
 
         /// <summary>
+        /// Add or update outside connection fail
+        /// </summary>
+        private static void AddOutsideConnectionFail(ushort source, ushort target)
+        {
+            long _info;
+            PATHFINDPAIR _pair = new PATHFINDPAIR(source, target);
+
+            if (_outsideConnectionFails.TryGetValue(_pair, out _info))
+            {
+                _info = DateTime.Now.Ticks;
+                _outsideConnectionFails[_pair] = _info;
+            }
+            else
+            {
+                if (_outsideConnectionFails.Count >= MAX_OUTSIDECONNECTIONS)
+                {
+                    DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"Pathfindfailure: outsideconnection fail count is {_outsideConnectionFails.Count}, Removing key {_outsideConnectionFails.OrderBy(x => x.Value).First().Key.PrintKey()}");
+                    lock (_dictionaryLock)
+                    {
+                        _outsideConnectionFails.Remove(_outsideConnectionFails.OrderBy(x => x.Value).First().Key);
+                    }
+                }
+
+                _outsideConnectionFails.Add(_pair, DateTime.Now.Ticks);
+                DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"Pathfindfailure: Added outsideconnection fail {_pair.PrintKey()}, Count is {_outsideConnectionFails.Count}");
+            }
+
+        }
+
+
+        /// <summary>
         /// Increase buidign fail count
         /// </summary>
         private static void UpdateBuildingFailCount(ushort buildingID)
@@ -104,7 +141,8 @@ namespace MoreEffectiveTransfer.Util
         public static void RemoveOldEntries()
         {
             long diffTime = DateTime.Now.Ticks - lru_lastCleaned;
-            int remove_count = 0;
+            int failpair_remove_count = 0;
+            int failoutside_remove_count = 0;
 
             if (diffTime > LRU_INTERVALL)
             {
@@ -115,11 +153,17 @@ namespace MoreEffectiveTransfer.Util
                     foreach (var item in _pathfindFails.Where(kvp => kvp.Value < (DateTime.Now.Ticks - LRU_INTERVALL)).ToList())
                     {
                         _pathfindFails.Remove(item.Key);
-                        remove_count++;
+                        failpair_remove_count++;
+                    }
+
+                    foreach (var item in _outsideConnectionFails.Where(kvp => kvp.Value < (DateTime.Now.Ticks - LRU_INTERVALL)).ToList())
+                    {
+                        _outsideConnectionFails.Remove(item.Key);
+                        failoutside_remove_count++;
                     }
                 }
 
-                DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"Pathfindfailure: LRU removed {remove_count} entries, new Count is {_pathfindFails.Count}");
+                DebugLog.LogDebug(DebugLog.REASON_PATHFIND, $"Pathfindfailure: LRU removed {failpair_remove_count} pairs + {failoutside_remove_count} outsideconnections, new count is {_pathfindFails.Count} pairs + {_outsideConnectionFails.Count} outsideconnections");
             }
         }
 
@@ -127,11 +171,27 @@ namespace MoreEffectiveTransfer.Util
         /// <summary>
         /// Returns true when pair exists in exclusion list
         /// </summary>
-        public static bool Find(ushort source, ushort target)
+        public static bool FindBuildingPair(ushort source, ushort target)
         {
             long _info;
             PATHFINDPAIR _pair = new PATHFINDPAIR(source, target);
             if (_pathfindFails.TryGetValue(_pair, out _info))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        /// Returns true when buildingID in outsideconnection fail list
+        /// </summary>
+        public static bool FindOutsideConnectionPair(ushort source, ushort target)
+        {
+            long _info;
+            PATHFINDPAIR _pair = new PATHFINDPAIR(source, target);
+            if (_outsideConnectionFails.TryGetValue(_pair, out _info))
             {
                 return true;
             }
@@ -159,10 +219,16 @@ namespace MoreEffectiveTransfer.Util
 #endif
 
             if (((data.m_targetBuilding != 0) && !(targetBuilding.Info?.m_buildingAI is OutsideConnectionAI)) &&
-                    ((data.m_sourceBuilding != 0) && !(sourceBuilding.Info?.m_buildingAI is OutsideConnectionAI)))
-                {
-                    AddFailPair(data.m_sourceBuilding, data.m_targetBuilding);
-                }
+                ((data.m_sourceBuilding != 0) && !(sourceBuilding.Info?.m_buildingAI is OutsideConnectionAI)))
+            {
+                AddFailPair(data.m_sourceBuilding, data.m_targetBuilding);
+            }
+            else if (((data.m_targetBuilding != 0) && (targetBuilding.Info?.m_buildingAI is OutsideConnectionAI)) ||
+                     ((data.m_sourceBuilding != 0) && (sourceBuilding.Info?.m_buildingAI is OutsideConnectionAI)))
+            {
+                AddOutsideConnectionFail(data.m_sourceBuilding, data.m_targetBuilding);
+            }
+
         }
 
 

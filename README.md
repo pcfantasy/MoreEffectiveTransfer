@@ -24,11 +24,7 @@ This mod attempts to improve the situation by:
 </ul>
 
 ## What it does not
-This mod only affects supply/demand involving "building based" services and goods (=a building is sending out some vehicle to service/transfer something somewhere). With the exception of health care (hospital visits) it <b>does not affect any "citizen activity based" services</b> (=a cim actively travels somewhere for some reason), such as:
-school, leisure, shopping, going to work, ...
-<br /><br />
-All of these matches are going through the vanilla transfer manager, so: <br/>
-=> citizens go to any school as they like, they go shopping wherever they please, they pick a work place as they want, and they dont just go to the nearby park, instead travelling all across the city to the fancy 5* zoo.<br/>
+It does not restrict any citizen activities: citizens go to any school as they like, they go shopping wherever they please, they pick a work place as they want, and they dont just go to the nearby park, instead travelling all across the city to the fancy 5* zoo.<br/>
 This is intentional - the Cims value their freedom and certainly dont accept being restricted to their district...
 <br /><br />
 This mod does not change the match-making to use actual pathfinding distance/routing. Using that would be very costly without optimized data structures and algorithms, and cannot be easily done. 
@@ -64,7 +60,7 @@ The setting's effect is: <br />
 <br /><br />
 
   
-## Problems
+## Limits
 There is obviously a conflict between the "higher priority first" approach and the "closed distance preferred" approach.
 In particular, preferring matchmaking by closest distance cannot fully prevent that buildings get serviced by service buildings from far away.
 That is because a more suitable, closer service offer might have already been matched to a higher priority request, so now the closer building has no choice but be matched with an offer from a service further away.
@@ -82,24 +78,13 @@ TLDR: you notice in your city that garbage trucks go from A to B, and from B to 
 [MoreEffectiveTransfer 模组说明书](https://github.com/pcfantasy/MoreEffectiveTransfer/wiki/%E4%B8%AD%E6%96%87%E8%AF%B4%E6%98%8E%E4%B9%A6) <br>
 
 # Impact and Performance
-As this transfer manager does a lot more than the vanilla one, it naturally executes more work on the CPU and thus taxes your system a bit more than pure Vanilla.
-Care has been taken to implement these additional functionalities as efficiently as possible.
-I have done some long-term measurement with the following results:
-<br /><br />
-City: "Cim City" (Vanilla.crp) by ThisHero		(https://steamcommunity.com/sharedfiles/filedetails/?id=2117400989)
+As of version 2.1.0.220303 the match-making is run on a background thread, reducing the burden for the game's main simulation thread.
+There is some performance improvement over vanilla due to this, although most likely this wont translate to higher frame rate.
 <br />
-It is a massive pure Vanilla+DLC city, spanning 25 tiles and having over 300,000 cims in it, with a stable economy suitable for running unattended.
-Additional mods used to gather statistics:
-<ul>
-<li>Enhanced Outside Connections View		https://steamcommunity.com/sharedfiles/filedetails/?id=2368396560
-<li>More City statistics		https://steamcommunity.com/sharedfiles/filedetails/?id=2685974449
-</ul>
+Vanilla transfer manager on a large city: 0.6ms time per run
 <br />
-Letting the sumulation run for almost 1 year resulted in the following performance statistics:
-<ul>
-<li>* VANILLA TRANSFER MANAGER: NUM INVOCATIONS: 213164, TOTAL MS: 83101, <b>AVG TIME/INVOCATION: 0.3898454ms</b>
-<li>* NEW TRANSFER MANAGER: NUM INVOCATIONS: 160056, TOTAL MS: 64400, <b>AVG TIME/INVOCATION: 0.4023592ms</b>
-</ul>
+METM on the same city: ~0.45ms time per run
+<br />
 
 # Source Code
 On Github: https://github.com/TheDogKSP/MoreEffectiveTransfer
