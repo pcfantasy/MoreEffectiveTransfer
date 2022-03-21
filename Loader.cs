@@ -16,9 +16,9 @@ namespace MoreEffectiveTransfer
 
         public static bool isFirstTime = true;
 #if (DEBUG_VANILLA)
-        public const int HarmonyPatchNumExpected = 3;
+        public const int HarmonyPatchNumExpected = 6;
 #else
-        public const int HarmonyPatchNumExpected = 2;
+        public const int HarmonyPatchNumExpected = 5;
 #endif
 
         public override void OnCreated(ILoading loading)
