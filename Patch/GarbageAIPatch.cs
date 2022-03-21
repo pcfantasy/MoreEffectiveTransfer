@@ -4,6 +4,8 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using UnityEngine;
 using MoreEffectiveTransfer.Util;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MoreEffectiveTransfer.Patch
 {
@@ -12,6 +14,21 @@ namespace MoreEffectiveTransfer.Patch
     {
         public const ushort GARBAGE_BUFFER_MIN_LEVEL = 800;
         public const float GARBAGE_DISTANCE_SEARCH = 150f;
+
+        //prevent double-dispatching of multiple vehicles to same target
+        private const int LRU_MAX_SIZE = 16;
+        private static Dictionary<ushort, long> LRU_DISPATCH_LIST = new Dictionary<ushort, long>(LRU_MAX_SIZE);
+
+        private static void AddBuildingLRU(ushort buildingID)
+        {
+            if (LRU_DISPATCH_LIST.Count > LRU_MAX_SIZE)
+            {
+                // remove oldest:
+                LRU_DISPATCH_LIST.Remove(LRU_DISPATCH_LIST.OrderBy(x => x.Value).First().Key);
+            }
+
+            LRU_DISPATCH_LIST.Add(buildingID, DateTime.Now.Ticks);
+        }
 
         /// <summary>
         /// Find close by building with garbage
@@ -45,13 +62,24 @@ namespace MoreEffectiveTransfer.Patch
                         // CHeck Building garbage buffer
                         if (instance.m_buildings.m_buffer[currentBuilding].m_garbageBuffer >= GARBAGE_BUFFER_MIN_LEVEL)
                         {
-                            float currentSqauredDistance = VectorUtils.LengthSqrXZ(pos - instance.m_buildings.m_buffer[currentBuilding].m_position);
-                            if (currentSqauredDistance < shortestSquaredDistance)
+                            // check if not already dispatched to
+                            long value;
+                            if (LRU_DISPATCH_LIST.TryGetValue(currentBuilding, out value))
                             {
-                                result = currentBuilding;
-                                shortestSquaredDistance = currentSqauredDistance;
+                                // dont consider building
+                            }
+                            else
+                            {
+                                // not found in LRU, may consider this building
+                                float distanceSqr = VectorUtils.LengthSqrXZ(pos - instance.m_buildings.m_buffer[currentBuilding].m_position);
+                                if (distanceSqr < shortestSquaredDistance)
+                                {
+                                    result = currentBuilding;
+                                    shortestSquaredDistance = distanceSqr;
+                                }
                             }
                         }
+
                         currentBuilding = instance.m_buildings.m_buffer[currentBuilding].m_nextGridBuilding;
                         if (++num7 >= numUnits)
                         {
@@ -62,6 +90,9 @@ namespace MoreEffectiveTransfer.Patch
                 }
             }
 
+            if (result != 0) 
+                AddBuildingLRU(result);
+            
             return result;
         }
 

@@ -4,6 +4,8 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using UnityEngine;
 using MoreEffectiveTransfer.Util;
+using System.Collections.Generic;
+using System.Linq;
 
 
 namespace MoreEffectiveTransfer.Patch
@@ -14,11 +16,26 @@ namespace MoreEffectiveTransfer.Patch
         public const ushort CRIME_BUFFER_CITIZEN_MULT = 25; //as multiplier for citizenCount, to be compared with m_crimebuffer value of building!
         public const float CRIME_DISTANCE_SEARCH = 150f;
 
+        //prevent double-dispatching of multiple vehicles to same target
+        private const int LRU_MAX_SIZE = 16;
+        private static Dictionary<ushort, long> LRU_DISPATCH_LIST = new Dictionary<ushort, long>(LRU_MAX_SIZE);
+
+        private static void AddBuildingLRU(ushort buildingID)
+        {
+            if (LRU_DISPATCH_LIST.Count > LRU_MAX_SIZE)
+            {
+                // remove oldest:
+                LRU_DISPATCH_LIST.Remove(LRU_DISPATCH_LIST.OrderBy(x => x.Value).First().Key);
+            }
+
+            LRU_DISPATCH_LIST.Add(buildingID, DateTime.Now.Ticks);
+        }
+
         /// <summary>
         /// Find close by building with crime
         /// </summary>
         public static ushort FindBuildingWithCrime(Vector3 pos, float maxDistance)
-        {            
+        {
             BuildingManager instance = Singleton<BuildingManager>.instance;
             uint numUnits = instance.m_buildings.m_size;    //get number of building units
 
@@ -43,19 +60,30 @@ namespace MoreEffectiveTransfer.Patch
                     // Iterate through all buildings at this grid location
                     while (currentBuilding != 0)
                     {
-                        // CHeck Building Crime buffer
+                        // Check Building Crime buffer
                         byte citizencount = instance.m_buildings.m_buffer[currentBuilding].m_citizenCount;
-                        int min_crime_amount = Math.Min(100, (CRIME_BUFFER_CITIZEN_MULT * citizencount));
+                        int min_crime_amount = Math.Max(200, (CRIME_BUFFER_CITIZEN_MULT * citizencount));
 
                         if (instance.m_buildings.m_buffer[currentBuilding].m_crimeBuffer >= min_crime_amount)
                         {
-                            float currentSqauredDistance = VectorUtils.LengthSqrXZ(pos - instance.m_buildings.m_buffer[currentBuilding].m_position);
-                            if (currentSqauredDistance < shortestSquaredDistance)
+                            // check if not already dispatched to
+                            long value;
+                            if (LRU_DISPATCH_LIST.TryGetValue(currentBuilding, out value))
                             {
-                                result = currentBuilding;
-                                shortestSquaredDistance = currentSqauredDistance;
+                                // dont consider building
+                            }
+                            else
+                            {
+                                // not found in LRU, may consider this building
+                                float distanceSqr = VectorUtils.LengthSqrXZ(pos - instance.m_buildings.m_buffer[currentBuilding].m_position);
+                                if (distanceSqr < shortestSquaredDistance)
+                                {
+                                    result = currentBuilding;
+                                    shortestSquaredDistance = distanceSqr;
+                                }
                             }
                         }
+
                         currentBuilding = instance.m_buildings.m_buffer[currentBuilding].m_nextGridBuilding;
                         if (++num7 >= numUnits)
                         {
@@ -65,6 +93,9 @@ namespace MoreEffectiveTransfer.Patch
                     }
                 }
             }
+
+            if (result != 0)
+                AddBuildingLRU(result);
 
             return result;
         }
