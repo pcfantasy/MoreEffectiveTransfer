@@ -11,8 +11,8 @@ namespace MoreEffectiveTransfer.Patch
 
     public static class PoliceAIPatch
     {
-        public const ushort CRIME_BUFFER_MIN_LEVEL = 200;
-        public const float CRIME_DISTANCE_SEARCH = 200f;
+        public const ushort CRIME_BUFFER_CITIZEN_MULT = 25; //as multiplier for citizenCount, to be compared with m_crimebuffer value of building!
+        public const float CRIME_DISTANCE_SEARCH = 150f;
 
         /// <summary>
         /// Find close by building with crime
@@ -44,7 +44,10 @@ namespace MoreEffectiveTransfer.Patch
                     while (currentBuilding != 0)
                     {
                         // CHeck Building Crime buffer
-                        if (instance.m_buildings.m_buffer[currentBuilding].m_crimeBuffer >= CRIME_BUFFER_MIN_LEVEL)
+                        byte citizencount = instance.m_buildings.m_buffer[currentBuilding].m_citizenCount;
+                        int min_crime_amount = Math.Min(100, (CRIME_BUFFER_CITIZEN_MULT * citizencount));
+
+                        if (instance.m_buildings.m_buffer[currentBuilding].m_crimeBuffer >= min_crime_amount)
                         {
                             float currentSqauredDistance = VectorUtils.LengthSqrXZ(pos - instance.m_buildings.m_buffer[currentBuilding].m_position);
                             if (currentSqauredDistance < shortestSquaredDistance)

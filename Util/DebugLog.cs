@@ -24,7 +24,7 @@ namespace MoreEffectiveTransfer.Util
             //ANALYSE3 = TransferManager.TransferReason.GarbageTransfer,
             //ANALYSE4 = TransferManager.TransferReason.Goods,
             //PATHFIND = 254
-            ALL = 256 //256=DISABLED!
+            ALL = 255 //256=DISABLED!
         };
 
         private const string LOG_FILE_NAME = "MoreEffectiveTransfer.log";

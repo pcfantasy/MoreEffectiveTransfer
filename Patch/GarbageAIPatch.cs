@@ -10,8 +10,8 @@ namespace MoreEffectiveTransfer.Patch
 
     public static class GarbageAIPatch
     {
-        public const ushort GARBAGE_BUFFER_MIN_LEVEL = 600;
-        public const float GARBAGE_DISTANCE_SEARCH = 200f;
+        public const ushort GARBAGE_BUFFER_MIN_LEVEL = 800;
+        public const float GARBAGE_DISTANCE_SEARCH = 150f;
 
         /// <summary>
         /// Find close by building with garbage
