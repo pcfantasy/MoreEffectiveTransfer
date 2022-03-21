@@ -133,6 +133,12 @@ namespace MoreEffectiveTransfer.Patch
 #endif
                 }
             }
+
+            //need to change target because problem already solved?
+            if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_crimeBuffer <= 50))
+            {
+                vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, 0); //clear target
+            }
         }
     
     }
@@ -168,8 +174,11 @@ namespace MoreEffectiveTransfer.Patch
 #endif
                 }
             }
+
+            //need to change target because problem already solved?
+            // ->not done for copterai
         }
-    
+
     }
 
 }
