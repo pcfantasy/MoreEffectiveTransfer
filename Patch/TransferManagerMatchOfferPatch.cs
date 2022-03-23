@@ -30,7 +30,6 @@ namespace MoreEffectiveTransfer.Patch
         }
 
 
-
         [HarmonyPostfix]
         public static void Postfix()
         {

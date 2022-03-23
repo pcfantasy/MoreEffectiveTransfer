@@ -1,4 +1,5 @@
 ﻿using MoreEffectiveTransfer.CustomManager;
+using MoreEffectiveTransfer.Patch;
 using MoreEffectiveTransfer.Util;
 using System.Diagnostics;
 
@@ -28,6 +29,10 @@ namespace MoreEffectiveTransfer
             DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: max queued transferjobs: {TransferJobPool.Instance.GetMaxUsage()}");
             DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: max transfer ringbuffer usage: {CustomTransferDispatcher.Instance.GetMaxUsage()}");
             DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: total chirps about routing issues: {PathFindFailure.GetTotalChirps()}");
+            DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: max pathfindfailpairs dictionary usage: {PathFindFailure.GetMaxUsagePathFindFails()}");
+            DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: max outsideconnectionfailpairs dictionary usage: {PathFindFailure.GetMaxUsageOutsideFails()}");
+            DebugLog.LogInfo($"-     GARBAGEAIPATCH:  num setnewtarget: {GarbageAIPatch.setnewtarget_counter}, num dynamic_redispatch: {GarbageAIPatch.dynamic_redispatch_counter}, num lru_list hits: {GarbageAIPatch.lru_hit_counter}");
+            DebugLog.LogInfo($"-     POLICEAIPATCH:   num setnewtarget: {PoliceAIPatch.setnewtarget_counter}, num dynamic_redispatch: {PoliceAIPatch.dynamic_redispatch_counter}, num lru_list hits: {PoliceAIPatch.lru_hit_counter}");
             DebugLog.LogInfo("--- END PROFILING STATISTICS ---");
         }
     }

@@ -19,6 +19,12 @@ namespace MoreEffectiveTransfer.Patch
         private const int LRU_MAX_SIZE = 16;
         private static Dictionary<ushort, long> LRU_DISPATCH_LIST = new Dictionary<ushort, long>(LRU_MAX_SIZE);
 
+        #region STATISTICS
+        internal static int lru_hit_counter;
+        internal static int setnewtarget_counter;
+        internal static int dynamic_redispatch_counter;
+        #endregion
+
         private static void AddBuildingLRU(ushort buildingID)
         {
             if (LRU_DISPATCH_LIST.Count >= LRU_MAX_SIZE)
@@ -67,6 +73,7 @@ namespace MoreEffectiveTransfer.Patch
                             if (LRU_DISPATCH_LIST.TryGetValue(currentBuilding, out value))
                             {
                                 // dont consider building
+                                lru_hit_counter++;
                             }
                             else
                             {
@@ -122,6 +129,7 @@ namespace MoreEffectiveTransfer.Patch
                     vehicleData.m_flags = vehicleData.m_flags & (~Vehicle.Flags.GoingBack) & (~Vehicle.Flags.WaitingTarget);
                     // set new target
                     vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, newTarget);
+                    GarbageAIPatch.setnewtarget_counter++;
 #if (DEBUG)
                     var instB = default(InstanceID);
                     instB.Building = newTarget;
@@ -137,6 +145,7 @@ namespace MoreEffectiveTransfer.Patch
             {
                 //need to change target because problem already solved?
                 vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, 0); //clear target
+                GarbageAIPatch.dynamic_redispatch_counter++;
             }
 
         }
