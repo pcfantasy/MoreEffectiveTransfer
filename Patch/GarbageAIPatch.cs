@@ -13,7 +13,7 @@ namespace MoreEffectiveTransfer.Patch
     public static class GarbageAIPatch
     {
         public const ushort GARBAGE_BUFFER_MIN_LEVEL = 800;
-        public const float GARBAGE_DISTANCE_SEARCH = 150f;
+        public const float GARBAGE_DISTANCE_SEARCH = 160f;
 
         //prevent double-dispatching of multiple vehicles to same target
         private const int LRU_MAX_SIZE = 16;
@@ -21,7 +21,7 @@ namespace MoreEffectiveTransfer.Patch
 
         private static void AddBuildingLRU(ushort buildingID)
         {
-            if (LRU_DISPATCH_LIST.Count > LRU_MAX_SIZE)
+            if (LRU_DISPATCH_LIST.Count >= LRU_MAX_SIZE)
             {
                 // remove oldest:
                 LRU_DISPATCH_LIST.Remove(LRU_DISPATCH_LIST.OrderBy(x => x.Value).First().Key);
@@ -109,6 +109,10 @@ namespace MoreEffectiveTransfer.Patch
             if (vehicleData.m_transferSize >= (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleID].Info?.m_vehicleAI as GarbageTruckAI).m_cargoCapacity)
                 return;
 
+            // check transfertype was not move transfer
+            if (vehicleData.m_transferType != (byte)TransferManager.TransferReason.Garbage)
+                return;
+
             if ((vehicleData.m_flags & (Vehicle.Flags.GoingBack | Vehicle.Flags.WaitingTarget)) != 0)
             {
                 ushort newTarget = GarbageAIPatch.FindBuildingWithGarbage(vehicleData.GetLastFramePosition(), GarbageAIPatch.GARBAGE_DISTANCE_SEARCH);
@@ -129,10 +133,9 @@ namespace MoreEffectiveTransfer.Patch
 #endif
                 }
             }
-
-            //need to change target because problem already solved?
-            if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_garbageBuffer <= GarbageAIPatch.GARBAGE_BUFFER_MIN_LEVEL / 2))
+            else if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_garbageBuffer <= GarbageAIPatch.GARBAGE_BUFFER_MIN_LEVEL / 2))
             {
+                //need to change target because problem already solved?
                 vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, 0); //clear target
             }
 

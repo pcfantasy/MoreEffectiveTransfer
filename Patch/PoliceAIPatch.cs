@@ -14,7 +14,7 @@ namespace MoreEffectiveTransfer.Patch
     public static class PoliceAIPatch
     {
         public const ushort CRIME_BUFFER_CITIZEN_MULT = 25; //as multiplier for citizenCount, to be compared with m_crimebuffer value of building!
-        public const float CRIME_DISTANCE_SEARCH = 150f;
+        public const float CRIME_DISTANCE_SEARCH = 160f;
 
         //prevent double-dispatching of multiple vehicles to same target
         private const int LRU_MAX_SIZE = 16;
@@ -22,7 +22,7 @@ namespace MoreEffectiveTransfer.Patch
 
         private static void AddBuildingLRU(ushort buildingID)
         {
-            if (LRU_DISPATCH_LIST.Count > LRU_MAX_SIZE)
+            if (LRU_DISPATCH_LIST.Count >= LRU_MAX_SIZE)
             {
                 // remove oldest:
                 LRU_DISPATCH_LIST.Remove(LRU_DISPATCH_LIST.OrderBy(x => x.Value).First().Key);
@@ -113,6 +113,10 @@ namespace MoreEffectiveTransfer.Patch
             if (vehicleData.m_transferSize >= (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleID].Info?.m_vehicleAI as PoliceCarAI).m_crimeCapacity)
                 return;
 
+            // check transfertype was not move transfer
+            if (vehicleData.m_transferType != (byte)TransferManager.TransferReason.Crime)
+                return;
+
             if ((vehicleData.m_flags & (Vehicle.Flags.GoingBack | Vehicle.Flags.WaitingTarget)) != 0)
             {
                 ushort newTarget = PoliceAIPatch.FindBuildingWithCrime(vehicleData.GetLastFramePosition(), PoliceAIPatch.CRIME_DISTANCE_SEARCH);
@@ -133,10 +137,9 @@ namespace MoreEffectiveTransfer.Patch
 #endif
                 }
             }
-
-            //need to change target because problem already solved?
-            if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_crimeBuffer <= 50))
+            else if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_crimeBuffer < 50))
             {
+                //need to change target because problem already solved?
                 vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, 0); //clear target
             }
         }
@@ -152,6 +155,10 @@ namespace MoreEffectiveTransfer.Patch
         {
             // police capacity left?
             if (vehicleData.m_transferSize >= (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleID].Info?.m_vehicleAI as PoliceCopterAI).m_crimeCapacity)
+                return;
+
+            // check transfertype was not move transfer
+            if (vehicleData.m_transferType != (byte)TransferManager.TransferReason.Crime)
                 return;
 
             if ((vehicleData.m_flags & (Vehicle.Flags.GoingBack | Vehicle.Flags.WaitingTarget)) != 0)
@@ -174,9 +181,11 @@ namespace MoreEffectiveTransfer.Patch
 #endif
                 }
             }
-
-            //need to change target because problem already solved?
-            // ->not done for copterai
+            else if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_crimeBuffer < 50))
+            {
+                //need to change target because problem already solved?
+                vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, 0); //clear target
+            }
         }
 
     }
