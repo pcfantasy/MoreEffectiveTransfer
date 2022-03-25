@@ -8,13 +8,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace MoreEffectiveTransfer.Patch.Police
+namespace MoreEffectiveTransfer.Patch.Fire
 {
 
-    public static class PoliceAIPatch
+    public static class FireAIPatch
     {
-        internal const ushort CRIME_BUFFER_CITIZEN_MULT = 25; //as multiplier for citizenCount, to be compared with m_crimebuffer value of building!
-        internal const float CRIME_DISTANCE_SEARCH = 160f;
+        internal const float FIRE_DISTANCE_SEARCH = 160f;
 
         //prevent double-dispatching of multiple vehicles to same target
         private const int LRU_MAX_SIZE = 8;
@@ -40,7 +39,7 @@ namespace MoreEffectiveTransfer.Patch.Police
         /// <summary>
         /// Find close by building with crime
         /// </summary>
-        public static ushort FindBuildingWithCrime(Vector3 pos, float maxDistance)
+        public static ushort FindBuildingWithFire(Vector3 pos, float maxDistance)
         {
             BuildingManager instance = Singleton<BuildingManager>.instance;
             uint numUnits = instance.m_buildings.m_size;    //get number of building units
@@ -66,11 +65,8 @@ namespace MoreEffectiveTransfer.Patch.Police
                     // Iterate through all buildings at this grid location
                     while (currentBuilding != 0)
                     {
-                        // Check Building Crime buffer
-                        byte citizencount = instance.m_buildings.m_buffer[currentBuilding].m_citizenCount;
-                        int min_crime_amount = Math.Max(200, (CRIME_BUFFER_CITIZEN_MULT * citizencount));
-
-                        if (instance.m_buildings.m_buffer[currentBuilding].m_crimeBuffer >= min_crime_amount)
+                        // Check Building Fire
+                        if (instance.m_buildings.m_buffer[currentBuilding].m_fireIntensity > 0)
                         {
                             // check if not already dispatched to
                             long value;
@@ -107,33 +103,62 @@ namespace MoreEffectiveTransfer.Patch.Police
             return result;
         }
 
+        public static void TargetCimsParentVehicleTarget(ushort vehicleID, ref Vehicle vehicleData)
+        {
+            CitizenManager instance = Singleton<CitizenManager>.instance;
+            uint numCitizenUnits = instance.m_units.m_size;
+            uint num = vehicleData.m_citizenUnits;
+            int num2 = 0;
+            while (num != 0)
+            {
+                uint nextUnit = instance.m_units.m_buffer[num].m_nextUnit;
+                for (int i = 0; i < 5; i++)
+                {
+                    uint citizen = instance.m_units.m_buffer[num].GetCitizen(i);
+                    if (citizen == 0)
+                    {
+                        continue;
+                    }
+                    ushort instance2 = instance.m_citizens.m_buffer[citizen].m_instance;
+                    if (instance2 == 0)
+                    {
+                        continue;
+                    }
+                    CitizenInfo info = instance.m_instances.m_buffer[instance2].Info;
+                    info.m_citizenAI.SetTarget(instance2, ref instance.m_instances.m_buffer[instance2], vehicleData.m_targetBuilding);
+                }
+                num = nextUnit;
+                if (++num2 > numCitizenUnits)
+                {
+                    CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+                    break;
+                }
+            }
+        }
+
     }
 
 
-    [HarmonyPatch(typeof(PoliceCarAI), "SimulationStep", new Type[] { typeof(ushort), typeof(Vehicle), typeof(Vehicle.Frame), typeof(ushort), typeof(Vehicle), typeof(int) }, new ArgumentType[] { ArgumentType.Normal, ArgumentType.Ref, ArgumentType.Ref, ArgumentType.Normal, ArgumentType.Ref, ArgumentType.Normal })]
-    public static class PoliceCarAISimulationStepPatch
+    [HarmonyPatch(typeof(FireTruckAI), "SimulationStep", new Type[] { typeof(ushort), typeof(Vehicle), typeof(Vehicle.Frame), typeof(ushort), typeof(Vehicle), typeof(int) }, new ArgumentType[] { ArgumentType.Normal, ArgumentType.Ref, ArgumentType.Ref, ArgumentType.Normal, ArgumentType.Ref, ArgumentType.Normal })]
+    public static class FireTruckAISimulationStepPatch
     {
         [HarmonyPostfix]
         public static void Postfix(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ushort leaderID, ref Vehicle leaderData, int lodPhysics)
         {
-            // police capacity left?
-            if (vehicleData.m_transferSize >= (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleID].Info?.m_vehicleAI as PoliceCarAI).m_crimeCapacity)
-                return;
-
-            // check transfertype was not move transfer
-            if (vehicleData.m_transferType != (byte)TransferManager.TransferReason.Crime)
+            // check transfertype
+            if (vehicleData.m_transferType != (byte)TransferManager.TransferReason.Fire)
                 return;
 
             if ((vehicleData.m_flags & (Vehicle.Flags.GoingBack | Vehicle.Flags.WaitingTarget)) != 0)
             {
-                ushort newTarget = PoliceAIPatch.FindBuildingWithCrime(vehicleData.GetLastFramePosition(), PoliceAIPatch.CRIME_DISTANCE_SEARCH);
+                ushort newTarget = FireAIPatch.FindBuildingWithFire(vehicleData.GetLastFramePosition(), FireAIPatch.FIRE_DISTANCE_SEARCH);
                 if (newTarget != 0)
                 {
                     // clear flag goingback and waiting target
                     vehicleData.m_flags = vehicleData.m_flags & (~Vehicle.Flags.GoingBack) & (~Vehicle.Flags.WaitingTarget);
                     // set new target
                     vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, newTarget);
-                    PoliceAIPatch.setnewtarget_counter++;
+                    FireAIPatch.setnewtarget_counter++;
 #if (DEBUG)
                     var instB = default(InstanceID);
                     instB.Building = newTarget;
@@ -141,45 +166,47 @@ namespace MoreEffectiveTransfer.Patch.Police
                     var instV = default(InstanceID);
                     instV.Vehicle = vehicleID;
                     string vehicleName = $"ID={vehicleID} ({Singleton<InstanceManager>.instance.GetName(instV)})";
-                    DebugLog.LogDebug((DebugLog.LogReason)TransferManager.TransferReason.Crime, $"PoliceCarAI: vehicle {vehicleName} set new target: {targetName}");
+                    DebugLog.LogDebug((DebugLog.LogReason)TransferManager.TransferReason.Fire, $"FireTruckAI: vehicle {vehicleName} set new target: {targetName}");
 #endif
+
+                    // If the fire truck is stopped, the new target building is close enough that it will not move again so retarget deployed firefighting cims
+                    if ((vehicleData.m_flags & Vehicle.Flags.Stopped) != 0)
+                    {
+                        FireAIPatch.TargetCimsParentVehicleTarget(vehicleID, ref vehicleData);
+                    }
                 }
             }
-            else if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_crimeBuffer < 50))
+            else if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_fireIntensity == 0))
             {
                 //need to change target because problem already solved?
                 vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, 0); //clear target
-                PoliceAIPatch.dynamic_redispatch_counter++;
+                FireAIPatch.dynamic_redispatch_counter++;
             }
         }
     
     }
 
 
-    [HarmonyPatch(typeof(PoliceCopterAI), "SimulationStep", new Type[] { typeof(ushort), typeof(Vehicle), typeof(Vehicle.Frame), typeof(ushort), typeof(Vehicle), typeof(int) }, new ArgumentType[] { ArgumentType.Normal, ArgumentType.Ref, ArgumentType.Ref, ArgumentType.Normal, ArgumentType.Ref, ArgumentType.Normal })]
-    public static class PoliceCopterAIAISimulationStepPatch
+    [HarmonyPatch(typeof(FireCopterAI), "SimulationStep", new Type[] { typeof(ushort), typeof(Vehicle), typeof(Vehicle.Frame), typeof(ushort), typeof(Vehicle), typeof(int) }, new ArgumentType[] { ArgumentType.Normal, ArgumentType.Ref, ArgumentType.Ref, ArgumentType.Normal, ArgumentType.Ref, ArgumentType.Normal })]
+    public static class FireCopterAIAISimulationStepPatch
     {
         [HarmonyPostfix]
         public static void Postfix(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ushort leaderID, ref Vehicle leaderData, int lodPhysics)
         {
-            // police capacity left?
-            if (vehicleData.m_transferSize >= (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleID].Info?.m_vehicleAI as PoliceCopterAI).m_crimeCapacity)
-                return;
-
-            // check transfertype was not move transfer
-            if (vehicleData.m_transferType != (byte)TransferManager.TransferReason.Crime)
-                return;
-
             if ((vehicleData.m_flags & (Vehicle.Flags.GoingBack | Vehicle.Flags.WaitingTarget)) != 0)
             {
-                ushort newTarget = PoliceAIPatch.FindBuildingWithCrime(vehicleData.GetLastFramePosition(), PoliceAIPatch.CRIME_DISTANCE_SEARCH);
+                ushort newTarget = FireAIPatch.FindBuildingWithFire(vehicleData.GetLastFramePosition(), FireAIPatch.FIRE_DISTANCE_SEARCH);
                 if (newTarget != 0)
                 {
+                    // set correct transfertype
+                    if (vehicleData.m_transferType == (byte)TransferManager.TransferReason.ForestFire)
+                        vehicleData.m_transferType = (byte)TransferManager.TransferReason.Fire2;
+
                     // clear flag goingback and waiting target
                     vehicleData.m_flags = vehicleData.m_flags & (~Vehicle.Flags.GoingBack) & (~Vehicle.Flags.WaitingTarget);
                     // set new target
                     vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, newTarget);
-                    PoliceAIPatch.setnewtarget_counter++;
+                    FireAIPatch.setnewtarget_counter++;
 #if (DEBUG)
                     var instB = default(InstanceID);
                     instB.Building = newTarget;
@@ -189,13 +216,14 @@ namespace MoreEffectiveTransfer.Patch.Police
                     string vehicleName = $"ID={vehicleID} ({Singleton<InstanceManager>.instance.GetName(instV)})";
                     DebugLog.LogDebug((DebugLog.LogReason)TransferManager.TransferReason.Crime, $"PoliceCopterAI: vehicle {vehicleName} set new target: {targetName}");
 #endif
+
                 }
             }
-            else if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_crimeBuffer < 50))
+            else if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_fireIntensity == 0))
             {
                 //need to change target because problem already solved?
                 vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, 0); //clear target
-                PoliceAIPatch.dynamic_redispatch_counter++;
+                FireAIPatch.dynamic_redispatch_counter++;
             }
         }
 

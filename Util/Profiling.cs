@@ -31,8 +31,9 @@ namespace MoreEffectiveTransfer
             DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: total chirps about routing issues: {PathFindFailure.GetTotalChirps()}");
             DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: max pathfindfailpairs dictionary usage: {PathFindFailure.GetMaxUsagePathFindFails()}");
             DebugLog.LogInfo($"-     NEW TRANSFER MANAGER: max outsideconnectionfailpairs dictionary usage: {PathFindFailure.GetMaxUsageOutsideFails()}");
-            DebugLog.LogInfo($"-     GARBAGEAIPATCH:  num setnewtarget: {GarbageAIPatch.setnewtarget_counter}, num dynamic_redispatch: {GarbageAIPatch.dynamic_redispatch_counter}, num lru_list hits: {GarbageAIPatch.lru_hit_counter}");
-            DebugLog.LogInfo($"-     POLICEAIPATCH:   num setnewtarget: {PoliceAIPatch.setnewtarget_counter}, num dynamic_redispatch: {PoliceAIPatch.dynamic_redispatch_counter}, num lru_list hits: {PoliceAIPatch.lru_hit_counter}");
+            DebugLog.LogInfo($"-     GARBAGEAIPATCH:  num setnewtarget: {Patch.Garbage.GarbageAIPatch.setnewtarget_counter}, num dynamic_redispatch: {Patch.Garbage.GarbageAIPatch.dynamic_redispatch_counter}, num lru_list hits: {Patch.Garbage.GarbageAIPatch.lru_hit_counter}");
+            DebugLog.LogInfo($"-     POLICEAIPATCH:   num setnewtarget: {Patch.Police.PoliceAIPatch.setnewtarget_counter}, num dynamic_redispatch: {Patch.Police.PoliceAIPatch.dynamic_redispatch_counter}, num lru_list hits: {Patch.Police.PoliceAIPatch.lru_hit_counter}");
+            DebugLog.LogInfo($"-     FIREAIPATCH:     num setnewtarget: {Patch.Fire.FireAIPatch.setnewtarget_counter}, num dynamic_redispatch: {Patch.Fire.FireAIPatch.dynamic_redispatch_counter}, num lru_list hits: {Patch.Fire.FireAIPatch.lru_hit_counter}");
             DebugLog.LogInfo("--- END PROFILING STATISTICS ---");
         }
     }

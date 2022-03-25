@@ -7,16 +7,16 @@ using MoreEffectiveTransfer.Util;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MoreEffectiveTransfer.Patch
+namespace MoreEffectiveTransfer.Patch.Garbage
 {
 
     public static class GarbageAIPatch
     {
-        public const ushort GARBAGE_BUFFER_MIN_LEVEL = 800;
-        public const float GARBAGE_DISTANCE_SEARCH = 160f;
+        internal const ushort GARBAGE_BUFFER_MIN_LEVEL = 800;
+        internal const float GARBAGE_DISTANCE_SEARCH = 160f;
 
         //prevent double-dispatching of multiple vehicles to same target
-        private const int LRU_MAX_SIZE = 16;
+        private const int LRU_MAX_SIZE = 8;
         private static Dictionary<ushort, long> LRU_DISPATCH_LIST = new Dictionary<ushort, long>(LRU_MAX_SIZE);
 
         #region STATISTICS
