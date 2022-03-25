@@ -98,7 +98,7 @@ namespace MoreEffectiveTransfer
         {
             LoadSetting();
 
-#if (DEBUG)
+#if (DEBUG||DEBUG_VANILLA)
             UIHelperBase group0 = helper.AddGroup(Localization.Get("DEBUGPROFILE"));
             group0.AddCheckbox(Localization.Get("optionEnableNewTransferManager"), optionEnableNewTransferManager, (index) => setOptionEnableNewTransferManager(index));
 #endif
