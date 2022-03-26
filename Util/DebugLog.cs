@@ -20,10 +20,10 @@ namespace MoreEffectiveTransfer.Util
 
         public enum LogReason : int { 
             ANALYSE1 = TransferManager.TransferReason.Crime,
-            ANALYSE2 = TransferManager.TransferReason.Garbage,
+            //ANALYSE2 = TransferManager.TransferReason.Garbage,
             //ANALYSE3 = TransferManager.TransferReason.GarbageTransfer,
             //ANALYSE4 = TransferManager.TransferReason.Goods,
-            //PATHFIND = 254
+            PATHFIND = 254,
             ALL = 255 //256=DISABLED!
         };
 

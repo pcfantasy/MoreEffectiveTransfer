@@ -195,6 +195,7 @@ namespace MoreEffectiveTransfer.Patch.Fire
         {
             if ((vehicleData.m_flags & (Vehicle.Flags.GoingBack | Vehicle.Flags.WaitingTarget)) != 0)
             {
+                /*
                 ushort newTarget = FireAIPatch.FindBuildingWithFire(vehicleData.GetLastFramePosition(), FireAIPatch.FIRE_DISTANCE_SEARCH);
                 if (newTarget != 0)
                 {
@@ -218,6 +219,7 @@ namespace MoreEffectiveTransfer.Patch.Fire
 #endif
 
                 }
+                */
             }
             else if ((vehicleData.m_targetBuilding != 0) && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[vehicleData.m_targetBuilding].m_fireIntensity == 0))
             {
