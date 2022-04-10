@@ -1,6 +1,6 @@
 -- CHANGELOG --
 
--- 2.2.0.devel --
+-- 2.2.0.220410 --
 * NEW: SmarterPoliceAI and SmarterGabrbageAI: implements the general idea from SmartFireFightersAI mod to Police and Garbage
 * also handles FireFighterAI, so separate mod "SmartFirefighters" is not needed any more (but will not conflict)
 * NEW: dynamic re-dispatching of vehicles en route (reduce situations that 2 or more vehicles arrive in succession at same building)
