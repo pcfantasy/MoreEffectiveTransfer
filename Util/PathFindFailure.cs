@@ -42,16 +42,22 @@ namespace MoreEffectiveTransfer.Util
         const int MAX_OUTSIDECONNECTIONS = 256;
         static Dictionary<PATHFINDPAIR, long> _outsideConnectionFails = new Dictionary<PATHFINDPAIR, long>(MAX_OUTSIDECONNECTIONS);
 
+        // Statistics
+        #region STATISTICS
+        static int max_pathfindfails = 0;
+        static int max_outsideconnectionfails = 0;
+        static int total_chirps_sent = 0;        
+
+        public static int GetMaxUsagePathFindFails() => max_pathfindfails;
+        public static int GetMaxUsageOutsideFails() => max_outsideconnectionfails;
+        public static int GetTotalChirps() => total_chirps_sent;
+        #endregion
 
         static readonly object _dictionaryLock = new object();
+        const long LRU_INTERVALL = TimeSpan.TicksPerMillisecond * 1000 * 15; //15 sec
+        const long CHIRP_INTERVALL = TimeSpan.TicksPerMillisecond * 1000 * 60; //1 min
         static long lru_lastCleaned;
         static long last_chirp;
-        static int total_chirps_sent;
-        const long  LRU_INTERVALL = TimeSpan.TicksPerMillisecond * 1000 * 15; //15 sec
-        const long  CHIRP_INTERVALL = TimeSpan.TicksPerMillisecond * 1000 * 60; //1 min
-
-
-        public static int GetTotalChirps() => total_chirps_sent;
 
 
         /// <summary>
@@ -143,6 +149,11 @@ namespace MoreEffectiveTransfer.Util
             long diffTime = DateTime.Now.Ticks - lru_lastCleaned;
             int failpair_remove_count = 0;
             int failoutside_remove_count = 0;
+
+            // Statistics:
+            max_pathfindfails = Math.Max(max_pathfindfails, _pathfindFails.Count);
+            max_outsideconnectionfails = Math.Max(max_outsideconnectionfails, _outsideConnectionFails.Count);
+
 
             if (diffTime > LRU_INTERVALL)
             {
@@ -270,6 +281,9 @@ namespace MoreEffectiveTransfer.Util
         }
 
 
+        /// <summary>
+        /// FInd citizen working there or living there for chirp origin
+        /// </summary>
         private static uint FindCitizenOfBuilding(Building building)
         {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;

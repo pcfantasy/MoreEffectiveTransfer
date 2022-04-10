@@ -3,7 +3,7 @@ using HarmonyLib;
 using MoreEffectiveTransfer.Util;
 
 
-namespace MoreEffectiveTransfer.Patch
+namespace MoreEffectiveTransfer.Patch.Pathfind
 {
     [HarmonyPatch(typeof(CarAI), "PathfindFailure")]
     public class CarAIPathfindFailurePatch

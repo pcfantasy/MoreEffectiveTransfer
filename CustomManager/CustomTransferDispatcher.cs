@@ -54,8 +54,12 @@ namespace MoreEffectiveTransfer.CustomManager
         private static TransferJobPool _instance = null;
         private Stack<TransferJob> pooledJobs = null;
         private static readonly object _poolLock = new object();
+
+        #region STATISTICS
         private int _usageCount = 0;
         private int _maxUsageCount = 0;
+        public int GetMaxUsage() => _maxUsageCount;
+        #endregion
 
         public static TransferJobPool Instance
         {
@@ -122,7 +126,6 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-        public int GetMaxUsage() => _maxUsageCount;
     }
 
 
@@ -142,7 +145,11 @@ namespace MoreEffectiveTransfer.CustomManager
         private const int RINGBUF_SIZE = 256 * 8;
         private volatile int _ringbufReadPosition;
         private volatile int _ringbufWritePosition;
+
+        #region STATISTICS
         private int _ringBufMaxUsageCount;
+        public int GetMaxUsage() => _ringBufMaxUsageCount;
+        #endregion
 
         // References to game functionalities:
         private static TransferManager _TransferManager = null;
@@ -222,9 +229,6 @@ namespace MoreEffectiveTransfer.CustomManager
             CustomTransferDispatcher._instance = null;
         }
 
-        public int GetMaxUsage() => _ringBufMaxUsageCount;
-
-
         /// <summary>
         /// Thread-safe Enqueue
         /// </summary>
@@ -254,7 +258,6 @@ namespace MoreEffectiveTransfer.CustomManager
             }
         }
 
-
         /// <summary>
         /// Enqueue transferresult from match-maker thread to results ring buffer for StartTransfers
         /// </summary>
@@ -276,7 +279,6 @@ namespace MoreEffectiveTransfer.CustomManager
                     _ringbufWritePosition = 0;
             }
         }
-
 
         /// <summary>
         /// to be called from MatchOffers Prefix Patch:
@@ -337,7 +339,6 @@ namespace MoreEffectiveTransfer.CustomManager
 
         } //SubmitMatchOfferJob
 
-
         /// <summary>
         /// to be called from MatchOffers Postfix Patch:
         /// receive match-maker results from ring buffer and start transfers
@@ -366,7 +367,10 @@ namespace MoreEffectiveTransfer.CustomManager
             DebugLog.LogDebug(DebugLog.REASON_ALL, $"StartTransfers: initiated {num_transfers_initiated} transfers.");
         }
 
-
+        /// <summary>
+        /// CLear all offers from original vanilla arrays
+        /// </summary>
+        /// <param name="material"></param>
         private void ClearAllTransferOffers(TransferManager.TransferReason material)
         {
             for (int k = 0; k < 8; ++k)
@@ -378,7 +382,6 @@ namespace MoreEffectiveTransfer.CustomManager
             m_incomingAmount[(int)material] = 0;
             m_outgoingAmount[(int)material] = 0;
         }
-
 
         [Conditional("DEBUG")]
         private void DebugJobSummarize(TransferJob job)
